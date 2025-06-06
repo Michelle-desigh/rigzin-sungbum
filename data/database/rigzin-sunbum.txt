@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>才旺諾布全集閱讀系統</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tibetan:wght@300;400;500;600;700&family=Noto+Serif+TC:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Font Definitions */
+        @font-face {
+            font-family: 'Monlam Uni Chouk';
+            src: url('fonts/Monlam Uni Chouk.woff2') format('woff2');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: 'WenDingCuXingKai'; /* 文鼎粗行楷 */
+            src: url('fonts/文鼎粗行楷.woff2') format('woff2');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+        /* 您可以為截圖中的其他藏文字體也添加 @font-face 規則，如果需要在正文等其他地方使用它們 */
+        @font-face {
+            font-family: 'Jomolhari';
+            src: url('fonts/Jomolhari-Regular.woff') format('woff');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Monlam Dutsa';
+            src: url('fonts/Monlam Dutsa 1 Regular.woff') format('woff');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+         @font-face {
+            font-family: 'Qomolangma Drutsa';
+            src: url('fonts/Qomolangma-Drutsa.woff') format('woff');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            /* ...其他顏色變數... */
+            --glass-bg: rgba(0, 0, 0, 0.35); /* 稍微加深玻璃背景以襯托白色文字 */
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --text-light: rgba(255, 255, 255, 0.95);
+            --tibetan-title-font: 'Monlam Uni Chouk', 'Noto Sans Tibetan', serif; /* 藏文標題字體 */
+            --chinese-title-font: 'WenDingCuXingKai', 'Noto Serif TC', serif; /* 中文標題字體 */
+            --border-radius-main: 12px; /* 圓角調整 */
+            --border-radius-small: 6px;
+        }
+
+        body {
+            font-family: 'Inter', 'Microsoft YaHei', 'PingFang TC', sans-serif;
+            background: url('background_literature.jpg') no-repeat center center;
+            background-size: cover;
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: var(--text-light); /* 主要文字顏色改為淺色 */
+            display: flex;
+            flex-direction: column;
+            padding-top: 50px; /* 為固定頂部導航欄留出空間 */
+        }
+
+        /* Top Navigation Bar (from function bar.html, adapted) */
+        .top-nav {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 6px 20px; /* 稍微減小padding */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .nav-left { display: flex; gap: 15px; }
+        .nav-right { display: flex; gap: 10px; align-items: center;}
+
+        .nav-item, .top-nav-btn {
+            color: var(--text-light);
+            text-decoration: none;
+            padding: 7px 12px; /* 稍微減小padding */
+            border-radius: var(--border-radius-small);
+            transition: background 0.2s, color 0.2s;
+            font-size: 14px;
+            background: transparent;
+            border: 1px solid transparent; /* 預留邊框空間 */
+            cursor: pointer;
+        }
+        .nav-item:hover, .top-nav-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        .top-nav-btn.admin-only, .top-nav-btn.reader-only { /* 確保按鈕正確顯示/隱藏 */
+            /* display: inline-flex !important; 由JS的body class控制 */
+        }
+
+
+        /* --- ModeSelectorScreen & AppContainer specific adjustments for the new Nav --- */
+        #modeSelectorScreen {
+            height: calc(100vh - 50px); /* 減去導航欄高度 */
+            /* 其他樣式保持 */
+        }
+        #appContainer {
+            flex-grow: 1;
+            display: none; /* JS控制 */
+        }
+        body.app-active #appContainer { display: flex; }
+
+
+        /* .background-container, .glass, .mode-selector-content (圓角已調整), .main-title, .tibetan-subtitle, .english-subtitle, .mode-buttons (圓角已調整) */
+        /* 這些樣式大部分保持不變，但圓角會使用變數 */
+        .mode-selector-content { border-radius: var(--border-radius-main); max-width: 850px; width: 90%; padding: 3rem 2.5rem; }
+        .mode-button { border-radius: 20px; /* mode-button 可以保持較圓潤 */}
+
+        .sidebar { border-top-right-radius: var(--border-radius-main); border-bottom-right-radius: var(--border-radius-main); }
+        .category-header { border-radius: var(--border-radius-small); margin: 0 0.5rem;}
+        .course-item { border-radius: var(--border-radius-small); margin: 0.2rem 0.5rem;}
+
+        .main-content { margin-left: 320px; /* 初始 sidebar 寬度 */ }
+
+        .breadcrumb { display: none !important; }
+
+        .header h1 { font-family: var(--chinese-title-font), 'Noto Serif TC', serif; }
+        .header .tibetan-subtitle-header { font-family: var(--tibetan-title-font), 'Noto Sans Tibetan', serif; font-size: 1.8rem; margin-top: -1rem; margin-bottom: 1rem; opacity: 0.9;}
+
+
+        .search-container { border-radius: var(--border-radius-small); }
+        .stats-bar { border-radius: var(--border-radius-main); }
+        .view-btn { border-radius: var(--border-radius-small); }
+
+        .documents-grid { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); /* 卡片稍微變小 */ }
+        .document-card { border-radius: var(--border-radius-main); }
+        .document-title { font-family: var(--tibetan-title-font), 'Noto Sans Tibetan', serif; }
+        .document-subtitle { font-family: var(--chinese-title-font), 'Noto Serif TC', serif; }
+
+        .btn { border-radius: var(--border-radius-small); justify-content: center; text-align: center;}
+        .btn-primary, .btn-secondary, .modern-btn { text-align: center; }
+
+
+        .utility-sidebar { border-top-left-radius: var(--border-radius-main); border-bottom-left-radius: var(--border-radius-main); }
+
+        /* Modal adjustments */
+        .modal-content { border-radius: var(--border-radius-main); }
+        #modalTitleEl { font-family: var(--chinese-title-font), 'Noto Serif TC', serif; }
+        #modalTitleTibetanEl { font-family: var(--tibetan-title-font), 'Noto Sans Tibetan', serif; }
+        .language-switcher button { border-radius: var(--border-radius-small); }
+
+        #adminLoginModalEl .modal-content { max-width: 380px; /* 登入彈窗縮小 */ }
+        #articleFormModalEl .modal-content { max-width: min(90vw, 950px); /* 編輯彈窗稍微縮小 */ }
+        #infoModalEl .modal-content { max-width: min(90vw, 800px); } /* 資訊彈窗 */
+
+        /* Footer (from function bar.html, adapted) */
+        footer {
+            background: rgba(0, 0, 0, 0.85);
+            color: var(--text-light);
+            padding: 1rem 1rem 0.8rem; /* 稍微調整 padding */
+            text-align: center;
+            border-top: 1px solid var(--glass-border);
+            font-size: 0.75rem; /* 縮小字體 */
+            margin-top: auto; /* Pushes footer to bottom */
+        }
+        .social-links {
+            margin-bottom: 0.8rem;
+        }
+        .social-links a {
+            color: var(--text-light);
+            margin: 0 0.6rem;
+            text-decoration: none;
+            font-size: 1.3rem; /* 圖標大小 */
+            transition: color 0.2s;
+        }
+        .social-links a:hover {
+            color: #FFD700; /* 金黃色 hover */
+        }
+        .copyright {
+            font-size: 0.7rem; /* 進一步縮小版權字體 */
+            opacity: 0.7;
+            padding-top: 0.8rem;
+            border-top: 1px solid rgba(255,255,255,0.15);
+        }
+
+        /* --- Styles from rigzinsunbum.html that are still relevant --- */
+        /* (Make sure to remove or integrate any duplicate/conflicting styles) */
+        /* Keep .message, form styles, etc. Adjust their border-radius if needed */
+        .message { border-radius: var(--border-radius-small); }
+        .form-control, .form-select, .form-textarea { border-radius: var(--border-radius-small); }
+
+
+        /* Utility class from function bar.html, if needed by JS, otherwise can be removed if rigzinsunbum's JS doesn't use it */
+        .hidden { display: none !important; }
+
+        /* Animation styles (Keep these as they are critical for effects) */
+        /* ... (all the @keyframes and animation-related classes like .document-card::after, .search-container:focus-within::before, .btn::before, etc.) ... */
+         /* Dynamically added styles placeholder, actual styles added by JS */
+        #dynamic-animation-styles { }
+
+    </style>
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <nav class="top-nav">
+        <div class="nav-left" id="navLeftLinks">
+            <a href="javascript:void(0)" class="nav-item" onclick="showModeSelectorScreen()">回首頁</a>
+            <a href="javascript:void(0)" class="nav-item" onclick="showInfoModalFromFile('關於我們', '關於我們.txt', true)">關於我們</a>
+            <a href="javascript:void(0)" class="nav-item" onclick="showInfoModalFromFile('編者的話', 'སྒྲིག་པ་པོའི་གཏམ།編者的話.txt')">編者的話</a>
+            <a href="javascript:void(0)" class="nav-item" onclick="showInfoModalFromFile('參考資源', '參考資源.txt')">參考資源</a>
+        </div>
+        <div class="nav-right" id="navRightControls">
+            <!-- Login/Logout/Admin buttons will be populated by JS based on mode -->
+        </div>
+    </nav>
+
+    <div class="background-container" id="backgroundContainer"></div>
+
+    <div id="modeSelectorScreen">
+        <div class="mode-selector-content">
+            <h1 class="main-title" style="font-family: var(--chinese-title-font), 'Noto Serif TC', serif;">才旺諾布全集閱讀系統</h1>
+            <p class="tibetan-subtitle" style="font-family: var(--tibetan-title-font), 'Noto Sans Tibetan', serif;">༄༅། །ཚེ་དབང་ནོར་བུའི་གསུང་འབུམ་ཀློག་སྟེགས།</p>
+            <p class="english-subtitle">Tsewang Norbu Complete Works Reading System</p>
+            <div class="mode-buttons">
+                <button class="mode-button" onclick="enterMode('read')">📖 進入閱讀模式</button>
+                <button class="mode-button" onclick="enterMode('edit')">🔐 進入編輯模式</button>
+            </div>
+            <!-- Theme switcher removed -->
+        </div>
+    </div>
+
+    <div id="appContainer">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2 class="sidebar-title" style="font-family: var(--chinese-title-font), 'Noto Serif TC', serif;">課程目錄</h2>
+                <p class="sidebar-subtitle" style="font-family: var(--tibetan-title-font), 'Noto Sans Tibetan', serif;">སློབ་ཚན་གྱི་དཀར་ཆག</p>
+            </div>
+            <nav class="course-menu" id="courseMenuContainer"></nav>
+        </aside>
+
+        <main class="main-content" id="mainContentArea">
+            <!-- top-bar is now part of the fixed .top-nav -->
+            <div class="container" style="padding-top: 2rem;"> <!-- Added padding-top to container since top-bar is removed from here -->
+                <header class="header">
+                    <h1 style="font-family: var(--chinese-title-font), 'Noto Serif TC', serif;">才旺諾布全集閱讀系統</h1>
+                    <p class="tibetan-subtitle-header" style="font-family: var(--tibetan-title-font), 'Noto Sans Tibetan', serif;">ཚེ་དབང་ནོར་བུའི་གསུང་འབུམ་ཀློག་སྟེགས།</p>
+                    <p>Tsewang Norbu Complete Works Reading System</p>
+                </header>
+
+                <div class="search-section">
+                    <div class="search-container">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" class="search-input" placeholder="搜尋文獻標題、內容或作者..." id="searchInputEl">
+                    </div>
+                </div>
+
+                <div class="stats-bar">
+                    <div class="view-controls">
+                        <button class="view-btn active" id="gridViewBtn">📇 卡片檢視</button>
+                        <button class="view-btn" id="listViewBtn">📋 清單檢視</button>
+                    </div>
+                    <div style="font-size: 0.9rem; opacity: 0.9;">
+                        總計 <strong id="totalCountEl">0</strong> 部文獻
+                    </div>
+                </div>
+
+                <div class="documents-grid" id="documentsGridEl"></div>
+            </div>
+        </main>
+
+        <aside class="utility-sidebar reader-only" id="utilitySidebarEl">
+             <div class="utility-sidebar-header">
+                <h3 class="utility-sidebar-title">工具選單</h3>
+            </div>
+            <div class="utility-sidebar-content">
+                <div class="utility-item" onclick="showFavorites()">
+                    <span class="utility-item-icon">♥</span> 已收藏文章
+                </div>
+                <div id="favoritesListContainerEl" style="display:none;"><p>暫無收藏。</p></div>
+                <div class="utility-item" onclick="showUtilityModal('reportErrorModal', '回報錯字')">
+                    <span class="utility-item-icon">✉︎</span> 回報錯字
+                </div>
+                <div class="utility-item" onclick="showUtilityModal('donateModal', '護持贊助')">
+                    <span class="utility-item-icon">💰</span> 護持贊助
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Document Modal -->
+    <div class="modal" id="documentModalEl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div style="width: calc(100% - 60px); display: flex; flex-direction: column;">
+                    <h2 id="modalTitleEl">文獻標題</h2>
+                    <div id="modalTitleTibetanEl" class="modal-title-tibetan">藏文標題副標</div>
+                </div>
+                <button class="close-btn" onclick="closeModal('documentModalEl')">×</button>
+            </div>
+            <div class="language-switcher" id="languageSwitcherControls">
+                <button onclick="showLanguage('bo')" data-lang="bo">藏文</button>
+                <button onclick="showLanguage('zh')" data-lang="zh">中文</button>
+                <button onclick="showLanguage('en')" data-lang="en">English</button>
+                <button onclick="showLanguage('bo-zh')" data-lang="bo-zh">藏中對照</button>
+            </div>
+            <div class="modal-body text-content-base" id="modalBodyEl">
+                <div id="modalTibetanContentEl" class="language-content tibetan-text"></div>
+                <hr class="language-separator">
+                <div id="modalChineseContentEl" class="language-content chinese-text"></div>
+                <hr class="language-separator">
+                <div id="modalEnglishContentEl" class="language-content english-text"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Login Modal -->
+    <div class="modal" id="adminLoginModalEl">
+        <div class="modal-content">
+            <div class="modal-header"><h2 style="text-align: center; width:100%;">🔒 管理員登入</h2></div>
+            <div class="modal-body">
+                <form id="adminLoginFormEl">
+                    <div class="form-group"><label for="adminUsername">用戶名</label><input type="text" id="adminUsername" class="form-control" required></div>
+                    <div class="form-group"><label for="adminPassword">密碼</label><input type="password" id="adminPassword" class="form-control" required></div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">登入</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Article Form Modal -->
+    <div class="modal" id="articleFormModalEl">
+        <div class="modal-content">
+            <div class="modal-header"><h2 id="articleFormModalTitleEl" style="text-align: center; width:calc(100% - 40px);">📝 新增/編輯文獻</h2><button class="close-btn" onclick="closeModal('articleFormModalEl')">×</button></div>
+            <div class="modal-body">
+                <form id="articleFormEl">
+                    <!-- ... (form fields) ... -->
+                    <input type="hidden" id="articleId">
+                    <div class="form-group"><label for="articleTibetanTitle">藏文標題</label><input type="text" id="articleTibetanTitle" class="form-control" required></div>
+                    <div class="form-group"><label for="articleChineseTitle">中文標題</label><input type="text" id="articleChineseTitle" class="form-control" required></div>
+                    <div class="form-group"><label for="articleEnglishTitle">英文標題 (選填)</label><input type="text" id="articleEnglishTitle" class="form-control"></div>
+                    <div class="form-group"><label for="articleAuthor">作者</label><input type="text" id="articleAuthor" class="form-control" required></div>
+                    <div class="form-group"><label for="articleCategory">分類</label><input type="text" id="articleCategory" class="form-control" placeholder="例如：祈請文、自傳" required></div>
+                    <div class="form-group"><label for="articleTags">標籤 (逗號分隔)</label><input type="text" id="articleTags" class="form-control" placeholder="例如：長壽, 金剛結"></div>
+                    <div class="form-group"><label for="articleContentTibetan">藏文內容</label><textarea id="articleContentTibetan" class="form-textarea" required></textarea></div>
+                    <div class="form-group"><label for="articleContentChinese">中文內容</label><textarea id="articleContentChinese" class="form-textarea" required></textarea></div>
+                    <div class="form-group"><label for="articleContentEnglish">英文內容 (選填)</label><textarea id="articleContentEnglish" class="form-textarea"></textarea></div>
+                    <div class="form-group">
+                        <label>可提供語言 (勾選)</label>
+                        <div>
+                            <input type="checkbox" id="langBo" value="bo" checked> <label for="langBo" style="display:inline; margin-right:10px;">藏文</label>
+                            <input type="checkbox" id="langZh" value="zh" checked> <label for="langZh" style="display:inline; margin-right:10px;">中文</label>
+                            <input type="checkbox" id="langEn" value="en"> <label for="langEn" style="display:inline;">英文</label>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">儲存文獻</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Generic Info Modal (About, Editor's Note, Resources) -->
+    <div class="modal" id="infoModalEl">
+        <div class="modal-content">
+            <div class="modal-header"><h2 id="infoModalTitleEl" style="text-align: center; width:calc(100% - 40px);">資訊</h2><button class="close-btn" onclick="closeModal('infoModalEl')">×</button></div>
+            <div class="modal-body" id="infoModalBodyEl" style="white-space: pre-wrap; line-height: 1.7; color: var(--text-light);"></div>
+        </div>
+    </div>
+
+    <div id="messageAreaEl"></div>
+
+    <footer>
+        <div class="social-links">
+            <a href="https://www.facebook.com/rigzinchenpoassociation/?locale=zh_TW" target="_blank" title="Facebook">FB</a>
+            <a href="http://www.rigzin-chenpo.org/index2.html" target="_blank" title="Website">🌐</a>
+            <!-- Add other social links if needed -->
+        </div>
+        <div class="copyright">
+            噶陀仁珍千寶 © 2025 才旺諾布全集 All Rights Reserved
+        </div>
+    </footer>
+
+    <script>
+        // --- DATA (Sample) ---
+        // (您的 initialDocuments 數據結構保持不變，確保 ContentEnglish 的 class 是 "english-text")
+        // 並確保 availableLanguages 陣列正確反映了每個文獻實際擁有的語言版本
+        let documentsData = [];
+        const initialDocuments = [ /* 您提供的 JSON 數據放在這裡 */ ];
+
+
+        // --- DOM Elements ---
+        const navRightControlsEl = document.getElementById('navRightControls');
+        // (其他 DOM 元素選擇保持不變)
+        const documentsGridEl = document.getElementById('documentsGridEl');
+        const searchInputEl = document.getElementById('searchInputEl');
+        const totalCountEl = document.getElementById('totalCountEl');
+        const documentModalEl = document.getElementById('documentModalEl');
+        const modalTitleEl = document.getElementById('modalTitleEl');
+        const modalTitleTibetanEl = document.getElementById('modalTitleTibetanEl');
+        const modalBodyEl = document.getElementById('modalBodyEl');
+        const modalTibetanContentEl = document.getElementById('modalTibetanContentEl');
+        const modalChineseContentEl = document.getElementById('modalChineseContentEl');
+        const modalEnglishContentEl = document.getElementById('modalEnglishContentEl');
+        const languageSwitcherControlsEl = document.getElementById('languageSwitcherControls');
+        const languageSeparators = modalBodyEl.querySelectorAll('.language-separator');
+
+        const adminLoginModalEl = document.getElementById('adminLoginModalEl');
+        const adminLoginFormEl = document.getElementById('adminLoginFormEl');
+        // const userSectionEl = document.getElementById('userSectionEl'); // Replaced by navRightControlsEl
+        const messageAreaEl = document.getElementById('messageAreaEl');
+        const articleFormModalEl = document.getElementById('articleFormModalEl');
+        const articleFormEl = document.getElementById('articleFormEl');
+        const articleFormModalTitleEl = document.getElementById('articleFormModalTitleEl');
+        const courseMenuContainerEl = document.getElementById('courseMenuContainer');
+        const utilitySidebarEl = document.getElementById('utilitySidebarEl');
+        const favoritesListContainerEl = document.getElementById('favoritesListContainerEl');
+        const utilityModalEl = document.getElementById('utilityModalEl');
+        const utilityModalTitleEl = document.getElementById('utilityModalTitleEl');
+        const utilityModalBodyEl = document.getElementById('utilityModalBodyEl');
+        const modeSelectorScreenEl = document.getElementById('modeSelectorScreen');
+        const appContainerEl = document.getElementById('appContainer');
+        const mainContentAreaEl = document.getElementById('mainContentArea');
+        const leftSidebarEl = document.getElementById('sidebar');
+        const backgroundContainerEl = document.getElementById('backgroundContainer');
+        // const breadcrumbPathEl = document.getElementById('breadcrumbPath'); // Hidden
+        // const currentDocCategoryEl = document.getElementById('currentDocCategory'); // Hidden
+        // const currentDocTitleEl = document.getElementById('currentDocTitle'); // Hidden
+        const infoModalEl = document.getElementById('infoModalEl');
+        const infoModalTitleEl = document.getElementById('infoModalTitleEl');
+        const infoModalBodyEl = document.getElementById('infoModalBodyEl');
+
+
+        // --- State Variables ---
+        let currentView = 'grid';
+        let isAdminLoggedIn = false;
+        let currentOpenDocId = null;
+        let currentMode = '';
+        let guestFavorites = [];
+
+        // Theme switcher function removed
+
+        // --- Mode Management ---
+        function enterMode(mode) {
+            currentMode = mode;
+            modeSelectorScreenEl.style.display = 'none';
+            appContainerEl.style.display = 'flex'; // Show app container
+            document.body.classList.add('app-active');
+            document.body.classList.remove('read-mode', 'edit-mode');
+            document.body.classList.add(mode + '-mode');
+
+            updateNavRightControls(); // Update top nav buttons
+
+            if (mode === 'edit') {
+                if (!isAdminLoggedIn) { // Only show login if not already logged in
+                    adminLoginModalEl.classList.add('active');
+                } else {
+                    setupEditModeUI(); // Directly setup if already logged in
+                }
+            } else { // read mode
+                isAdminLoggedIn = false; // Reading mode means guest or logged-out admin
+                setupReadModeUI();
+            }
+            if(mode === 'read' || (mode === 'edit' && isAdminLoggedIn)) {
+                 loadInitialContent(); // Load content for read mode or logged-in edit mode
+            }
+        }
+
+        function showModeSelectorScreen() {
+            modeSelectorScreenEl.style.display = 'flex';
+            appContainerEl.style.display = 'none'; // Hide app container
+            document.body.classList.remove('app-active', 'read-mode', 'edit-mode');
+            if (currentMode === 'edit' && isAdminLoggedIn) {
+                // No need to auto-logout, admin can choose to go back to selector
+            }
+            currentMode = '';
+            updateNavRightControls(); // Update top nav buttons
+        }
+
+        function setupReadModeUI() {
+            // (Sidebar and main content layout adjustments)
+             mainContentAreaEl.classList.remove('no-left-sidebar');
+            if (utilitySidebarEl.classList.contains('open')) mainContentAreaEl.classList.add('with-right-sidebar');
+            else mainContentAreaEl.classList.remove('with-right-sidebar');
+            leftSidebarEl.style.transform = 'translateX(0)';
+        }
+        function setupEditModeUI() {
+             mainContentAreaEl.classList.remove('with-right-sidebar', 'no-left-sidebar');
+            leftSidebarEl.style.transform = 'translateX(0)';
+        }
+
+
+        // --- Data Management & UI Rendering ---
+        // (updateDocumentMeta, processAllDocumentMeta, loadDocumentsData, renderDocuments, openDocumentModal, updateLanguageSwitcher, showLanguage, closeModal remain the same)
+        // Make sure to replace `fullContentTibetan` and `fullContentChinese` with `ContentTibetan` and `ContentChinese` in `updateDocumentMeta` and `openArticleFormModal` if you haven't already.
+
+
+        // --- Admin & User Section for Top Nav ---
+        adminLoginFormEl.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('adminUsername').value;
+            const password = document.getElementById('adminPassword').value;
+            if (username === 'admin' && password === 'password123') {
+                isAdminLoggedIn = true;
+                closeModal('adminLoginModalEl');
+                showMessage('管理員登入成功！', 'success');
+                setupEditModeUI();
+                updateNavRightControls();
+                loadInitialContent(); // Load content after successful login
+            } else {
+                showMessage('用戶名或密碼錯誤。', 'error');
+            }
+        });
+
+        function adminLogout(switchToReadMode = true) {
+            isAdminLoggedIn = false;
+            updateNavRightControls();
+            if (switchToReadMode) {
+                currentMode = 'read'; // Switch to read mode
+                document.body.classList.remove('edit-mode');
+                document.body.classList.add('read-mode');
+                setupReadModeUI();
+                loadInitialContent(); // Reload content for read mode
+                showMessage('管理員已登出。已切換至閱讀模式。', 'info');
+            } else {
+                 showModeSelectorScreen(); // If not switching to read, go to mode selector
+            }
+        }
+
+        function updateNavRightControls() {
+            navRightControlsEl.innerHTML = ''; // Clear existing buttons
+
+            if (currentMode === 'edit') {
+                if (isAdminLoggedIn) {
+                    const addArticleBtn = document.createElement('button');
+                    addArticleBtn.className = 'top-nav-btn admin-only';
+                    addArticleBtn.innerHTML = '✨ 新增文獻';
+                    addArticleBtn.onclick = openArticleFormModal;
+                    navRightControlsEl.appendChild(addArticleBtn);
+
+                    const adminInfoDiv = document.createElement('div');
+                    adminInfoDiv.style.cssText = "color:white; display:flex; align-items:center; gap:0.5rem; padding: 0 10px;";
+                    adminInfoDiv.className = 'admin-only';
+                    adminInfoDiv.innerHTML = `<span>管理員</span><div style="width:20px; height:20px; background:var(--accent-gradient); border-radius:50%; text-align:center; line-height:20px; font-weight:bold; font-size:12px;">A</div>`;
+                    navRightControlsEl.appendChild(adminInfoDiv);
+
+                    const logoutBtn = document.createElement('button');
+                    logoutBtn.className = 'top-nav-btn admin-only';
+                    logoutBtn.textContent = '登出管理';
+                    logoutBtn.onclick = () => adminLogout(true); // Logout and switch to read mode
+                    navRightControlsEl.appendChild(logoutBtn);
+                } else {
+                    // If in edit mode but not logged in, login modal is shown by enterMode()
+                    // We might want a "Cancel Edit Mode" button or rely on "回首頁"
+                }
+            } else if (currentMode === 'read') {
+                const toolsButton = document.createElement('button');
+                toolsButton.className = 'top-nav-btn reader-only utility-toggle-btn';
+                toolsButton.innerHTML = '🛠️ 工具';
+                toolsButton.onclick = () => toggleSidebar('utilitySidebarEl');
+                navRightControlsEl.appendChild(toolsButton);
+            } else { // Mode selector screen or initial state
+                 const loginButton = document.createElement('button');
+                 loginButton.className = 'top-nav-btn';
+                 loginButton.textContent = '登入';
+                 loginButton.onclick = () => enterMode('edit'); // This will trigger login modal
+                 navRightControlsEl.appendChild(loginButton);
+            }
+        }
+        // (showMessage function remains the same)
+
+        // --- Info Modal Functionality ---
+        async function showInfoModalFromFile(title, filePath, isAboutUs = false) {
+            infoModalTitleEl.textContent = title;
+            infoModalBodyEl.innerHTML = '載入中...'; // Show loading state
+            infoModalEl.classList.add('active');
+            try {
+                if (isAboutUs && filePath === '關於我們.txt') { // Placeholder for About Us
+                    infoModalBodyEl.textContent = "「才旺諾布全集閱讀系統」致力於保存與傳播大學者才旺諾布的珍貴著作。\n\n我們的目標是提供一個現代化、易於使用的平台，讓研究者、學習者和所有對藏傳佛教文化感興趣的人們，都能方便地閱讀和研究這些重要的文獻。\n\n感謝您的支持！\n\n(此處為「關於我們」的示範內容，請替換成您的實際介紹。)";
+                    return;
+                }
+
+                const response = await fetch(filePath);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status} for ${filePath}`);
+                }
+                const content = await response.text();
+                infoModalBodyEl.textContent = content;
+            } catch (error) {
+                console.error("Error fetching file for modal:", error);
+                infoModalBodyEl.textContent = `無法載入內容：${filePath}\n錯誤：${error.message}\n\n請確保檔案 ${filePath} 與 HTML 檔案位於同一目錄下。`;
+            }
+        }
+
+
+        // --- Sidebar, Search, View Mode, Favorites, Utility Modals, Article Form ---
+        // (These functions remain largely the same, ensure DOM element IDs and classes are consistent)
+        // (Small adjustment to card size in grid view if desired in CSS)
+        // (Small adjustment to favorite button in renderDocuments)
+        // renderDocuments:
+        // actionButtonsHTML = `<button class="btn btn-secondary reader-only" onclick="toggleFavorite('${doc.id}', this)">${isFavorited ? '♥ 已收藏' : '♡ 加入收藏'}</button>`;
+
+        // --- Initialization ---
+        function loadInitialContent() {
+            loadDocumentsData();
+            renderSidebar();
+            renderDocuments();
+            // (Breadcrumb update logic can be removed or adapted if breadcrumb is hidden)
+        }
+
+        // --- Global Functions ---
+        window.enterMode = enterMode;
+        window.showModeSelectorScreen = showModeSelectorScreen;
+        // window.changeTheme = changeTheme; // Removed
+        window.openDocumentModal = openDocumentModal;
+        window.closeModal = closeModal;
+        window.toggleFavorite = toggleFavorite;
+        window.showFavorites = showFavorites;
+        window.showUtilityModal = showUtilityModal;
+        window.openArticleFormModal = openArticleFormModal;
+        window.adminLogout = adminLogout;
+        window.showLanguage = showLanguage;
+        window.toggleSidebar = toggleSidebar; // Ensure this is global if used by HTML onclick
+        window.toggleCategory = toggleCategory; // Ensure this is global
+        window.showInfoModalFromFile = showInfoModalFromFile; // For new nav items
+
+        // --- Initial Call & Event Listeners ---
+        const mainTitleElementForAnimation = document.querySelector('.main-title');
+        if (mainTitleElementForAnimation) {
+            // (animationend listener for main-title remains)
+        }
+        showModeSelectorScreen(); // Start with mode selection
+        updateNavRightControls(); // Initialize top nav buttons
+
+        // (DOMContentLoaded, keydown listeners, scrollBehavior, dynamicStyle script remain the same)
+        // Ensure the dynamic animation style script is still appended at the end.
+
+        // --- Utility functions (from function bar.html, adapted or integrated) ---
+        // Login modal specific open/close from function_bar.html is now integrated into adminLoginModalEl logic
+        // Smooth scroll for # links (if any are left or added later)
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                const href = this.getAttribute('href');
+                if (href.length > 1) { // Ensure it's not just "#"
+                    e.preventDefault();
+                    const targetElement = document.querySelector(href);
+                    if (targetElement) {
+                         targetElement.scrollIntoView({ behavior: 'smooth' });
+                    }
+                }
+            });
+        });
+
+        // (Make sure to replace all instances of userSectionEl with navRightControlsEl if that was the intent for top nav buttons)
+        // The provided JS for updateUserSectionUI already uses navRightControlsEl implicitly by adding buttons to it if it's the only place for user controls.
+        // If userSectionEl was a different element, ensure its logic is correctly migrated or removed.
+        // The new updateUserSectionUI in this combined script focuses on `navRightControlsEl`.
+        // The old .top-bar div within main-content should be removed from HTML as nav is now fixed at top.
+    </script>
+</body>
+</html>

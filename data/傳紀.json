@@ -1,0 +1,17 @@
+[
+    {
+    "id": "biography_001",
+    "tibetanTitle": "另一篇祈願文 (藏)",
+    "chineseTitle": "另一篇祈願文 (中)",
+    "author": "佚名",
+    "category": "祈請文",
+    "tags": ["迴向"],
+    "ContentTibetan": "<p class=\"tibetan-text\">此祈願文之藏文內容...</p>",
+    "ContentChinese": "<p class=\"chinese-text\">此祈願文之中文內容...</p>",
+    "status": "published",
+    "meta": { "words": "N/A", "pages": "N/A", "readTime": "N/A", "preview": "N/A" },
+     "availableLanguages": ["bo", "zh", "en"],
+    "createdAt": "2023-05-21T11:00:00Z",
+    "updatedAt": "2023-05-21T11:00:00Z"
+  }
+]

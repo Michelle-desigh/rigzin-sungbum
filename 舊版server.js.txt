@@ -1,0 +1,273 @@
+const express = require('express');
+const cors = require('cors');
+const fse = require('fs-extra'); // fs-extra for easier file system operations
+const path = require('path');
+const app = express();
+const port = process.env.PORT || 3001; // API server port
+
+app.use(cors()); // Enable CORS for all routes
+app.use(express.json({ limit: '50mb' })); // Middleware to parse JSON request bodies, increased limit for potentially large content
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
+
+const dataDir = path.join(__dirname, 'data'); // Folder to store your JSON data files
+const runtimeDataFile = path.join(dataDir, 'all_runtime_documents.json'); // Runtime merged data file
+
+// --- Meta Calculation Helper Function ---
+function calculateMeta(tibetanContentHtml, chineseContentHtml) {
+    const meta = {
+        words: "N/A",
+        pages: "N/A",
+        readTime: "N/A",
+        preview: "N/A"
+    };
+
+    let plainTibetan = "";
+    if (tibetanContentHtml && typeof tibetanContentHtml === 'string') {
+        plainTibetan = tibetanContentHtml.replace(/<[^>]+>/g, "").trim();
+        const tibetanSyllables = plainTibetan.split(/[་\s]+/).filter(s => s.trim().length > 0).length;
+        meta.preview = plainTibetan.substring(0, 80) + (plainTibetan.length > 80 ? '...' : '');
+        meta.tibetanSyllables = tibetanSyllables;
+    }
+
+    let plainChinese = "";
+    if (chineseContentHtml && typeof chineseContentHtml === 'string') {
+        plainChinese = chineseContentHtml.replace(/<[^>]+>/g, "").trim();
+        const chineseChars = plainChinese.replace(/[^\u4E00-\u9FA5]/g, "").length;
+        if (!meta.preview || meta.preview === "N/A" || meta.preview.endsWith("...")) { // Prefer Tibetan preview if available and long enough
+             if(plainChinese.length > 0) meta.preview = plainChinese.substring(0, 80) + (plainChinese.length > 80 ? '...' : '');
+        }
+        meta.chineseChars = chineseChars;
+    }
+    
+    let wordsDescription = [];
+    if (meta.tibetanSyllables > 0) wordsDescription.push(`藏 ${meta.tibetanSyllables} 音節`);
+    if (meta.chineseChars > 0) wordsDescription.push(`中 ${meta.chineseChars} 字`);
+    meta.words = wordsDescription.join(' | ') || "N/A";
+
+    let totalReadTimeMinutes = 0;
+    if (meta.tibetanSyllables > 0) totalReadTimeMinutes += meta.tibetanSyllables / 150;
+    if (meta.chineseChars > 0) totalReadTimeMinutes += meta.chineseChars / 250;
+    
+    if (totalReadTimeMinutes > 0) {
+        meta.readTime = `閱讀約 ${Math.ceil(totalReadTimeMinutes)} 分鐘`;
+        meta.pages = `${Math.ceil(Math.ceil(totalReadTimeMinutes) / 5)} 頁 (估算)`;
+    } else {
+        meta.readTime = "N/A";
+        meta.pages = "N/A";
+    }
+    
+    delete meta.tibetanSyllables;
+    delete meta.chineseChars;
+
+    return meta;
+}
+
+// --- Data Store Initialization and Management ---
+async function initializeDataStore() {
+    try {
+        await fse.ensureDir(dataDir);
+        const runtimeFileExists = await fse.pathExists(runtimeDataFile);
+
+        if (!runtimeFileExists) {
+            console.log(`Runtime data file (${runtimeDataFile}) not found. Attempting to build from source JSON files...`);
+            let initialDocs = [];
+            const files = await fse.readdir(dataDir);
+            for (const file of files) {
+                if (file.endsWith('.json') && file !== path.basename(runtimeDataFile)) {
+                    const filePath = path.join(dataDir, file);
+                    try {
+                        const fileData = await fse.readJson(filePath);
+                        if (Array.isArray(fileData)) {
+                            const processedFileData = fileData.map(doc => ({
+                                ...doc,
+                                // Ensure ContentTibetan and ContentChinese are used for meta calculation
+                                meta: calculateMeta(doc.ContentTibetan, doc.ContentChinese) 
+                            }));
+                            initialDocs = initialDocs.concat(processedFileData);
+                            console.log(`Loaded and processed ${processedFileData.length} documents from JSON: ${file}`);
+                        } else {
+                             console.warn(`Warning: JSON File ${filePath} is not a valid array and was skipped.`);
+                        }
+                    } catch (readErr) {
+                        console.warn(`Warning: Could not process file ${filePath}: ${readErr.message}`);
+                    }
+                }
+            }
+            await fse.writeJson(runtimeDataFile, initialDocs, { spaces: 2 });
+            console.log(`Initialized runtime data file at ${runtimeDataFile} with ${initialDocs.length} documents from source files (meta calculated).`);
+        } else {
+            console.log(`Runtime data file found at ${runtimeDataFile}. Server will use this file.`);
+            // Optional: Update meta for existing documents in runtime file if needed on startup
+            // This can be uncommented if you want to ensure meta is always fresh on server start,
+            // but it will add to startup time if the file is large.
+            /*
+            let documents = await fse.readJson(runtimeDataFile);
+            let updated = false;
+            documents = documents.map(doc => {
+                // Re-calculate meta if it seems uninitialized or outdated (e.g., still "N/A")
+                // You might want a more sophisticated check here
+                if (!doc.meta || doc.meta.words === "N/A" || typeof doc.meta.preview === 'undefined') {
+                    console.log(`Updating meta for existing document ID: ${doc.id}`);
+                    updated = true;
+                    return { ...doc, meta: calculateMeta(doc.ContentTibetan, doc.ContentChinese) };
+                }
+                return doc;
+            });
+            if (updated) {
+                await fse.writeJson(runtimeDataFile, documents, { spaces: 2 });
+                console.log("Re-calculated and updated meta for some existing documents in runtime file.");
+            }
+            */
+        }
+    } catch (err) {
+        console.error("Error initializing data store:", err);
+    }
+}
+
+async function getAllDocuments() {
+    try {
+        const documents = await fse.readJson(runtimeDataFile);
+        return documents;
+    } catch (err) {
+        console.error(`Error reading ${runtimeDataFile}: ${err.message}. Attempting to re-initialize.`);
+        await initializeDataStore(); 
+        try { 
+            const documents = await fse.readJson(runtimeDataFile);
+            return documents;
+        } catch (secondErr) {
+            console.error(`Still failed to read ${runtimeDataFile} after re-initialize: ${secondErr.message}`);
+            return [];
+        }
+    }
+}
+
+async function saveAllDocuments(documents) {
+    try {
+        await fse.writeJson(runtimeDataFile, documents, { spaces: 2 });
+        console.log(`Documents saved to ${runtimeDataFile}`);
+    } catch (err) {
+        console.error(`Error writing to ${runtimeDataFile}:`, err);
+    }
+}
+
+// --- API Endpoints ---
+
+// GET all documents (can filter by status, e.g., for read mode)
+app.get('/api/documents', async (req, res) => {
+    let documents = await getAllDocuments();
+    if (req.query.status === 'published') {
+        documents = documents.filter(doc => doc.status === 'published');
+    } else if (req.query.status === 'draft') {
+        documents = documents.filter(doc => doc.status === 'draft');
+    }
+    // Add mode specific filtering if needed, for now, status filter is primary
+    res.json(documents);
+});
+
+// GET a single document by ID
+app.get('/api/documents/:id', async (req, res) => {
+    const documents = await getAllDocuments();
+    const doc = documents.find(d => d.id === req.params.id);
+    if (doc) {
+        res.json(doc);
+    } else {
+        res.status(404).json({ message: 'Document not found' });
+    }
+});
+
+// POST a new document
+app.post('/api/documents', async (req, res) => {
+    const documents = await getAllDocuments();
+    let newDocData = req.body;
+    
+    // Validate required fields (using ContentTibetan/ContentChinese)
+    if (!newDocData.tibetanTitle || !newDocData.chineseTitle) {
+        return res.status(400).json({ message: 'Tibetan and Chinese titles are required.' });
+    }
+    if (!newDocData.ContentTibetan && !newDocData.ContentChinese) {
+        return res.status(400).json({ message: 'Either Tibetan or Chinese content is required.' });
+    }
+
+    const newDoc = {
+        id: 'doc_' + Date.now() + Math.random().toString(36).substring(2, 7),
+        ...newDocData, // Spread the rest of the properties from request body
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        status: newDocData.status || 'draft', // Default to draft if not provided
+        meta: calculateMeta(newDocData.ContentTibetan, newDocData.ContentChinese) // Calculate meta
+    };
+
+    documents.push(newDoc);
+    await saveAllDocuments(documents);
+    res.status(201).json(newDoc);
+});
+
+// PUT (update) an existing document by ID
+app.put('/api/documents/:id', async (req, res) => {
+    let documents = await getAllDocuments();
+    const docId = req.params.id;
+    const updatedDocData = req.body;
+    const docIndex = documents.findIndex(d => d.id === docId);
+
+    if (docIndex > -1) {
+        documents[docIndex] = { 
+            ...documents[docIndex], // Keep existing fields like createdAt, id
+            ...updatedDocData,     // Apply updates from request body
+            id: docId,             // Ensure ID is not changed by accident from body
+            updatedAt: new Date().toISOString(),
+            // Re-calculate meta based on potentially updated ContentTibetan/ContentChinese
+            meta: calculateMeta(updatedDocData.ContentTibetan || documents[docIndex].ContentTibetan, 
+                                updatedDocData.ContentChinese || documents[docIndex].ContentChinese)
+        };
+        
+        await saveAllDocuments(documents);
+        res.json(documents[docIndex]);
+    } else {
+        res.status(404).json({ message: 'Document not found for update' });
+    }
+});
+
+// PATCH to update specific fields, e.g., status
+app.patch('/api/documents/:id/status', async (req, res) => {
+    let documents = await getAllDocuments();
+    const docId = req.params.id;
+    const { status } = req.body; 
+
+    if (!status || (status !== 'published' && status !== 'draft')) {
+        return res.status(400).json({ message: 'Invalid status value. Must be "published" or "draft".' });
+    }
+
+    const docIndex = documents.findIndex(d => d.id === docId);
+    if (docIndex > -1) {
+        documents[docIndex].status = status;
+        documents[docIndex].updatedAt = new Date().toISOString();
+        // Meta doesn't typically change with status, but if content could, re-calc here
+        await saveAllDocuments(documents);
+        res.json(documents[docIndex]);
+    } else {
+        res.status(404).json({ message: 'Document not found for status update' });
+    }
+});
+
+// DELETE a document by ID
+app.delete('/api/documents/:id', async (req, res) => {
+    let documents = await getAllDocuments();
+    const docId = req.params.id;
+    const initialLength = documents.length;
+    documents = documents.filter(d => d.id !== docId);
+
+    if (documents.length < initialLength) {
+        await saveAllDocuments(documents);
+        res.status(200).json({ message: 'Document deleted successfully' });
+    } else {
+        res.status(404).json({ message: 'Document not found for deletion' });
+    }
+});
+
+// Start the server
+app.listen(port, async () => {
+    await initializeDataStore(); 
+    console.log(`Backend server for Rigzin Sunbum Web running on http://localhost:${port}`);
+    console.log(`Runtime data is being managed in: ${runtimeDataFile}`);
+});

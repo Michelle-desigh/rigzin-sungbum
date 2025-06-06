@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>才旺諾布全集閱讀系統</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tibetan:wght@300;400;500;600;700&family=Noto+Serif+TC:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        @font-face {
+            font-family: 'Monlam Uni Chouk';
+            src: url('fonts/Monlam Uni Chouk.woff2') format('woff2');
+            font-weight: normal; font-style: normal; font-display: swap;
+        }
+        @font-face {
+            font-family: 'WenDingCuXingKai';
+            src: url('fonts/文鼎粗行楷.woff2') format('woff2'); /* 確保檔案名稱與實際檔案一致 */
+            font-weight: normal; font-style: normal; font-display: swap;
+        }
+        @font-face {
+            font-family: 'Adobe Caslon Pro Italic'; /* 定義字型名稱 */
+            src: url('fonts/ACaslonPro-Italic.woff2') format('woff2'); /* 確保檔案名稱與實際檔案一致 */
+            font-weight: normal;
+            font-style: italic; /* 通常 Italic 字型本身就是斜體，但明確指定有好處 */
+            font-display: swap;
+        }
+        /* 您可以為截圖中的其他藏文字體也添加 @font-face 規則，如果需要在正文等其他地方使用它們 */
+        @font-face {
+            font-family: 'Jomolhari';
+            src: url('fonts/Jomolhari-Regular.woff') format('woff');
+            font-weight: normal; font-style: normal; font-display: swap;
+        }
+        @font-face {
+            font-family: 'Monlam Dutsa';
+            src: url('fonts/Monlam Dutsa 1 Regular.woff') format('woff'); /* 檔案名稱注意空格 */
+            font-weight: normal; font-style: normal; font-display: swap;
+        }
+         @font-face {
+            font-family: 'Qomolangma Drutsa';
+            src: url('fonts/Qomolangma-Drutsa.woff') format('woff');
+            font-weight: normal; font-style: normal; font-display: swap;
+        }
+        /* 如果有華康仿宋體和行楷體w5，也需要定義 */
+        @font-face {
+            font-family: 'HuaKangFangSongW6'; /* 假設的字型名稱 */
+            src: url('fonts/華康仿宋體W6-B5.woff2') format('woff2');
+            font-weight: normal; font-style: normal; font-display: swap;
+        }
+        @font-face {
+            font-family: 'XingKaiTiW5'; /* 假設的字型名稱 */
+            src: url('fonts/行楷體w5.woff2') format('woff2');
+            font-weight: normal; font-style: normal; font-display: swap;
+        }
+
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            /* ... (顏色變數保持不變) ... */
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --glass-bg: rgba(20, 20, 30, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --text-light: rgba(240, 240, 255, 0.95);
+            --text-accent: #FFD700;
+            --tibetan-title-font: 'Monlam Uni Chouk', 'Noto Sans Tibetan', serif;
+            --chinese-title-font: 'WenDingCuXingKai', 'Noto Serif TC', serif;
+            --english-subtitle-font: 'Adobe Caslon Pro Italic', 'Inter', serif; /* 新增英文字體變數 */
+            --border-radius-main: 10px;
+            --border-radius-small: 5px;
+        }
+
+        body { /* ... (body 樣式保持不變) ... */ }
+        .top-nav { /* ... (top-nav 樣式保持不變) ... */ }
+        .nav-left, .nav-right { /* ... (樣式保持不變) ... */ }
+        .nav-item, .top-nav-btn { /* ... (樣式保持不變) ... */ }
+
+        #modeSelectorScreen { /* ... (樣式保持不變) ... */ }
+        .mode-selector-content { /* ... (樣式保持不變) ... */ }
+
+        .main-title { font-family: var(--chinese-title-font); /* 應用中文字體 */ }
+        .tibetan-subtitle { font-family: var(--tibetan-title-font); /* 應用藏文字體 */ }
+        .english-subtitle {
+            font-family: var(--english-subtitle-font); /* 應用英文字體 */
+            font-style: italic; /* 即使字型本身是 italic，也明確指定 */
+            font-size: 1.1rem; color: var(--text-light); margin-bottom: 2rem; opacity: 0.85;
+        }
+        .mode-buttons { /* ... (樣式保持不變) ... */ }
+        .mode-button { /* ... (樣式保持不變) ... */ }
+
+        #appContainer { /* ... (樣式保持不變) ... */ }
+        .sidebar { /* ... (樣式保持不變) ... */ }
+        .main-content { /* ... (樣式保持不變) ... */ }
+        .container { /* ... (樣式保持不變) ... */ }
+        .header h1 { font-family: var(--chinese-title-font); }
+        .header .tibetan-subtitle-header { font-family: var(--tibetan-title-font); }
+        /* ... (其他 CSS 樣式大部分保持不變，確保圓角和字型變數已正確應用) ... */
+
+        /* Footer */
+        footer { /* ... (footer 樣式保持不變) ... */ }
+
+        /* Dynamic Animation Styles - will be populated by JS */
+        #dynamic-animation-styles {}
+    </style>
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <nav class="top-nav">
+        <div class="nav-left" id="navLeftLinks">
+            <!-- JS will populate common links here -->
+        </div>
+        <div class="nav-right" id="navRightControls">
+            <!-- JS will populate mode-specific controls (Login/Tools/Admin actions) -->
+        </div>
+    </nav>
+
+    <div class="background-container" id="backgroundContainer"></div>
+
+    <div id="modeSelectorScreen">
+         <div class="mode-selector-content">
+            <h1 class="main-title">才旺諾布全集閱讀系統</h1>
+            <p class="tibetan-subtitle">༄༅། །ཚེ་དབང་ནོར་བུའི་གསུང་འབུམ་ཀློག་སྟེགས།</p>
+            <p class="english-subtitle">Tsewang Norbu Complete Works Reading System</p>
+            <div class="mode-buttons">
+                <button class="mode-button" onclick="enterMode('read')">📖 進入閱讀模式</button>
+                <button class="mode-button" onclick="enterMode('edit')">🔐 進入編輯模式</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="appContainer">
+        <!-- ... (App Container 內部結構不變) ... -->
+    </div>
+
+    <!-- Modals: Document, Admin Login, Article Form, Info Modal -->
+    <!-- (Modal HTML structures remain the same) -->
+
+    <div id="messageAreaEl"></div>
+
+    <footer>
+        <!-- ... (Footer HTML 結構不變) ... -->
+    </footer>
+
+    <script>
+        // --- DATA (Sample) ---
+        let documentsData = [];
+        const initialDocuments = [ /* 您完整的 JSON 數據放在這裡 */ ];
+
+
+        // --- DOM Elements (確保所有選擇器仍然正確) ---
+        const navLeftLinksEl = document.getElementById('navLeftLinks');
+        const navRightControlsEl = document.getElementById('navRightControls');
+        // (其他 DOM 元素定義...)
+        const modeSelectorScreenEl = document.getElementById('modeSelectorScreen');
+        const appContainerEl = document.getElementById('appContainer');
+        const adminLoginModalEl = document.getElementById('adminLoginModalEl');
+        // ... 確保所有用到的 ID 都被獲取
+
+        // --- State Variables (保持不變) ---
+        let currentMode = '';
+        let isAdminLoggedIn = false;
+        // ...
+
+        // --- Mode Management & Top Navigation Controls ---
+        function enterMode(mode) {
+            console.log("Entering mode:", mode); // 調試信息
+            currentMode = mode;
+            modeSelectorScreenEl.style.display = 'none';
+            appContainerEl.style.display = 'flex';
+            document.body.classList.add('app-active');
+            document.body.classList.remove('read-mode', 'edit-mode');
+            document.body.classList.add(mode + '-mode');
+
+            updateNavControls(); // 更新頂部導航按鈕
+
+            if (mode === 'edit') {
+                if (!isAdminLoggedIn) {
+                    adminLoginModalEl.classList.add('active');
+                } else {
+                    setupEditModeUI();
+                    loadInitialContentIfNeeded();
+                }
+            } else { // read mode
+                isAdminLoggedIn = false; // 確保閱讀模式下非管理員
+                setupReadModeUI();
+                loadInitialContentIfNeeded();
+            }
+        }
+
+        function showModeSelectorScreen() {
+            console.log("Showing mode selector screen"); // 調試信息
+            currentMode = '';
+            modeSelectorScreenEl.style.display = 'flex';
+            appContainerEl.style.display = 'none';
+            document.body.classList.remove('app-active', 'read-mode', 'edit-mode');
+            // 登出邏輯已移至 adminLogout，這裡不需要自動登出
+            updateNavControls();
+        }
+
+        function updateNavControls() {
+            console.log("Updating nav controls. Current mode:", currentMode, "isAdminLoggedIn:", isAdminLoggedIn); // 調試信息
+            navLeftLinksEl.innerHTML = '';
+            navRightControlsEl.innerHTML = '';
+
+            // 創建按鈕的輔助函數
+            function createButton(text, onclickAction, className = 'nav-item') {
+                const btn = document.createElement('a'); // 使用 <a> 標籤模仿按鈕，方便 href
+                btn.href = "javascript:void(0)";
+                btn.className = className;
+                btn.textContent = text;
+                btn.onclick = onclickAction;
+                return btn;
+            }
+
+            navLeftLinksEl.appendChild(createButton('回首頁', showModeSelectorScreen));
+            navLeftLinksEl.appendChild(createButton('關於我們', () => showInfoModalFromFile('關於我們', '關於我們.txt', true)));
+            navLeftLinksEl.appendChild(createButton('編者的話', () => showInfoModalFromFile('編者的話', 'སྒྲིག་པ་པོའི་གཏམ།編者的話.txt')));
+            navLeftLinksEl.appendChild(createButton('參考資源', () => showInfoModalFromFile('參考資源', '參考資源.txt')));
+
+            if (currentMode === 'edit') {
+                if (isAdminLoggedIn) {
+                    navRightControlsEl.appendChild(createButton('✨ 新增', openArticleFormModal, 'top-nav-btn admin-only'));
+                    const adminInfoDiv = document.createElement('div');
+                    adminInfoDiv.style.cssText = "color:var(--text-light); display:flex; align-items:center; gap:0.3rem; font-size:13px; padding: 0 8px;";
+                    adminInfoDiv.className = 'admin-only';
+                    adminInfoDiv.innerHTML = `<span>管理員</span><div style="width:18px; height:18px; background:var(--accent-gradient); border-radius:50%; text-align:center; line-height:18px; font-weight:bold; font-size:11px;">A</div>`;
+                    navRightControlsEl.appendChild(adminInfoDiv);
+                    navRightControlsEl.appendChild(createButton('登出', () => adminLogout(true), 'top-nav-btn admin-only'));
+                } else {
+                    // 登入彈窗已由 enterMode('edit') 處理，這裡可能不需要額外按鈕
+                    // 或者可以放一個「取消編輯模式」按鈕返回首頁
+                    // navRightControlsEl.appendChild(createButton('取消', showModeSelectorScreen, 'top-nav-btn'));
+                }
+            } else if (currentMode === 'read') {
+                navRightControlsEl.appendChild(createButton('🛠️ 工具', () => toggleSidebar('utilitySidebarEl'), 'top-nav-btn reader-only utility-toggle-btn'));
+            } else { // Mode selector screen or initial state (currentMode is '')
+                navRightControlsEl.appendChild(createButton('登入', () => enterMode('edit'), 'top-nav-btn'));
+            }
+        }
+
+        // --- Admin Login/Logout (保持不變，但確保 console.log) ---
+        adminLoginFormEl.addEventListener('submit', function(e) {
+            e.preventDefault();
+            // ... (登入邏輯) ...
+            if (username === 'admin' && password === 'password123') {
+                isAdminLoggedIn = true; closeModal('adminLoginModalEl');
+                showMessage('管理員登入成功！', 'success');
+                setupEditModeUI();
+                updateNavControls(); // 確保導航更新
+                loadInitialContentIfNeeded();
+            } else { /* ... */ }
+        });
+        function adminLogout(switchToReadMode = true) {
+            isAdminLoggedIn = false;
+            if (switchToReadMode) {
+                enterMode('read'); // 直接調用 enterMode('read') 來處理模式切換和UI更新
+                showMessage('管理員已登出。已切換至閱讀模式。', 'info');
+            } else {
+                showModeSelectorScreen();
+            }
+        }
+
+        // --- Load Initial Content (只在需要時載入數據) ---
+        let dataLoaded = false;
+        function loadInitialContentIfNeeded() {
+            if (!dataLoaded) {
+                console.log("Loading initial documents for the first time."); // 調試
+                loadDocumentsData(); // 包含 processAllDocumentMeta
+                renderSidebar();
+                renderDocuments();
+                dataLoaded = true;
+            } else {
+                console.log("Documents already loaded, just re-rendering if necessary."); // 調試
+                //  如果需要在模式切換時強制重繪，可以在這裡調用 renderSidebar() 和 renderDocuments()
+                //  但通常只有在數據變化時才需要重繪列表
+            }
+        }
+
+        // --- 其他函數 (showMessage, updateDocumentMeta, processAllDocumentMeta, loadDocumentsData, renderDocuments, openDocumentModal, updateLanguageSwitcher, showLanguage, closeModal, showInfoModalFromFile, renderSidebar, setActiveSidebarItem, toggleCategory, toggleSidebar, searchInput listener, view mode listeners, toggleFavorite, showFavorites, renderFavoritesList, showUtilityModal, openArticleFormModal, articleFormEl listener) ---
+        // 這些函數的內部邏輯基本不變，但要確保它們能正確工作。
+
+        // --- Initial Call & Event Listeners ---
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log("DOM fully loaded and parsed"); // 調試
+            showModeSelectorScreen(); // 確保這是第一個調用的 UI 狀態函數
+            // updateNavControls(); // showModeSelectorScreen 內部會調用它
+
+            // ... (其他 DOMContentLoaded 內的邏輯，如動畫樣式注入) ...
+            const mainTitleAnimEl = document.querySelector('.main-title');
+            if (mainTitleAnimEl) {
+                mainTitleAnimEl.addEventListener('animationend', function(event) {
+                    if (event.animationName === 'typing') {
+                        mainTitleAnimEl.style.borderRight = 'none';
+                        mainTitleAnimEl.style.width = 'auto';
+                    }
+                });
+            }
+        });
+
+        // (其他全局事件監聽器，如 keydown)
+    </script>
+</body>
+</html>

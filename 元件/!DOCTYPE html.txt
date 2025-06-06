@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>才旺諾布全集閱讀系統</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tibetan:wght@300;400;500;600;700&family=Noto+Serif+TC:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* ... (您的顏色變數保持不變) ... */
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --accent-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --warm-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            --green-gradient: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+
+            --glass-bg: rgba(255, 255, 255, 0.25);
+            --glass-border: rgba(255, 255, 255, 0.18);
+            --shadow-soft: 0 8px 32px rgba(31, 38, 135, 0.37);
+            --shadow-hover: 0 15px 35px rgba(31, 38, 135, 0.5);
+
+            --text-primary: #2d3748;
+            --text-secondary: #4a5568;
+            --text-light: rgba(255, 255, 255, 0.9);
+            --tibetan-title-font: 'Noto Sans Tibetan', 'Noto Serif TC', serif;
+            --border-radius-main: 16px; /* 調整後的圓角 */
+            --border-radius-small: 8px;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+            color: var(--text-primary);
+            overflow-x: hidden;
+            display: flex; /* For footer */
+            flex-direction: column; /* For footer */
+        }
+
+        .background-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background: url('background_literature.jpg') no-repeat center center; /* 固定背景圖 */
+            background-size: cover;
+            /* transition: background 0.8s ease; -- 不再需要，因為主題切換已移除 */
+        }
+
+        .background-container::before {
+            /* ... (粒子效果保持不變) ... */
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="20" cy="20" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="40" r="0.5" fill="rgba(255,255,255,0.05)"/><circle cx="40" cy="80" r="1.5" fill="rgba(255,255,255,0.08)"/><circle cx="60" cy="10" r="0.8" fill="rgba(255,255,255,0.06)"/><circle cx="10" cy="60" r="1.2" fill="rgba(255,255,255,0.09)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            animation: float 15s ease-in-out infinite;
+        }
+        @keyframes float { 0%, 100% { transform: translateX(0) translateY(0); } 25% { transform: translateX(-3px) translateY(-3px); } 50% { transform: translateX(3px) translateY(3px); } 75% { transform: translateX(-2px) translateY(2px); } }
+
+
+        .glass { background: var(--glass-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--glass-border); box-shadow: var(--shadow-soft); }
+
+        #modeSelectorScreen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; text-align: center; position: relative; z-index: 10; }
+        .mode-selector-content {
+            /* ... (寬度保持，圓角修改) ... */
+            max-width: 850px; width: 90%;
+            border-radius: var(--border-radius-main); /* 圓角調整 */
+            padding: 3rem 2.5rem; /* 稍微調整 padding */
+        }
+        /* ... (fadeInUp 動畫保持不變) ... */
+
+        .main-title { /* ... (樣式保持不變) ... */ }
+        .tibetan-subtitle { /* ... (樣式保持不變) ... */ }
+        .english-subtitle { /* ... (樣式保持不變) ... */ }
+        .mode-buttons { /* ... (樣式保持不變) ... */ }
+        .mode-button {
+            /* ... (padding 和字體大小保持不變) ... */
+            border-radius: var(--border-radius-small); /* 圓角調整 */
+        }
+        /* ... (mode-button hover 和 ::before 保持不變) ... */
+
+        /* .theme-switcher 將被移除 */
+
+        #appContainer {
+            display: none; width: 100%; min-height: 100vh; opacity: 0; animation: fadeIn 0.6s ease-out forwards;
+            flex-grow: 1; /* For footer */
+        }
+        /* ... (fadeIn 動畫和 app-active 保持不變) ... */
+
+        .sidebar { /* ... (圓角調整，其他不變) ... */
+             border-top-right-radius: var(--border-radius-main);
+             border-bottom-right-radius: var(--border-radius-main);
+        }
+        /* ... (sidebar-header, course-menu 等側邊欄樣式保持不變，可按需調整圓角) ... */
+        .category-header { border-radius: var(--border-radius-small); margin: 0 0.5rem;}
+        .course-item { border-radius: var(--border-radius-small); margin: 0.2rem 0.5rem;}
+
+
+        .main-content { /* ... (樣式保持不變) ... */ }
+
+        .top-bar { /* ... (圓角調整，其他不變) ... */
+            border-bottom-left-radius: var(--border-radius-main);
+            border-bottom-right-radius: var(--border-radius-main);
+        }
+        .breadcrumb { display: none !important; /* 隱藏麵包屑導航 */ }
+        .user-section { /* ... (樣式保持不變) ... */ }
+        .modern-btn {
+            /* ... (padding 和字體大小保持不變) ... */
+            border-radius: var(--border-radius-small); /* 圓角調整 */
+            text-align: center; /* 確保文字置中 */
+        }
+        /* ... (modern-btn hover 和 ::before 保持不變) ... */
+
+        .container { /* ... (樣式保持不變) ... */ }
+        .header { /* ... (樣式保持不變) ... */ }
+
+        .search-section { /* ... (樣式保持不變) ... */ }
+        .search-container {
+            border-radius: var(--border-radius-small); /* 圓角調整 */
+        }
+        /* ... (search-input, search-icon 保持不變) ... */
+
+        .stats-bar {
+            border-radius: var(--border-radius-main); /* 圓角調整 */
+        }
+        .view-controls { /* ... (樣式保持不變) ... */ }
+        .view-btn {
+            border-radius: var(--border-radius-small); /* 圓角調整 */
+        }
+        /* ... (view-btn.active 保持不變) ... */
+
+        .documents-grid { /* ... (樣式保持不變) ... */ }
+        .document-card {
+            /* ... (padding 保持不變) ... */
+            border-radius: var(--border-radius-main); /* 圓角調整 */
+            /* 卡片寬度調整 - 可以通過 grid-template-columns 或 max-width 控制 */
+            /* 如果使用 grid, repeat(auto-fit, minmax(300px, 1fr)); 可嘗試減小 minmax 的第一個值 */
+        }
+        /* ... (document-card::before, hover, title, subtitle 等保持不變) ... */
+        .btn {
+            border-radius: var(--border-radius-small); /* 圓角調整 */
+            justify-content: center; /* 按鈕文字置中 */
+        }
+        /* ... (btn-primary, btn-secondary 保持不變) ... */
+
+
+        .utility-sidebar { /* ... (圓角調整，其他不變) ... */
+            border-top-left-radius: var(--border-radius-main);
+            border-bottom-left-radius: var(--border-radius-main);
+        }
+        /* ... (utility-sidebar-header, content, item 等保持不變) ... */
+
+
+        @media (max-width: 768px) {
+            /* ... (大部分響應式樣式保持不變) ... */
+            .mode-selector-content { padding: 2.5rem 1.5rem; }
+            .main-title { font-size: 2.5rem; } /* 確保在小螢幕也能容納 */
+        }
+        /* ... (menu-toggle 保持不變) ... */
+
+        /* ... (admin-only, reader-only 保持不變) ... */
+
+        .modal { /* ... (樣式保持不變) ... */ }
+        .modal-content {
+            /* ... (寬度和高度調整已在之前完成) ... */
+            border-radius: var(--border-radius-main); /* 圓角調整 */
+        }
+        .modal-header { /* ... (樣式保持不變) ... */ }
+        /* ... (modalTitleEl, modalTitleTibetanEl 樣式保持不變) ... */
+        .modal-body { /* ... (樣式保持不變) ... */ }
+        .modal-body h3 { /* ... (樣式保持不變) ... */ }
+        .close-btn { /* ... (樣式保持不變) ... */ }
+        /* ... (text-content-base, language-content, 各語言 text class, colophon 保持不變) ... */
+        .language-switcher button {
+             border-radius: var(--border-radius-small); /* 圓角調整 */
+        }
+        /* ... (language-separator 保持不變) ... */
+
+        /* ... (message 提示樣式保持不變) ... */
+
+        /* 表單樣式 */
+        .form-group { /* ... (樣式保持不變) ... */ }
+        .form-control, .form-select, .form-textarea {
+            border-radius: var(--border-radius-small); /* 圓角調整 */
+        }
+        /* ... (form-textarea, focus 樣式保持不變) ... */
+        #adminLoginModalEl .modal-content {
+            max-width: 400px; /* 縮小登入彈窗 */
+        }
+        #articleFormModalEl .modal-content {
+             max-width: min(90vw, 1000px); /* 編輯彈窗稍微縮小 */
+        }
+
+        /* Footer styles */
+        footer {
+            background-color: rgba(0, 0, 0, 0.7); /* 深色背景 */
+            color: var(--text-light);
+            padding: 1.5rem 1rem;
+            text-align: center;
+            border-top: 1px solid var(--glass-border);
+            margin-top: auto; /* Push to bottom in flex container */
+            font-size: 0.8rem; /* 縮小字體 */
+        }
+        .social-links a {
+            color: var(--text-light);
+            margin: 0 0.5rem;
+            text-decoration: none;
+            font-size: 1.2rem; /* 圖標大小 */
+            transition: color 0.3s;
+        }
+        .social-links a:hover {
+            color: var(--accent-gradient); /* 這裡用一個已有的漸變色，或者自定義顏色 */
+        }
+        .copyright {
+            margin-top: 0.8rem;
+            font-size: 0.75rem; /* 進一步縮小版權字體 */
+        }
+
+    </style>
+</head>
+<body>
+    <div class="background-container" id="backgroundContainer"></div>
+
+    <div id="modeSelectorScreen">
+        <div class="mode-selector-content">
+            <h1 class="main-title">才旺諾布全集閱讀系統</h1>
+            <p class="tibetan-subtitle">༄༅། །ཚེ་དབང་ནོར་བུའི་གསུང་འབུམ་ཀློག་སྟེགས།</p>
+            <p class="english-subtitle">Tsewang Norbu Complete Works Reading System</p>
+            <div class="mode-buttons">
+                <button class="mode-button" onclick="enterMode('read')">📖 進入閱讀模式</button>
+                <button class="mode-button" onclick="enterMode('edit')">🔐 進入編輯模式</button>
+            </div>
+            <!-- Theme switcher is removed -->
+        </div>
+    </div>
+
+    <div id="appContainer">
+        <aside class="sidebar" id="sidebar">
+             <!-- Sidebar content remains the same -->
+            <div class="sidebar-header">
+                <h2 class="sidebar-title">課程目錄</h2>
+                <p class="sidebar-subtitle">སློབ་ཚན་གྱི་དཀར་ཆག</p>
+            </div>
+            <nav class="course-menu" id="courseMenuContainer"></nav>
+        </aside>
+
+        <main class="main-content" id="mainContentArea">
+            <div class="top-bar">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <button class="menu-toggle" id="leftSidebarToggle" onclick="toggleSidebar('sidebar')">☰</button>
+                    <div class="breadcrumb" id="breadcrumbPath"> <!-- This will be hidden by CSS -->
+                        <span>🏠 首頁</span>
+                        <span>></span>
+                        <span id="currentDocCategory">自傳</span>
+                        <span>></span>
+                        <span id="currentDocTitle">媽嫫秘密業之明點</span>
+                    </div>
+                </div>
+                <div class="user-section" id="userSectionEl">
+                    <!-- Buttons dynamically added by JS -->
+                </div>
+            </div>
+
+            <div class="container">
+                <!-- Main content (header, search, grid) remains the same structurally -->
+                <header class="header">
+                    <h1>才旺諾布全集閱讀系統</h1>
+                    <p>ཚེ་དབང་ནོར་བུའི་གསུང་འབུམ་ཀློག་སྟེགས། | Tsewang Norbu Complete Works Reading System</p>
+                </header>
+
+                <div class="search-section">
+                    <div class="search-container">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" class="search-input" placeholder="搜尋文獻標題、內容或作者..." id="searchInputEl">
+                    </div>
+                </div>
+
+                <div class="stats-bar">
+                    <div class="view-controls">
+                        <button class="view-btn active" id="gridViewBtn">📇 卡片檢視</button>
+                        <button class="view-btn" id="listViewBtn">📋 清單檢視</button>
+                    </div>
+                    <div style="font-size: 0.9rem; opacity: 0.9;">
+                        總計 <strong id="totalCountEl">0</strong> 部文獻
+                    </div>
+                </div>
+
+                <div class="documents-grid" id="documentsGridEl">
+                    <!-- 文獻卡片將由 JavaScript 動態生成 -->
+                </div>
+            </div>
+        </main>
+
+        <aside class="utility-sidebar reader-only" id="utilitySidebarEl">
+             <!-- Utility sidebar content remains the same, symbols will be updated in JS for buttons -->
+            <div class="utility-sidebar-header">
+                <h3 class="utility-sidebar-title">工具選單</h3>
+            </div>
+            <div class="utility-sidebar-content">
+                <div class="utility-item" onclick="showFavorites()">
+                    <span class="utility-item-icon">♥</span> 已收藏文章
+                </div>
+                <div id="favoritesListContainerEl" style="display:none;">
+                    <p>暫無收藏。</p>
+                </div>
+                <div class="utility-item" onclick="showUtilityModal('reportErrorModal', '回報錯字')">
+                    <span class="utility-item-icon">✉︎</span> 回報錯字
+                </div>
+                <div class="utility-item" onclick="showUtilityModal('donateModal', '護持贊助')">
+                    <span class="utility-item-icon">💰</span> 護持贊助
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Document Modal -->
+    <div class="modal" id="documentModalEl">
+        <!-- Structure remains the same, CSS handles sizing and border-radius -->
+        <div class="modal-content">
+            <div class="modal-header">
+                <div style="width: calc(100% - 60px); display: flex; flex-direction: column;">
+                    <h2 id="modalTitleEl">文獻標題</h2>
+                    <div id="modalTitleTibetanEl" class="modal-title-tibetan">藏文標題副標</div>
+                </div>
+                <button class="close-btn" onclick="closeModal('documentModalEl')">×</button>
+            </div>
+            <div class="language-switcher" id="languageSwitcherControls">
+                <button onclick="showLanguage('bo')" data-lang="bo">藏文</button>
+                <button onclick="showLanguage('zh')" data-lang="zh">中文</button>
+                <button onclick="showLanguage('en')" data-lang="en">English</button>
+                <button onclick="showLanguage('bo-zh')" data-lang="bo-zh">藏中對照</button>
+            </div>
+            <div class="modal-body text-content-base" id="modalBodyEl">
+                <div id="modalTibetanContentEl" class="language-content tibetan-text"></div>
+                <hr class="language-separator">
+                <div id="modalChineseContentEl" class="language-content chinese-text"></div>
+                <hr class="language-separator">
+                <div id="modalEnglishContentEl" class="language-content english-text"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Login Modal -->
+    <div class="modal" id="adminLoginModalEl">
+        <div class="modal-content"> <!-- CSS will make this smaller -->
+            <div class="modal-header">
+                <h2>🔒 管理員登入</h2>
+                <button class="close-btn" onclick="closeModal('adminLoginModalEl'); showModeSelectorScreen();">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="adminLoginFormEl">
+                    <div class="form-group">
+                        <label for="adminUsername">用戶名</label>
+                        <input type="text" id="adminUsername" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="adminPassword">密碼</label>
+                        <input type="password" id="adminPassword" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">登入</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Article Form Modal -->
+    <div class="modal" id="articleFormModalEl">
+        <div class="modal-content"> <!-- CSS will slightly shrink this -->
+            <div class="modal-header">
+                <h2 id="articleFormModalTitleEl">📝 新增/編輯文獻</h2>
+                <button class="close-btn" onclick="closeModal('articleFormModalEl')">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="articleFormEl">
+                    <!-- Form fields remain the same -->
+                    <input type="hidden" id="articleId">
+                    <div class="form-group">
+                        <label for="articleTibetanTitle">藏文標題</label>
+                        <input type="text" id="articleTibetanTitle" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="articleChineseTitle">中文標題</label>
+                        <input type="text" id="articleChineseTitle" class="form-control" required>
+                    </div>
+                     <div class="form-group">
+                        <label for="articleEnglishTitle">英文標題 (選填)</label>
+                        <input type="text" id="articleEnglishTitle" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="articleAuthor">作者</label>
+                        <input type="text" id="articleAuthor" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="articleCategory">分類</label>
+                        <input type="text" id="articleCategory" class="form-control" placeholder="例如：祈請文、自傳" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="articleTags">標籤 (逗號分隔)</label>
+                        <input type="text" id="articleTags" class="form-control" placeholder="例如：長壽, 金剛結">
+                    </div>
+                    <div class="form-group">
+                        <label for="articleContentTibetan">藏文內容</label>
+                        <textarea id="articleContentTibetan" class="form-textarea" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="articleContentChinese">中文內容</label>
+                        <textarea id="articleContentChinese" class="form-textarea" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="articleContentEnglish">英文內容 (選填)</label>
+                        <textarea id="articleContentEnglish" class="form-textarea"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>可提供語言 (勾選)</label>
+                        <div>
+                            <input type="checkbox" id="langBo" value="bo" checked> <label for="langBo" style="display:inline; margin-right:10px;">藏文</label>
+                            <input type="checkbox" id="langZh" value="zh" checked> <label for="langZh" style="display:inline; margin-right:10px;">中文</label>
+                            <input type="checkbox" id="langEn" value="en"> <label for="langEn" style="display:inline;">英文</label>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">儲存文獻</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Generic Utility Modal for About, Editor's Note, Resources -->
+    <div class="modal" id="infoModalEl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="infoModalTitleEl">資訊</h2>
+                <button class="close-btn" onclick="closeModal('infoModalEl')">×</button>
+            </div>
+            <div class="modal-body" id="infoModalBodyEl" style="white-space: pre-wrap; line-height: 1.7; color: var(--text-light);">
+                <!-- Content dynamically inserted by JS -->
+            </div>
+        </div>
+    </div>
+
+
+    <div id="messageAreaEl"></div>
+
+    <footer>
+        <div class="social-links">
+            <!-- Replace # with your actual links -->
+            <a href="#" target="_blank" title="Facebook">FB</a>
+            <a href="#" target="_blank" title="Twitter">TW</a>
+            <a href="#" target="_blank" title="Instagram">IG</a>
+            <a href="#" target="_blank" title="YouTube">YT</a>
+            <a href="#" target="_blank" title="LinkedIn">LI</a>
+        </div>
+        <div class="copyright">
+            噶陀仁珍千寶 © 2025 才旺諾布全集 All Rights Reserved
+        </div>
+    </footer>
+
+    <script>
+        // --- DATA (Sample) ---
+        // ... (Your initialDocuments data structure remains the same, ensure ContentEnglish class is "english-text")
+        let documentsData = [];
+        const initialDocuments = [
+            {
+                id: 'history_005',
+                tibetanTitle: '༄༅། །བུ་སྟོན་ཁ་ཆེས་མཛད་པའི་ཆོས་འབྱུང་རིན་པོ་ཆེའི་མཛོད་ལས། ག་པ་འཛིན་པ་ཚེ་དབང་ནོར་བུས་ཉེ་བར་བཏུས་པ་བཞུགས་སོ། །',
+                chineseTitle: '布敦大師所撰佛法源流寶藏錄之持明才旺諾布節錄文',
+                englishTitle: 'From the Treasury of Religious History by Buton Rinchen Drub Compiled by the Vidyādhara Tsewang Norbu',
+                author: '才旺諾布',
+                category: '歷史',
+                tags: ["佛法源流", "布敦大師", "Buton"],
+                ContentTibetan: `<p class="tibetan-text">༈ ཨོཾ་སྭཱསྟི། ... (完整藏文內容) ... །སརྦ་མངྒ་ལཾ།</p>`,
+                ContentChinese: `<p class="chinese-text">嗡娑帝<b>竊聞西藏王統之始末，... (完整中文內容) ... 薩哇 芒嘎朗！。</p>`,
+                ContentEnglish: `<p class="english-text"> Oṃ Svāsti!<b>According to the lineage of Tibetan kings ... (完整英文內容) ... Sarva Maṅgalam (May all be auspicious) </p>`,
+                status: "published",
+                meta: { "words": "N/A", "pages": "N/A", "readTime": "N/A", "preview": "N/A" },
+                availableLanguages: ["bo", "zh", "en"],
+                createdAt: "2025-05-31T14:08:00Z",
+                updatedAt: "2025-05-31T22:18:00Z"
+            },
+            {
+                id: 'aspiration_002',
+                tibetanTitle: '另一篇祈願文 (藏)',
+                chineseTitle: '另一篇祈願文 (中)',
+                englishTitle: 'Another Aspiration Prayer (Eng)', // Added for consistency
+                author: '佚名',
+                category: '祈請文',
+                tags: ["迴向"],
+                ContentTibetan: `<p class="tibetan-text">此祈願文之藏文內容...</p>`,
+                ContentChinese: `<p class="chinese-text">此祈願文之中文內容...</p>`,
+                ContentEnglish: `<p class="english-text">English content of this aspiration...</p>`, // Added
+                status: "published",
+                meta: { "words": "N/A", "pages": "N/A", "readTime": "N/A", "preview": "N/A" },
+                availableLanguages: ["bo", "zh", "en"], // Adjusted
+                createdAt: "2023-05-21T11:00:00Z",
+                updatedAt: "2023-05-21T11:00:00Z"
+            }
+        ];
+
+
+        // --- DOM Elements ---
+        // ... (Most DOM element selections remain the same) ...
+        const infoModalEl = document.getElementById('infoModalEl');
+        const infoModalTitleEl = document.getElementById('infoModalTitleEl');
+        const infoModalBodyEl = document.getElementById('infoModalBodyEl');
+
+
+        // --- Theme Switcher ---
+        // function changeTheme(themeName) { ... } // This function is no longer needed as theme switcher is removed.
+
+        // --- Mode Management ---
+        // ... (enterMode, showModeSelectorScreen, setupReadModeUI, setupEditModeUI remain largely the same) ...
+
+        // --- Data Management & UI Rendering (Cards) ---
+        // ... (updateDocumentMeta, processAllDocumentMeta, loadDocumentsData, renderDocuments remain largely the same) ...
+        // In renderDocuments, update favorite button text:
+        // actionButtonsHTML = `<button class="btn btn-secondary reader-only" onclick="toggleFavorite('${doc.id}', this)">${isFavorited ? '♥ 已收藏' : '♡ 加入收藏'}</button>`;
+
+        // --- Modal Document Viewer ---
+        // ... (openDocumentModal, updateLanguageSwitcher, showLanguage, closeModal remain largely the same) ...
+
+        // --- Admin & User Section ---
+        // ... (adminLoginFormEl listener, adminLogout remain largely the same) ...
+        function updateUserSectionUI() {
+            userSectionEl.innerHTML = '';
+            const homeButton = document.createElement('button');
+            homeButton.className = 'modern-btn';
+            homeButton.textContent = '回首頁';
+            homeButton.onclick = showModeSelectorScreen;
+            userSectionEl.appendChild(homeButton);
+
+            const aboutButton = document.createElement('button');
+            aboutButton.className = 'modern-btn';
+            aboutButton.textContent = '關於我們';
+            aboutButton.onclick = () => showInfoModal('關於我們', '這是關於我們的內容，您可以替換成您的實際介紹。');
+            userSectionEl.appendChild(aboutButton);
+
+            const editorsNoteButton = document.createElement('button');
+            editorsNoteButton.className = 'modern-btn';
+            editorsNoteButton.textContent = '編者的話';
+            editorsNoteButton.onclick = () => showInfoModalFromFile('編者的話', 'སྒྲིག་པ་པོའི་གཏམ།編者的話.txt');
+            userSectionEl.appendChild(editorsNoteButton);
+
+            const resourcesButton = document.createElement('button');
+            resourcesButton.className = 'modern-btn';
+            resourcesButton.textContent = '參考資源';
+            resourcesButton.onclick = () => showInfoModalFromFile('參考資源', '參考資源.txt');
+            userSectionEl.appendChild(resourcesButton);
+
+            if (currentMode === 'edit' && isAdminLoggedIn) {
+                const addArticleBtn = document.createElement('button');
+                addArticleBtn.className = 'modern-btn admin-only';
+                addArticleBtn.innerHTML = '✨ 新增文獻';
+                addArticleBtn.onclick = openArticleFormModal;
+                userSectionEl.insertBefore(addArticleBtn, userSectionEl.firstChild); // Add to beginning
+
+                const adminInfoDiv = document.createElement('div');
+                adminInfoDiv.style.cssText = "color:white; display:flex; align-items:center; gap:0.5rem;";
+                adminInfoDiv.className = 'admin-only';
+                adminInfoDiv.innerHTML = `<span>管理員</span><div style="width:24px; height:24px; background:var(--accent-gradient); border-radius:50%; text-align:center; line-height:24px; font-weight:bold;">A</div>`;
+                userSectionEl.insertBefore(adminInfoDiv, homeButton);
+
+
+                const logoutBtn = document.createElement('button');
+                logoutBtn.className = 'modern-btn admin-only';
+                logoutBtn.textContent = '登出管理';
+                logoutBtn.onclick = adminLogout;
+                userSectionEl.appendChild(logoutBtn); // Add to end
+            } else if (currentMode === 'read') {
+                const toolsButton = document.createElement('button');
+                toolsButton.className = 'modern-btn reader-only utility-toggle-btn';
+                toolsButton.innerHTML = '🛠️ 工具'; // Changed back to "工具"
+                toolsButton.onclick = () => toggleSidebar('utilitySidebarEl');
+                userSectionEl.insertBefore(toolsButton, homeButton);
+            }
+        }
+
+        // --- Show Info Modal (for About, Editor's Note, Resources) ---
+        function showInfoModal(title, content) {
+            infoModalTitleEl.textContent = title;
+            infoModalBodyEl.textContent = content; // Using textContent for simple text to preserve formatting
+            infoModalEl.classList.add('active');
+        }
+
+        async function showInfoModalFromFile(title, filePath) {
+            try {
+                const response = await fetch(filePath);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const content = await response.text();
+                showInfoModal(title, content);
+            } catch (error) {
+                console.error("Error fetching file for modal:", error);
+                showInfoModal(title, `無法載入內容：${filePath}\n錯誤：${error.message}`);
+            }
+        }
+
+
+        // --- Sidebar Rendering ---
+        // ... (renderSidebar, setActiveSidebarItem, toggleCategory, toggleSidebar remain largely the same) ...
+
+        // --- Search Function ---
+        // ... (searchInputEl listener remains the same) ...
+
+        // --- View Mode (Grid/List) ---
+        // In gridViewBtn listener, adjust columns for smaller cards:
+        // documentsGridEl.style.gridTemplateColumns = 'repeat(auto-fit, minmax(320px, 1fr))'; // Smaller min width
+
+        // --- Favorites ---
+        // ... (toggleFavorite, showFavorites, renderFavoritesList remain largely the same, check button text) ...
+
+        // --- Utility Modals (Report Error / Donate) ---
+        // ... (showUtilityModal for report/donate remains largely the same) ...
+
+        // --- Article Form (Add/Edit) ---
+        // ... (openArticleFormModal, articleFormEl listener remain largely the same) ...
+
+        // --- Initialization ---
+        // ... (loadInitialContent remains largely the same) ...
+
+        // --- Global Functions on window object ---
+        // ... (Remove changeTheme from global if it was there) ...
+
+        // --- Initial Call & Event Listeners ---
+        // ... (mainTitleElementForAnimation listener, showModeSelectorScreen call, DOMContentLoaded listener, keydown listener, scrollBehavior, dynamicStyle remain largely the same) ...
+
+        // Ensure the dynamic style script for animations is still present at the end.
+        // Make sure the main-title animation is correct after removing theme switcher.
+
+    </script>
+</body>
+</html>

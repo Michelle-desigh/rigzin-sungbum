@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>才旺諾布全集閱讀系統</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tibetan:wght@300;400;500;600;700&family=Noto+Serif+TC:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        @font-face {
+            font-family: 'Monlam Uni Chouk';
+            src: url('fonts/Monlam Uni Chouk.woff2') format('woff2');
+            font-weight: normal; font-style: normal; font-display: swap;
+        }
+        @font-face {
+            font-family: 'WenDingCuXingKai';
+            src: url('fonts/文鼎粗行楷.woff2') format('woff2');
+            font-weight: normal; font-style: normal; font-display: swap;
+        }
+                @font-face {
+            font-family: 'Adobe Caslon Pro Italic'; /* 定義字型名稱 */
+            src: url('fonts/ACaslonPro-Italic.woff2') format('woff2'); /* 確保檔案名稱與實際檔案一致 */
+            font-weight: normal;
+            font-style: italic; /* 通常 Italic 字型本身就是斜體，但明確指定有好處 */
+            font-display: swap;
+        }
+        /* 您可以為截圖中的其他藏文字體也添加 @font-face 規則，如果需要在正文等其他地方使用它們 */
+        @font-face {
+            font-family: 'Jomolhari';
+            src: url('fonts/Jomolhari-Regular.woff') format('woff');
+            font-weight: normal; font-style: normal; font-display: swap;
+        }
+        @font-face {
+            font-family: 'Monlam Dutsa';
+            src: url('fonts/Monlam Dutsa 1 Regular.woff') format('woff'); /* 檔案名稱注意空格 */
+            font-weight: normal; font-style: normal; font-display: swap;
+        }
+         @font-face {
+            font-family: 'Qomolangma Drutsa';
+            src: url('fonts/Qomolangma-Drutsa.woff') format('woff');
+            font-weight: normal; font-style: normal; font-display: swap;
+        }
+        /* 如果有華康仿宋體和行楷體w5，也需要定義 */
+        @font-face {
+            font-family: 'HuaKangFangSongW6'; /* 假設的字型名稱 */
+            src: url('fonts/華康仿宋體W6-B5.woff2') format('woff2');
+            font-weight: normal; font-style: normal; font-display: swap;
+        }
+        @font-face {
+            font-family: 'XingKaiTiW5'; /* 假設的字型名稱 */
+            src: url('fonts/行楷體w5.woff2') format('woff2');
+            font-weight: normal; font-style: normal; font-display: swap;
+        }
+
+
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --glass-bg: rgba(20, 20, 30, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --text-light: rgba(240, 240, 255, 0.95);
+            --text-accent: #FFD700;
+            --tibetan-title-font: 'Monlam Uni Chouk', 'Noto Sans Tibetan', serif;
+            --chinese-title-font: 'WenDingCuXingKai', 'Noto Serif TC', serif;
+            --english-title-font: 'ACaslsonPro-Italic', 'Noto Serif TC', serif;
+            --border-radius-main: 10px;
+            --border-radius-small: 5px;
+        }
+
+        body {
+            font-family: 'Inter', 'Microsoft YaHei', 'PingFang TC', sans-serif;
+            background: url('background_literature.jpg') no-repeat center center;
+            background-size: cover;
+            min-height: 100vh;
+            color: var(--text-light);
+            display: flex;
+            flex-direction: column;
+            padding-top: 52px;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><defs><pattern id="books" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse"><rect width="20" height="80" x="10" y="10" fill="rgba(255,255,255,0.05)" rx="2"/><rect width="20" height="75" x="35" y="15" fill="rgba(255,255,255,0.03)" rx="2"/><rect width="20" height="70" x="60" y="20" fill="rgba(255,255,255,0.04)" rx="2"/></pattern></defs><rect width="100%" height="100%" fill="url(%23books)"/></svg>') repeat;
+            opacity: 0.3;
+            z-index: -1;
+        }
+
+        .top-nav {
+            background: rgba(10, 10, 20, 0.85);
+            padding: 8px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--glass-border);
+            height: 52px;
+        }
+
+        .nav-left { display: flex; gap: 12px; align-items: center; }
+        .nav-right { display: flex; gap: 8px; align-items: center; }
+        
+        .nav-item, .top-nav-btn {
+            color: var(--text-light); 
+            text-decoration: none; 
+            padding: 6px 10px;
+            border-radius: var(--border-radius-small); 
+            transition: background 0.2s, color 0.2s;
+            font-size: 14px; 
+            background: transparent; 
+            border: 1px solid transparent; 
+            cursor: pointer;
+        }
+        
+        .nav-item:hover, .top-nav-btn:hover { 
+            background: rgba(255, 255, 255, 0.1); 
+            color: white; 
+        }
+
+        #modeSelectorScreen { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            flex-grow: 1; 
+            text-align: center; 
+            position: relative; 
+            z-index: 10; 
+        }
+
+        .mode-selector-content {
+            background: var(--glass-bg); 
+            backdrop-filter: blur(15px); 
+            border-radius: var(--border-radius-main);
+            padding: 3rem 2.5rem; 
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 10px 35px rgba(0,0,0,0.3); 
+            animation: fadeInUp 0.8s ease-out;
+            max-width: 800px; 
+            width: 90%;
+        }
+
+        @keyframes fadeInUp { 
+            from { opacity: 0; transform: translateY(25px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+
+        .main-title {
+            font-family: var(--chinese-title-font), 'Noto Serif TC', serif; 
+            font-size: 3.2rem;
+            font-weight: bold; 
+            margin-bottom: 0.8rem; 
+            letter-spacing: 1px;
+            background: linear-gradient(45deg, #fff, #e0e0ff); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent;
+            white-space: nowrap;
+        }
+
+        .tibetan-subtitle {
+            font-family: var(--tibetan-title-font), 'Noto Sans Tibetan', serif; 
+            font-size: 1.5rem;
+            color: var(--text-light); 
+            margin-bottom: 1.2rem; 
+            opacity: 0.9;
+        }
+
+        .english-subtitle { 
+            font-family: var(--english-title-font), 'ACaslsonPro-Italic';            
+            font-size: 1rem; 
+            color: var(--text-light); 
+            margin-bottom: 2rem; 
+            opacity: 0.8; 
+            font-style: italic; 
+        }
+
+        .mode-buttons { 
+            display: flex; 
+            gap: 1rem; 
+            flex-wrap: wrap; 
+            justify-content: center; 
+            margin-bottom: 1.5rem; 
+        }
+
+        .mode-button {
+            padding: 0.9rem 2rem; 
+            font-size: 1rem; 
+            font-weight: 500; 
+            border: none;
+            border-radius: 20px; 
+            cursor: pointer; 
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative; 
+            overflow: hidden; 
+            background: rgba(255,255,255,0.15); 
+            color: white;
+            border: 1px solid var(--glass-border); 
+            backdrop-filter: blur(8px); 
+            min-width: 160px;
+        }
+
+        .mode-button:hover { 
+            transform: translateY(-5px) scale(1.03); 
+            box-shadow: 0 15px 30px rgba(0,0,0,0.25); 
+            background: rgba(255,255,255,0.25); 
+        }
+
+        #appContainer { 
+            display: none; 
+            width: 100%; 
+            flex-grow: 1; 
+            opacity: 0; 
+            animation: fadeIn 0.5s ease-out forwards; 
+        }
+
+        @keyframes fadeIn { to { opacity: 1; } }
+        
+        body.app-active #appContainer { display: flex; }
+
+        .sidebar {
+            width: 300px;
+            background: var(--glass-bg); 
+            backdrop-filter: blur(20px); 
+            overflow-y: auto;
+            position: fixed; 
+            height: calc(100vh - 52px);
+            left: 0; 
+            top: 52px;
+            z-index: 100; 
+            border-right: 1px solid var(--glass-border);
+            transition: transform 0.3s ease-out;
+            border-top-right-radius: var(--border-radius-main);
+        }
+
+        .sidebar-header { padding: 1.8rem 1.5rem; }
+        .sidebar-title { font-family: var(--chinese-title-font); }
+        .sidebar-subtitle { font-family: var(--tibetan-title-font); }
+
+        .main-content {
+            flex: 1; 
+            margin-left: 300px;
+            min-height: calc(100vh - 52px);
+            position: relative; 
+            transition: margin-left 0.3s ease-out;
+            padding: 1.5rem;
+        }
+
+        .main-content.no-left-sidebar { margin-left: 0; }
+        .main-content.with-right-sidebar { padding-right: 300px; }
+
+        .container {
+            max-width: 1300px; 
+            margin: 0 auto;
+        }
+
+        .header { 
+            text-align: center; 
+            margin-bottom: 2.5rem; 
+            color: white; 
+        }
+
+        .header h1 { 
+            font-family: var(--chinese-title-font); 
+            font-size: 2.8rem; 
+        }
+
+        .header .tibetan-subtitle-header { 
+            font-family: var(--tibetan-title-font); 
+            font-size: 1.6rem; 
+            margin-top: -0.5rem; 
+        }
+
+        .search-section { 
+            max-width: 650px; 
+            margin: 0 auto 2.5rem; 
+        }
+
+        .search-container { 
+            position: relative;
+            border-radius: var(--border-radius-small); 
+        }
+
+        .search-input { 
+            width: 100%;
+            padding: 0.8rem 1rem 0.8rem 3rem; 
+            font-size: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius-small);
+            color: var(--text-light);
+        }
+
+        .search-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .search-icon { 
+            position: absolute;
+            left: 1rem; 
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .stats-bar {
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius-main); 
+            padding: 1rem 1.5rem; 
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .view-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .view-btn {
+            padding: 0.6rem 1rem; 
+            font-size: 0.85rem; 
+            border-radius: var(--border-radius-small);
+            border: 1px solid var(--glass-border);
+            background: transparent;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .view-btn:hover,
+        .view-btn.active {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .documents-grid {
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem; 
+            margin-bottom: 2rem;
+        }
+
+        .document-card {
+            background: rgba(30,30,40,0.7);
+            backdrop-filter: blur(15px);
+            border-radius: var(--border-radius-main); 
+            padding: 1.5rem;
+            border: 1px solid var(--glass-border);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .document-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .document-title { 
+            font-size: 1.3rem; 
+            font-family: var(--tibetan-title-font);
+            margin-bottom: 0.5rem;
+        }
+
+        .document-subtitle { 
+            font-size: 1.1rem; 
+            font-family: var(--chinese-title-font);
+            margin-bottom: 0.5rem;
+            color: var(--text-accent);
+        }
+
+        .document-meta { 
+            font-size: 0.85rem;
+            opacity: 0.8;
+            margin-bottom: 1rem;
+        }
+
+        .document-preview { 
+            font-size: 0.9rem; 
+            padding: 0.8rem; 
+            border-radius: var(--border-radius-small);
+            background: rgba(0, 0, 0, 0.2);
+            margin-bottom: 1rem;
+            opacity: 0.9;
+        }
+
+        .btn {
+            padding: 0.7rem 1.5rem; 
+            font-size: 0.9rem; 
+            border-radius: var(--border-radius-small);
+            justify-content: center; 
+            text-align: center;
+            border: 1px solid var(--glass-border);
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-light);
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .admin-only { display: none !important; } 
+        .reader-only { display: none !important; }
+        
+        body.edit-mode .admin-only { display: inline-flex !important; }
+        body.read-mode .reader-only { display: block !important; }
+        body.read-mode .top-nav-btn.reader-only { display: inline-flex !important; }
+
+        .modal { 
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active { display: flex; }
+
+        .modal-content { 
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius-main);
+            padding: 2rem;
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            color: var(--text-light);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(0, 0, 0, 0.2);
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .social-links {
+            margin-bottom: 1rem;
+        }
+
+        .social-links a {
+            color: var(--text-light);
+            text-decoration: none;
+            margin: 0 1rem;
+            padding: 0.5rem;
+            border-radius: var(--border-radius-small);
+            transition: background 0.2s;
+        }
+
+        .social-links a:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            body { padding-top: 48px; }
+            .top-nav { height: auto; padding: 6px 10px; flex-wrap: wrap; }
+            .nav-left { gap: 5px; margin-bottom: 5px; width: 100%; justify-content: center;}
+            .nav-right { width: 100%; justify-content: center; }
+            .nav-item, .top-nav-btn { font-size: 13px; padding: 5px 8px; }
+            .sidebar { width: 260px; height: calc(100vh - 48px); top: 48px; }
+            .main-content { margin-left: 0; padding: 1rem; }
+            body.app-active .main-content.sidebar-open { margin-left: 260px; }
+            .main-title { font-size: 2.2rem; white-space: normal; }
+            .mode-selector-content { padding: 2rem 1.5rem; }
+            .documents-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <nav class="top-nav">
+        <div class="nav-left" id="navLeftLinks">
+            <a href="javascript:void(0)" class="nav-item" onclick="showModeSelectorScreen()">回首頁</a>
+            <a href="javascript:void(0)" class="nav-item" onclick="showInfo('關於我們')">關於我們</a>
+            <a href="javascript:void(0)" class="nav-item" onclick="showInfo('編者的話')">編者的話</a>
+            <a href="javascript:void(0)" class="nav-item" onclick="showInfo('參考資源')">參考資源</a>
+        </div>
+        <div class="nav-right" id="navRightControls">
+            <button class="top-nav-btn" onclick="enterMode('edit')">登入</button>
+        </div>
+    </nav>
+
+    <div id="modeSelectorScreen">
+        <div class="mode-selector-content">
+            <h1 class="main-title">才旺諾布全集閱讀系統</h1>
+            <p class="tibetan-subtitle">༄༅། །ཚེ་དབང་ནོར་བུའི་གསུང་འབུམ་ཀློག་སྟེགས།</p>
+            <p class="english-subtitle">Tsewang Norbu Complete Works Reading System</p>
+            <div class="mode-buttons">
+                <button class="mode-button" onclick="enterMode('read')">📖 進入閱讀模式</button>
+                <button class="mode-button" onclick="enterMode('edit')">🔐 進入編輯模式</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="appContainer">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2 class="sidebar-title">課程目錄</h2>
+                <p class="sidebar-subtitle">སློབ་ཚན་གྱི་དཀར་ཆག</p>
+            </div>
+            <nav class="course-menu" id="courseMenuContainer">
+                <div style="padding: 1rem; color: var(--text-light); opacity: 0.8;">
+                    載入中...
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content" id="mainContentArea">
+            <div class="container">
+                <header class="header">
+                    <h1>才旺諾布全集閱讀系統</h1>
+                    <p class="tibetan-subtitle-header">ཚེ་དབང་ནོར་བུའི་གསུང་འབུམ་ཀློག་སྟེགས།</p>
+                    <p>Tsewang Norbu Complete Works Reading System</p>
+                </header>
+                
+                <div class="search-section">
+                    <div class="search-container">
+                        <span class="search-icon">⌕</span>
+                        <input type="text" class="search-input" placeholder="搜尋文獻標題、內容或作者..." id="searchInputEl">
+                    </div>
+                </div>
+                
+                <div class="stats-bar">
+                    <div class="view-controls">
+                        <button class="view-btn active" id="gridViewBtn">📇 卡片檢視</button>
+                        <button class="view-btn" id="listViewBtn">📋 清單檢視</button>
+                    </div>
+                    <div style="font-size: 0.9rem; opacity: 0.9;">總計 <strong id="totalCountEl">1</strong> 部文獻</div>
+                </div>
+                
+                <div class="documents-grid" id="documentsGridEl">
+                    <div class="document-card" onclick="openDocument('sample')">
+                        <h3 class="document-title">བུ་སྟོན་ཁ་ཆེས་མཛད་པའི་ཆོས་འབྱུང་རིན་པོ་ཆེའི་མཛོད</h3>
+                        <h4 class="document-subtitle">布敦大師所撰佛法源流寶藏錄</h4>
+                        <div class="document-meta">作者：才旺諾布 | 類別：歷史</div>
+                        <div class="document-preview">從布敦仁欽竹大師的《佛法源流寶藏》中節錄，講述西藏王統的歷史源流...</div>
+                        <a href="javascript:void(0)" class="btn">閱讀全文</a>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Document Modal -->
+    <div class="modal" id="documentModal">
+        <div class="modal-content" style="max-width: 800px;">
+            <button class="modal-close" onclick="closeModal('documentModal')">&times;</button>
+            <div id="modalContent">
+                <h2 style="font-family: var(--chinese-title-font); margin-bottom: 1rem;">載入中...</h2>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Login Modal -->
+    <div class="modal" id="adminLoginModal">
+        <div class="modal-content" style="max-width: 400px;">
+            <button class="modal-close" onclick="closeModal('adminLoginModal')">&times;</button>
+            <h2 style="margin-bottom: 1.5rem; text-align: center;">管理員登入</h2>
+            <form id="adminLoginForm">
+                <div style="margin-bottom: 1rem;">
+                    <label for="adminUsername" style="display: block; margin-bottom: 0.5rem;">用戶名：</label>
+                    <input type="text" id="adminUsername" required style="width: 100%; padding: 0.8rem; border-radius: var(--border-radius-small); border: 1px solid var(--glass-border); background: rgba(255,255,255,0.1); color: var(--text-light);">
+                </div>
+                <div style="margin-bottom: 1.5rem;">
+                    <label for="adminPassword" style="display: block; margin-bottom: 0.5rem;">密碼：</label>
+                    <input type="password" id="adminPassword" required style="width: 100%; padding: 0.8rem; border-radius: var(--border-radius-small); border: 1px solid var(--glass-border); background: rgba(255,255,255,0.1); color: var(--text-light);">
+                </div>
+                <button type="submit" class="btn" style="width: 100%;">登入</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="messageArea" style="position: fixed; top: 70px; right: 20px; z-index: 3000;"></div>
+
+    <footer>
+        <div class="social-links">
+            <a href="https://www.facebook.com/rigzinchenpoassociation/?locale=zh_TW" target="_blank" title="Facebook">ⓕ</a>
+            <a href="http://www.rigzin-chenpo.org/index2.html" target="_blank" title="Website">🏠︎</a>
+        </div>
+        <div class="copyright">噶陀仁珍千寶 © 2025 才旺諾布全集 All Rights Reserved</div>
+    </footer>
+
+    <script>
+        // --- Global Variables ---
+        let currentMode = '';
+        let isAdminLoggedIn = false;
+        let documentsData = [
+            {
+                id: "history_005",
+                tibetanTitle: "༄༅། །བུ་སྟོན་ཁ་ཆེས་མཛད་པའི་ཆོས་འབྱུང་རིན་པོ་ཆེའི་མཛོད་ལས། ག་པ་འཛིན་པ་ཚེ་དབང་ནོར་བུས་ཉེ་བར་བཏུས་པ་བཞུགས་སོ། །",
+                chineseTitle: "布敦大師所撰佛法源流寶藏錄之持明才旺諾布節錄文",
+                englishTitle: "From the Treasury of Religious History by Buton Rinchen Drub Compiled by the Vidyādhara Tsewang Norbu",
+                author: "才旺諾布",
+                category: "歷史",
+                tags: ["佛法源流", "布敦大師", "Buton"],
+                content: "嗡娑帝！竊聞西藏王統之始末，據布敦仁欽竹大師所著《佛法源流寶藏》云：天竺國王色堅心王之子，具相好者，降生於雪域天幕之巔，後至贊塘四門，是為聶赤贊普。其後有天王七代，末代斯日贊普時，有本教師贊米波且者..."
+            }
+        ];
+
+        // --- Mode Management Functions ---
+        function enterMode(mode) {
+            console.log('Entering mode:', mode);
+            currentMode = mode;
+            
+            // Hide mode selector
+            document.getElementById('modeSelectorScreen').style.display = 'none';
+            document.getElementById('appContainer').style.display = 'flex';
+            document.body.classList.add('app-active');
+            
+            // Set mode classes
+            document.body.classList.remove('read-mode', 'edit-mode');
+            document.body.classList.add(mode + '-mode');
+
+            // Update navigation
+            updateNavControls();
+
+            if (mode === 'edit') {
+                if (!isAdminLoggedIn) {
+                    showModal('adminLoginModal');
+                } else {
+                    setupEditMode();
+                }
+            } else {
+                setupReadMode();
+            }
+            
+            // Load content
+            loadContent();
+        }
+
+        function showModeSelectorScreen() {
+            currentMode = '';
+            document.getElementById('modeSelectorScreen').style.display = 'flex';
+            document.getElementById('appContainer').style.display = 'none';
+            document.body.classList.remove('app-active', 'read-mode', 'edit-mode');
+            updateNavControls();
+        }
+
+        function setupReadMode() {
+            document.getElementById('mainContentArea').classList.remove('no-left-sidebar');
+        }
+
+        function setupEditMode() {
+            document.getElementById('mainContentArea').classList.remove('with-right-sidebar');
+        }
+
+        // --- Navigation Functions ---
+        function updateNavControls() {
+            const navRight = document.getElementById('navRightControls');
+            
+            if (currentMode === 'edit' && isAdminLoggedIn) {
+                navRight.innerHTML = `
+                    <button class="top-nav-btn admin-only" onclick="addNewDocument()">✨ 新增</button>
+                    <div style="color:var(--text-light); display:flex; align-items:center; gap:0.3rem; font-size:13px;" class="admin-only">
+                        <span>管理員</span>
+                        <div style="width:18px; height:18px; background:var(--text-accent); border-radius:50%; text-align:center; line-height:18px; font-weight:bold; font-size:11px;">A</div>
+                    </div>
+                    <button class="top-nav-btn admin-only" onclick="adminLogout()">登出</button>`;
+            } else if (currentMode === 'read') {
+                navRight.innerHTML = `
+                    <button class="top-nav-btn reader-only" onclick="showTools()">✆✉♡♥</button>`;
+            } else {
+                navRight.innerHTML = `
+                    <button class="top-nav-btn" onclick="enterMode('edit')">登入</button>`;
+            }
+        }
+
+        // --- Modal Functions ---
+        function showModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // --- Admin Functions ---
+        function adminLogout() {
+            isAdminLoggedIn = false;
+            showMessage('已登出管理員模式', 'info');
+            enterMode('read');
+        }
+
+        function addNewDocument() {
+            showMessage('新增文件功能開發中...', 'info');
+        }
+
+        // --- Content Functions ---
+        function loadContent() {
+            renderDocuments();
+            renderSidebar();
+        }
+
+        function renderDocuments() {
+            const gridEl = document.getElementById('documentsGridEl');
+            const totalEl = document.getElementById('totalCountEl');
+            
+            if (!documentsData || documentsData.length === 0) {
+                gridEl.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--text-light); opacity: 0.8;">暫無文獻資料</div>';
+                totalEl.textContent = '0';
+                return;
+            }
+
+            totalEl.textContent = documentsData.length;
+            
+            gridEl.innerHTML = documentsData.map(doc => `
+                <div class="document-card" onclick="openDocument('${doc.id}')">
+                    <h3 class="document-title">${doc.tibetanTitle || '無標題'}</h3>
+                    <h4 class="document-subtitle">${doc.chineseTitle || ''}</h4>
+                    <div class="document-meta">作者：${doc.author || '未知'} | 類別：${doc.category || '未分類'}</div>
+                    <div class="document-preview">${(doc.content || '').substring(0, 100)}...</div>
+                    <a href="javascript:void(0)" class="btn">閱讀全文</a>
+                </div>
+            `).join('');
+        }
+
+        function renderSidebar() {
+            const sidebarEl = document.getElementById('courseMenuContainer');
+            
+            if (!documentsData || documentsData.length === 0) {
+                sidebarEl.innerHTML = '<div style="padding: 1rem; color: var(--text-light); opacity: 0.8;">暫無目錄</div>';
+                return;
+            }
+
+            // Group by category
+            const categories = {};
+            documentsData.forEach(doc => {
+                const cat = doc.category || '未分類';
+                if (!categories[cat]) categories[cat] = [];
+                categories[cat].push(doc);
+            });
+
+            sidebarEl.innerHTML = Object.entries(categories).map(([category, docs]) => `
+                <div style="margin-bottom: 1rem;">
+                    <h4 style="padding: 0.8rem 1rem; background: rgba(255,255,255,0.1); margin: 0; cursor: pointer; border-radius: var(--border-radius-small);" onclick="toggleCategory('${category}')">
+                        ${category} (${docs.length})
+                    </h4>
+                    <div id="category-${category}" style="padding-left: 1rem;">
+                        ${docs.map(doc => `
+                            <div style="padding: 0.5rem 1rem; cursor: pointer; border-radius: var(--border-radius-small); margin: 0.2rem 0;" 
+                                 onclick="openDocument('${doc.id}')" 
+                                 onmouseover="this.style.background='rgba(255,255,255,0.1)'" 
+                                 onmouseout="this.style.background='transparent'">
+                                ${doc.chineseTitle || doc.tibetanTitle || '無標題'}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function toggleCategory(category) {
+            const categoryEl = document.getElementById(`category-${category}`);
+            if (categoryEl) {
+                categoryEl.style.display = categoryEl.style.display === 'none' ? 'block' : 'none';
+            }
+        }
+
+        function openDocument(docId) {
+            const doc = documentsData.find(d => d.id === docId);
+            if (!doc) {
+                showMessage('找不到該文件', 'error');
+                return;
+            }
+
+            const modalContent = document.getElementById('modalContent');
+            modalContent.innerHTML = `
+                <h2 style="font-family: var(--chinese-title-font); margin-bottom: 0.5rem;">${doc.chineseTitle || '無標題'}</h2>
+                <h3 style="font-family: var(--tibetan-title-font); margin-bottom: 1rem; opacity: 0.9;">${doc.tibetanTitle || ''}</h3>
+                <div style="margin-bottom: 1rem; padding: 1rem; background: rgba(0,0,0,0.2); border-radius: var(--border-radius-small);">
+                    <strong>作者：</strong>${doc.author || '未知'} | 
+                    <strong>類別：</strong>${doc.category || '未分類'}
+                    ${doc.tags ? ` | <strong>標籤：</strong>${doc.tags.join(', ')}` : ''}
+                </div>
+                <div style="line-height: 1.8; font-size: 1rem;">
+                    ${doc.content || '暫無內容'}
+                </div>
+            `;
+            
+            showModal('documentModal');
+        }
+
+        // --- Utility Functions ---
+        function showMessage(text, type = 'info') {
+            const messageArea = document.getElementById('messageArea');
+            const messageEl = document.createElement('div');
+            messageEl.style.cssText = `
+                background: ${type === 'error' ? 'rgba(220, 53, 69, 0.9)' : type === 'success' ? 'rgba(40, 167, 69, 0.9)' : 'rgba(23, 162, 184, 0.9)'};
+                color: white;
+                padding: 1rem 1.5rem;
+                border-radius: var(--border-radius-small);
+                margin-bottom: 0.5rem;
+                backdrop-filter: blur(10px);
+                animation: slideInRight 0.3s ease-out;
+            `;
+            messageEl.textContent = text;
+            
+            messageArea.appendChild(messageEl);
+            
+            setTimeout(() => {
+                messageEl.style.animation = 'slideOutRight 0.3s ease-out forwards';
+                setTimeout(() => messageArea.removeChild(messageEl), 300);
+            }, 3000);
+        }
+
+        function showInfo(title) {
+            showMessage(`${title} 功能開發中...`, 'info');
+        }
+
+        function showTools() {
+            showMessage('工具功能開發中...', 'info');
+        }
+
+        // --- Event Listeners ---
+        document.addEventListener('DOMContentLoaded', function() {
+            // Admin login form
+            document.getElementById('adminLoginForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const username = document.getElementById('adminUsername').value;
+                const password = document.getElementById('adminPassword').value;
+                
+                if (username === 'admin' && password === 'password123') {
+                    isAdminLoggedIn = true;
+                    closeModal('adminLoginModal');
+                    showMessage('管理員登入成功！', 'success');
+                    setupEditMode();
+                    updateNavControls();
+                    loadContent();
+                } else {
+                    showMessage('用戶名或密碼錯誤', 'error');
+                }
+            });
+
+            // Search functionality
+            document.getElementById('searchInputEl').addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                if (!searchTerm) {
+                    renderDocuments();
+                    return;
+                }
+                
+                const filtered = documentsData.filter(doc =>
+                    (doc.tibetanTitle && doc.tibetanTitle.toLowerCase().includes(searchTerm)) ||
+                    (doc.chineseTitle && doc.chineseTitle.toLowerCase().includes(searchTerm)) ||
+                    (doc.englishTitle && doc.englishTitle.toLowerCase().includes(searchTerm)) ||
+                    (doc.author && doc.author.toLowerCase().includes(searchTerm)) ||
+                    (doc.content && doc.content.toLowerCase().includes(searchTerm))
+                );
+                
+                const gridEl = document.getElementById('documentsGridEl');
+                const totalEl = document.getElementById('totalCountEl');
+                
+                totalEl.textContent = filtered.length;
+                
+                if (filtered.length === 0) {
+                    gridEl.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--text-light); opacity: 0.8;">未找到相關文獻</div>';
+                } else {
+                    gridEl.innerHTML = filtered.map(doc => `
+                        <div class="document-card" onclick="openDocument('${doc.id}')">
+                            <h3 class="document-title">${doc.tibetanTitle || '無標題'}</h3>
+                            <h4 class="document-subtitle">${doc.chineseTitle || ''}</h4>
+                            <div class="document-meta">作者：${doc.author || '未知'} | 類別：${doc.category || '未分類'}</div>
+                            <div class="document-preview">${(doc.content || '').substring(0, 100)}...</div>
+                            <a href="javascript:void(0)" class="btn">閱讀全文</a>
+                        </div>
+                    `).join('');
+                }
+            });
+
+            // View mode buttons
+            document.getElementById('gridViewBtn').addEventListener('click', function() {
+                document.getElementById('gridViewBtn').classList.add('active');
+                document.getElementById('listViewBtn').classList.remove('active');
+                document.getElementById('documentsGridEl').style.display = 'grid';
+            });
+
+            document.getElementById('listViewBtn').addEventListener('click', function() {
+                document.getElementById('listViewBtn').classList.add('active');
+                document.getElementById('gridViewBtn').classList.remove('active');
+                // List view implementation could go here
+                showMessage('清單檢視功能開發中...', 'info');
+            });
+
+            // Close modals when clicking outside
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        this.classList.remove('active');
+                    }
+                });
+            });
+
+            // Initialize
+            showModeSelectorScreen();
+        });
+
+        // Add CSS animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideInRight {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOutRight {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

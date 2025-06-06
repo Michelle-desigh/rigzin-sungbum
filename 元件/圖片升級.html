@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>才旺諾布全集閱讀系統</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            min-height: 100vh;
+            color: #333;
+            /* background for #appContainer is set separately */
+        }
+
+        /* Mode Selector Screen */
+        #modeSelectorScreen {
+            display: flex; /* Will be 'flex' by default, JS will hide it when mode selected */
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-image: url('https://www.designwant.com/images/meta_og/6309_1200_630.jpg'); 
+            background-size: cover;
+            background-position: center;
+            color: white;
+            text-align: center;
+            position: relative; /* For the overlay */
+        }
+        #modeSelectorScreen::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(40, 40, 70, 0.55); /* Darker overlay for better text contrast */
+            z-index: 1;
+        }
+        #modeSelectorScreen > * { /* Target direct children: h1, p, div with buttons */
+            position: relative;
+            z-index: 2; /* Ensure content is above overlay */
+        }
+        #modeSelectorScreen h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+             font-family: "Noto Serif TC", "Songti SC", serif; /* MODIFIED FONT */
+        }
+        #modeSelectorScreen p {
+            font-size: 1.2rem;
+            margin-bottom: 2.5rem;
+            opacity: 0.9;
+        }
+        .mode-button {
+            padding: 1rem 2.5rem;
+            font-size: 1.2rem;
+            margin: 0.5rem;
+            border: 2px solid white;
+            background-color: transparent;
+            color: white;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        .mode-button:hover {
+            background-color: white;
+            color: #764ba2;
+            transform: translateY(-3px);
+        }
+
+        /* Main App Container (hidden initially) */
+        #appContainer {
+            display: none; /* Initially hidden, JS will show it */
+            width: 100%;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); /* Background for the app itself */
+        }
+        body.app-active #appContainer { display: flex; } /* Activate flex when app is shown */
+
+
+        /* Left Sidebar */
+        .sidebar {
+            width: 280px;
+            background: rgba(255,255,255,0.98);
+            backdrop-filter: blur(20px);
+            overflow-y: auto;
+            position: fixed;
+            height: 100vh;
+            left: 0;
+            top: 0;
+            z-index: 100;
+            box-shadow: 2px 0 15px rgba(0,0,0,0.1);
+            border-right: 1px solid rgba(255,255,255,0.2);
+            transition: transform 0.3s ease; /* For mobile toggle */
+        }
+        .sidebar-header { padding: 2rem 1.5rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-align: center; }
+        .sidebar-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            font-family: "Noto Serif TC", "Songti SC", serif; /* MODIFIED FONT */
+        }
+        .sidebar-subtitle { font-size: 0.9rem; opacity: 0.9; font-style: italic; }
+        .course-menu { padding: 1rem 0; }
+        .course-category { margin-bottom: 1rem; }
+        .category-header { padding: 1rem 1.5rem; background: linear-gradient(90deg, rgba(102, 126, 234, 0.1) 0%, rgba(102, 126, 234, 0.05) 100%); font-weight: 600; color: #4c51bf; font-size: 0.9rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: all 0.3s ease; border-left: 4px solid transparent; }
+        .category-header:hover { background: linear-gradient(90deg, rgba(102, 126, 234, 0.15) 0%, rgba(102, 126, 234, 0.08) 100%); border-left-color: #667eea; }
+        .category-toggle { font-size: 0.8rem; transition: transform 0.3s ease; }
+        .category-header.collapsed .category-toggle { transform: rotate(-90deg); }
+        .course-list { background: white; max-height: 500px; overflow-y: auto; overflow-x: hidden; transition: max-height 0.3s ease; }
+        .course-list.collapsed { max-height: 0; overflow: hidden;}
+        .course-item { padding: 0.8rem 1.5rem 0.8rem 2rem; cursor: pointer; transition: all 0.3s ease; border-left: 3px solid transparent; display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .course-item span:first-child { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-grow: 1; margin-right: 10px; }
+        .course-item:hover { background: rgba(102, 126, 234, 0.05); border-left-color: #667eea; transform: translateX(5px); }
+        .course-item.active { background: rgba(102, 126, 234, 0.1); border-left-color: #667eea; font-weight: 600; color: #4c51bf; }
+        .course-status { font-size: 0.7rem; padding: 0.2rem 0.5rem; border-radius: 12px; font-weight: 500; flex-shrink: 0; }
+        .course-status.completed { background: #d1fae5; color: #065f46; }
+        .course-status.current { background: #dbeafe; color: #1e40af; }
+        .course-status.pending { background: #f3f4f6; color: #6b7280; }
+
+        /* Main content area */
+        .main-content {
+            flex: 1;
+            margin-left: 280px; /* Default for when left sidebar is present */
+            min-height: 100vh;
+            position: relative; /* For right sidebar positioning */
+            padding-right: 0; /* Will be adjusted if right sidebar is active */
+            transition: margin-left 0.3s ease, padding-right 0.3s ease;
+        }
+         .main-content.no-left-sidebar { margin-left: 0; }
+         .main-content.with-right-sidebar { padding-right: 280px; } /* Space for right sidebar */
+
+
+        /* Right Utility Sidebar */
+        .utility-sidebar {
+            width: 280px;
+            overflow-y: auto;
+            position: fixed;
+            height: 100vh;
+            right: -280px; 
+            top: 0;
+            z-index: 90; 
+            box-shadow: -2px 0 15px rgba(0,0,0,0.1);
+            border-left: 1px solid rgba(255,255,255,0.15); /* Slightly more visible border */
+            transition: right 0.3s ease;
+            padding: 0; /* Remove padding to let header and items control it */
+            background-image: url('https://www.designwant.com/images/meta_og/6309_1200_630.jpg');
+            background-size: cover;
+            background-position: center;
+            display: flex; /* Enable flex for column layout */
+            flex-direction: column; /* Stack header and items vertically */
+        }
+        .utility-sidebar::before { /* Overlay for readability */
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(255, 255, 255, 0.55); /* Lighter overlay for cafe vibe & better contrast */
+            backdrop-filter: blur(3px); /* Optional: slight blur on overlay */
+            z-index: 1; 
+        }
+        .utility-sidebar.open { right: 0; }
+        .utility-sidebar-header {
+            padding: 1.5rem 1rem;
+            background: rgba(102, 126, 234, 0.75); /* Theme color, semi-transparent */
+            color: white;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            position: relative; /* To be above ::before */
+            z-index: 2;
+            flex-shrink: 0; /* Prevent header from shrinking */
+        }
+        .utility-sidebar-title { font-size: 1.1rem; font-weight: 600; } /* Uses default body font or inherited */
+        .utility-sidebar-content { /* New wrapper for scrollable items */
+            padding: 1rem;
+            overflow-y: auto; /* Allow this part to scroll */
+            flex-grow: 1; /* Take remaining space */
+            position: relative; /* To be above ::before */
+            z-index: 2;
+        }
+        .utility-item {
+            padding: 0.8rem 1rem;
+            margin-bottom: 0.8rem;
+            background: rgba(255, 255, 255, 0.85); /* More opaque for readability over image */
+            border-radius: 8px;
+            color: #4c51bf; /* Original color */
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        .utility-item:hover { background: rgba(230, 230, 245, 0.9); } /* Slightly different hover */
+        .utility-item-icon { font-size: 1.2rem; }
+        
+        #favoritesListContainerEl { /* Renamed ID in HTML */
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            padding: 0.8rem 1rem; /* Consistent padding */
+            background: rgba(255, 255, 255, 0.85); /* Similar to utility items */
+            border-radius: 8px;
+            margin-bottom: 0.8rem;
+        }
+        #favoritesListContainerEl .favorite-item { padding: 0.5rem 0; border-bottom: 1px dashed #ccc; color: #5c5c8a; cursor: pointer; }
+        #favoritesListContainerEl .favorite-item:last-child { border-bottom: none; }
+        #favoritesListContainerEl .favorite-item:hover { color: #667eea; }
+        #favoritesListContainerEl p { color: #777; font-style: italic; }
+
+
+        /* Top Bar */
+        .top-bar { background: rgba(255,255,255,0.1); backdrop-filter: blur(20px); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; color: white; border-bottom: 1px solid rgba(255,255,255,0.1); position: sticky; top: 0; z-index: 50; }
+        .breadcrumb { font-size: 0.9rem; opacity: 0.9; display: flex; align-items: center; gap: 0.5rem; }
+        .user-section { display: flex; align-items: center; gap: 1rem; }
+        .admin-btn, .utility-toggle-btn { padding: 0.6rem 1.2rem; background: rgba(255, 255, 255, 0.25); border: 1px solid rgba(255, 255, 255, 0.35); color: white; border-radius: 25px; cursor: pointer; font-weight: 500; transition: all 0.3s ease; font-size: 0.85rem; }
+        .admin-btn:hover, .utility-toggle-btn:hover { background: rgba(255,255,255,0.9); color: #333; }
+        .login-btn { padding: 0.6rem 1.5rem; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; border-radius: 25px; cursor: pointer; font-weight: 500; transition: all 0.3s ease; display: flex; align-items: center; gap: 0.5rem; text-decoration: none; }
+        .login-btn:hover { background: rgba(255,255,255,0.9); color: #333; transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .user-info { display: flex; align-items: center; gap: 1rem; color: white; }
+        .user-avatar { width: 35px; height: 35px; border-radius: 50%; background: linear-gradient(45deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; cursor: pointer; transition: all 0.3s ease; border: 2px solid rgba(255,255,255,0.3); }
+        .user-avatar:hover { transform: scale(1.1); border-color: rgba(255,255,255,0.6); }
+
+        .container { padding: 2rem; max-width: 1200px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 3rem; color: white; }
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            background: linear-gradient(45deg, #fff, #f0f0f0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-family: "Noto Serif TC", "Songti SC", serif; /* MODIFIED FONT */
+        }
+        .header p { font-size: 1.2rem; opacity: 0.9; margin-bottom: 2rem; font-style: italic; }
+        .search-section { max-width: 600px; margin: 0 auto 3rem; position: relative; }
+        .search-input { width: 100%; padding: 1rem 1.5rem 1rem 3rem; border: none; border-radius: 50px; font-size: 1.1rem; background: rgba(255,255,255,0.95); box-shadow: 0 8px 32px rgba(0,0,0,0.1); transition: all 0.3s ease; backdrop-filter: blur(10px); }
+        .search-input:focus { outline: none; box-shadow: 0 12px 40px rgba(0,0,0,0.2); transform: translateY(-2px); }
+        .search-icon { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: #666; font-size: 1.2rem; }
+        .stats-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); padding: 1rem 1.5rem; border-radius: 15px; color: white; }
+        .view-controls { display: flex; gap: 0.5rem; }
+        .view-btn { padding: 0.5rem 1rem; border: none; border-radius: 8px; background: rgba(255,255,255,0.2); color: white; cursor: pointer; transition: all 0.3s ease; font-size: 0.85rem; }
+        .view-btn.active { background: rgba(255,255,255,0.9); color: #333; }
+        
+        .documents-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 2rem; margin-bottom: 3rem; }
+        .document-card { background: rgba(255,255,255,0.95); border-radius: 20px; padding: 2rem; box-shadow: 0 8px 32px rgba(0,0,0,0.1); transition: all 0.4s ease; border: 1px solid rgba(255,255,255,0.2); position: relative; overflow: hidden; }
+        .document-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #667eea, #764ba2); }
+        .document-card:hover { transform: translateY(-8px) scale(1.02); box-shadow: 0 20px 60px rgba(0,0,0,0.15); }
+        .document-title { font-family: "Tibetan Machine Uni", "Noto Sans Tibetan", "Noto Serif Tibetan", serif; font-size: 1.3rem; font-weight: 600; margin-bottom: 0.5rem; color: #2d3748; line-height: 1.6; }
+        .document-subtitle { 
+            font-family: "Noto Serif TC", "Songti SC", serif; /* MODIFIED FONT (Removed KaiTi from stack) */
+            font-size: 1.1rem; 
+            color: #4a5568; 
+            margin-bottom: 1rem; 
+            font-style: normal; 
+        }
+        .document-meta { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1.5rem; font-size: 0.9rem; color: #666; }
+        .meta-item { display: flex; align-items: center; gap: 0.5rem; }
+        .document-preview { font-family: "Tibetan Machine Uni", "Noto Sans Tibetan", "Noto Serif Tibetan", serif; font-size: 1rem; line-height: 1.8; color: #4a5568; margin-bottom: 1.5rem; max-height: 100px; overflow: hidden; position: relative; background: rgba(249, 250, 251, 0.5); padding: 0.8rem; border-radius: 8px; border-left: 3px solid #667eea; }
+        .document-preview::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 30px; background: linear-gradient(transparent, rgba(255,255,255,0.95)); }
+        .document-actions { display: flex; gap: 1rem; justify-content: space-between; align-items: center; }
+        .btn { padding: 0.75rem 1.5rem; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4); }
+        .btn-secondary { background: rgba(0,0,0,0.05); color: #666; border: 1px solid rgba(0,0,0,0.1); }
+        .btn-secondary:hover { background: rgba(0,0,0,0.1); transform: translateY(-1px); }
+
+        /* Modal styles */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 1000; align-items: center; justify-content: center; animation: fadeIn 0.3s ease; }
+        .modal.active { display: flex; }
+        .modal-content { background: white; border-radius: 20px; max-width: 90vw; max-height: 90vh; overflow-y: auto; position: relative; margin: 2rem; box-shadow: 0 20px 80px rgba(0,0,0,0.3); animation: slideIn 0.3s ease; }
+        #articleFormModalEl .modal-content { max-width: 700px; } 
+        #utilityModalEl .modal-content { max-width: 500px; } 
+        .modal-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1.5rem 2rem; border-radius: 20px 20px 0 0; position: sticky; top: 0; z-index: 10; display: flex; justify-content: space-between; align-items: center; }
+        .modal-header h2 { 
+            margin: 0; 
+            font-size: 1.3rem; 
+            font-family: "Noto Serif TC", "Songti SC", serif; /* MODIFIED FONT (Removed KaiTi from stack) */
+        }
+        .modal-header .modal-title-tibetan { font-family: "Tibetan Machine Uni", "Noto Sans Tibetan", "Noto Serif Tibetan", serif; font-size: 1.1rem; opacity: 0.8; margin-top: 0.3rem; }
+        .close-btn { background: none; border: none; color: white; font-size: 2rem; cursor: pointer; opacity: 0.8; transition: opacity 0.3s ease; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .close-btn:hover { opacity: 1; background: rgba(255,255,255,0.1); }
+        .modal-body { padding: 2rem; }
+        .modal-body h3 { color: #6a0dad; font-size: 1.5em; margin-top: 20px; margin-bottom: 10px; border-left: 4px solid #6a0dad; padding-left: 8px; } /* Uses default body font or inherited */
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: #2d3748; }
+        .form-control, .form-select, .form-textarea { width: 100%; padding: 0.8rem; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 1rem; transition: all 0.3s ease; }
+        .form-textarea { min-height: 150px; resize: vertical; font-family: "Tibetan Machine Uni", "Noto Sans Tibetan", "Noto Serif TC", serif; }
+        .form-control:focus, .form-select:focus, .form-textarea:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); }
+        
+        .text-content-base { font-family: "Noto Serif TC", "Songti SC", serif; line-height: 1.8; color: #333; }
+        .tibetan-text { font-family: "Tibetan Machine Uni", "Noto Sans Tibetan", "Noto Serif Tibetan", serif; font-size: 1.1em; line-height: 2; direction: ltr; text-align: left; margin-bottom: 1em; white-space: pre-wrap; }
+        .chinese-text { font-family: "Noto Serif TC", "Songti SC", serif; font-size: 1.05em; text-align: justify; margin-bottom: 1em; white-space: pre-wrap; }
+        .colophon { font-style: italic; font-size: 0.9em; color: #666; margin-top: 20px; border-top: 1px dashed #ccc; padding-top: 15px; white-space: pre-wrap; }
+
+        /* Document Modal Title Edit Styles */
+        /* This rule targets the input fields for editing titles within the modal */
+        #modalEditableTitleContainer .form-control { 
+            margin-bottom: 0.5rem; 
+            font-family: "Noto Serif TC", "Songti SC", serif; /* MODIFIED FONT (for Chinese editable title input) */
+        }
+        #editableModalTibetanTitle.form-control { 
+            font-family: "Tibetan Machine Uni", "Noto Sans Tibetan", "Noto Serif Tibetan", serif; /* Tibetan input keeps its specific font */
+        }
+        #saveModalTitleBtn { 
+            padding: 0.5rem 1rem; 
+            font-size: 0.85rem; 
+            margin-top: 0.5rem; 
+            background: #5cb85c; /* Greenish for save */
+            border-color: #4cae4c;
+            color: white;
+        }
+         #saveModalTitleBtn:hover {
+            background: #4cae4c;
+        }
+
+
+        .message { position: fixed; top: 20px; right: 20px; padding: 1rem 1.5rem; border-radius: 10px; color: white; font-weight: 500; z-index: 1001; box-shadow: 0 4px 20px rgba(0,0,0,0.2); animation: slideInRight 0.3s ease; }
+        .message.success { background: linear-gradient(135deg, #48bb78, #38a169); }
+        .message.error { background: linear-gradient(135deg, #f56565, #e53e3e); }
+        .message.info { background: linear-gradient(135deg, #4299e1, #3182ce); }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(-50px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        @keyframes slideInRight { from { opacity: 0; transform: translateX(100px); } to { opacity: 1; transform: translateX(0); } }
+
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .utility-sidebar { width: 250px; right: -250px; transform: none; }
+            .utility-sidebar.open { right: 0; }
+            .main-content { margin-left: 0; padding-right: 0 !important; }
+            .top-bar { padding: 1rem; }
+            .container { padding: 1rem; }
+            .header h1 { font-size: 2rem; }
+            .documents-grid { grid-template-columns: 1fr; gap: 1rem; }
+            .stats-bar { flex-direction: column; gap: 1rem; }
+            .modal-content { margin: 1rem; max-width: calc(100vw - 2rem); }
+            #articleFormModalEl .modal-content { max-width: calc(100vw - 2rem); } 
+            .menu-toggle { display: block !important; }
+        }
+
+        .menu-toggle { display: none; background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; padding: 0.5rem; border-radius: 5px; transition: background 0.3s ease; }
+        .menu-toggle:hover { background: rgba(255,255,255,0.1); }
+        
+        .floating-elements { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: -1; }
+        .floating-element { position: absolute; width: 20px; height: 20px; background: rgba(255,255,255,0.1); border-radius: 50%; animation: float 6s ease-in-out infinite; }
+        @keyframes float { 0%, 100% { transform: translateY(0px) rotate(0deg); } 50% { transform: translateY(-20px) rotate(180deg); } }
+
+        .admin-only { display: none !important; } 
+        .reader-only { display: none !important; }
+        body.edit-mode .admin-only { display: inline-flex !important; }
+        body.edit-mode .admin-btn.admin-only { display: inline-flex !important; }
+        body.edit-mode .user-info.admin-only { display: flex !important; }
+        body.edit-mode #saveModalTitleBtn.admin-only { display: inline-block !important; }
+
+
+        body.read-mode .reader-only { display: block !important; }
+        body.read-mode .utility-toggle-btn.reader-only { display: inline-flex !important; }
+        body.read-mode .utility-sidebar.reader-only { display: flex !important; } 
+        body.read-mode .btn-secondary.reader-only { display: inline-flex !important; }
+
+    </style>
+</head>
+<body class="">
+    <!-- Floating elements, Mode Selector, App Container structure remains the same -->
+    <div class="floating-elements">
+        <div class="floating-element" style="top: 20%; left: 10%; animation-delay: 0s;"></div>
+        <div class="floating-element" style="top: 60%; left: 80%; animation-delay: 2s;"></div>
+        <div class="floating-element" style="top: 80%; left: 20%; animation-delay: 4s;"></div>
+    </div>
+
+    <div id="modeSelectorScreen">
+        <h1>才旺諾布全集閱讀系統</h1>
+        <p>ཚེ་དབང་ནོར་བུའི་གསུང་འབུམ་ཀློག་སྟེགས།</p>
+        <div>
+            <button class="mode-button" onclick="enterMode('read')">📖 進入閱讀模式</button>
+            <button class="mode-button" onclick="enterMode('edit')">🔐 進入編輯模式</button>
+        </div>
+    </div>
+
+    <div id="appContainer">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2 class="sidebar-title">課程目錄</h2>
+                <p class="sidebar-subtitle">སློབ་ཚན་གྱི་དཀར་ཆག</p>
+            </div>
+            <nav class="course-menu" id="courseMenuContainer"></nav>
+        </aside>
+
+        <main class="main-content" id="mainContentArea">
+            <div class="top-bar">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <button class="menu-toggle" id="leftSidebarToggle" onclick="toggleSidebar('sidebar')">☰</button>
+                    <div class="breadcrumb" id="breadcrumbPath">
+                        <span>🏠 首頁</span>
+                        <span>></span>
+                        <span id="currentDocCategory"></span>
+                        <span>></span>
+                        <span id="currentDocTitle"></span>
+                    </div>
+                </div>
+                <div class="user-section" id="userSectionEl"></div>
+            </div>
+
+            <div class="container">
+                <header class="header">
+                    <h1>才旺諾布全集閱讀系統</h1>
+                    <p>ཚེ་དབང་ནོར་བུའི་གསུང་འབུམ་ཀློག་སྟེགས། | Tsewang Norbu Complete Works Reading System</p>
+                </header>
+                <div class="search-section">
+                    <div style="position: relative;">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" class="search-input" placeholder="搜尋文獻標題、內容或作者..." id="searchInputEl">
+                    </div>
+                </div>
+                <div class="stats-bar">
+                    <div class="view-controls">
+                        <button class="view-btn active" id="gridViewBtn">📇 卡片檢視</button>
+                        <button class="view-btn" id="listViewBtn">📋 清單檢視</button>
+                    </div>
+                    <div style="font-size: 0.9rem; opacity: 0.9;">
+                        總計 <strong id="totalCountEl">0</strong> 部文獻
+                    </div>
+                </div>
+                <div class="documents-grid" id="documentsGridEl"></div>
+            </div>
+        </main>
+
+        <aside class="utility-sidebar reader-only" id="utilitySidebarEl">
+            <div class="utility-sidebar-header">
+                <h3 class="utility-sidebar-title">工具選單</h3>
+            </div>
+            <div class="utility-sidebar-content"> <!-- Wrapper for scrollable content -->
+                <div class="utility-item" onclick="showFavorites()">
+                    <span class="utility-item-icon">❤️</span> 已收藏文章
+                </div>
+                <div id="favoritesListContainerEl" style="display:none;">
+                    <p>暫無收藏。</p>
+                </div>
+                <div class="utility-item" onclick="showUtilityModal('reportErrorModal', '回報錯字')">
+                    <span class="utility-item-icon">🐞</span> 回報錯字
+                </div>
+                <div class="utility-item" onclick="showUtilityModal('donateModal', '護持贊助')">
+                    <span class="utility-item-icon">💖</span> 護持贊助
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <div class="modal" id="documentModalEl">
+        <div class="modal-content">
+            <div class="modal-header">
+                 <div style="width: calc(100% - 50px);"> <!-- Wrapper for title section to allow button float -->
+                    <div id="modalStaticTitleContainer">
+                        <h2 id="modalTitleEl">Document Title</h2>
+                        <div id="modalTitleTibetanEl" class="modal-title-tibetan">Tibetan Title</div>
+                    </div>
+                    <div id="modalEditableTitleContainer" style="display:none; width:100%;">
+                        <div class="form-group" style="margin-bottom: 0.5rem;">
+                            <input type="text" id="editableModalChineseTitle" class="form-control" placeholder="校正篇章的標題 (中文)">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0.5rem;">
+                            <input type="text" id="editableModalTibetanTitle" class="form-control" placeholder="校正篇章的標題 (藏文)">
+                        </div>
+                        <button id="saveModalTitleBtn" class="btn btn-sm admin-only">儲存標題</button>
+                    </div>
+                </div>
+                <button class="close-btn" onclick="closeModal('documentModalEl')">×</button>
+            </div>
+            <div class="modal-body text-content-base" id="modalBodyEl">
+                 <div id="modalTibetanContentEl"></div>
+                 <hr style="margin: 30px 0; border: 0; border-top: 1px dashed #ccc;">
+                 <div id="modalChineseContentEl"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AdminLoginModal, ArticleFormModalEl, UtilityModalEl, MessageAreaEl structures remain the same -->
+    <div class="modal" id="adminLoginModalEl">
+        <div class="modal-content" style="max-width: 450px;">
+            <div class="modal-header">
+                <h2>🔒 管理員登入</h2>
+                <button class="close-btn" onclick="closeModal('adminLoginModalEl'); showModeSelectorScreen();">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="adminLoginFormEl">
+                    <div class="form-group">
+                        <label for="adminUsername">用戶名</label>
+                        <input type="text" id="adminUsername" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="adminPassword">密碼</label>
+                        <input type="password" id="adminPassword" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">登入</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="articleFormModalEl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="articleFormModalTitleEl">📝 新增/編輯文獻</h2>
+                <button class="close-btn" onclick="closeModal('articleFormModalEl')">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="articleFormEl">
+                    <input type="hidden" id="articleId">
+                    <div class="form-group">
+                        <label for="articleTibetanTitle">藏文標題</label>
+                        <input type="text" id="articleTibetanTitle" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="articleChineseTitle">中文標題</label>
+                        <input type="text" id="articleChineseTitle" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="articleAuthor">作者</label>
+                        <input type="text" id="articleAuthor" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="articleCategory">分類</label>
+                        <input type="text" id="articleCategory" class="form-control" placeholder="例如：祈請文、自傳" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="articleTags">標籤 (逗號分隔)</label>
+                        <input type="text" id="articleTags" class="form-control" placeholder="例如：長壽, 金剛結">
+                    </div>
+                    <div class="form-group">
+                        <label for="articleFullContentTibetan">藏文內容</label>
+                        <textarea id="articleFullContentTibetan" class="form-textarea" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="articleFullContentChinese">中文內容</label>
+                        <textarea id="articleFullContentChinese" class="form-textarea" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">儲存文獻</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="utilityModalEl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="utilityModalTitleEl">工具視窗</h2>
+                <button class="close-btn" onclick="closeModal('utilityModalEl')">×</button>
+            </div>
+            <div class="modal-body" id="utilityModalBodyEl">
+            </div>
+        </div>
+    </div>
+
+    <div id="messageAreaEl"></div>
+
+    <script>
+        let documentsData = []; 
+        const initialDocuments = [ 
+            { id: 'mamo_secret', tibetanTitle: 'མ་མོ་གསང་བ་ལས་ཀྱི་ཐིག་ལེ།', chineseTitle: '媽嫫秘密業之明點', author: '蓮花生大師 (སློབ་དཔོན་པདྨ་སཾ་བྷཱ་བ)', category: '自傳', preview: '', tags: ['密續', '空行母', '儀軌'], meta: { words: '', pages: '', readTime: '' }, fullContentTibetan: `<p class="tibetan-text">དཔལ་ལྡན་མཁའ་འགྲོའི་ཚོགས་བཅས་ལ། །རྣམ་པར་བཏུད་དེ་ཕྱག་འཚལ་ལོ། །དབྱིངས་དང་ཡེ་ཤེས་དབྱེར་མེད་པའི། །མཁའ་འགྲོ་དྲུག་ཅུ་རྩ་བརྒྱད་ཀྱི། །གཙོ་མོ་སྲིད་པ་བདེ་འགྲོའི་ཐུགས། །གནས་ལུགས་ཐབས་དང་ཤེས་རབ་ཀྱིས། །འགྲོ་བ་འདྲེན་མཛད་ཡུམ་ཆེན་ལ། །གསོལ་བ་འདེབས་སོ་བྱིན་གྱིས་རློབས། །</p>`, fullContentChinese: `<p class="chinese-text">向具德空行母及眷屬，恭敬頂禮！<br>法界與智慧無二融合中，六十八空行母之主尊，輪迴善趣心要之所在，以實相方便與智慧，引導眾生之大佛母前，祈請加持！</p>`},
+            { id: 'prayer1', tibetanTitle: ' ༈ ཚེ་སྒྲུབ་རྡོ་རྗེ་རྒྱ་མདུད་ཀྱི་གསོལ་འདེབས་མི་ཤིགས་དྭངས་མའི་དངོས་གྲུབ་ཅེས་བྱ་བ་བཞུགས་སོ། །', chineseTitle: '壽修金剛結之祈請文〈不滅精粹成就〉', author: '仁珍才旺諾布', category: '祈請文', preview: '', tags: ['長壽', '金剛結', '祈請'], meta: { words: '', pages: '', readTime: '' }, fullContentTibetan: `<p class="tibetan-text">༈ ཚེ་སྒྲུབ་རྡོ་རྗེ་རྒྱ་མདུད་ཀྱི་གསོལ་འདེབས་མི་ཤིགས་དྭངས་མའི་དངོས་གྲུབ་ཅེས་བྱ་བ་བཞུགས་སོ། །<br>ཨོཾ་ཨཱ་ཧཱུྃ་ཧྲཱིཿ མི་ཤིག་དྭངས་མ་རྟག་བརྟན་གཡུང་དྲུང་གི །ངོ་བོར་རབ་བཞུགས་བདེ་ཆེན་འཁོར་ལོས་བསྒྱུར། །རྒྱལ་བ་རྒྱ་མཚོའི་སྤྲུལ་བཞི་འོད་དཔག་མེད། །ཚེ་བདག་མགོན་པོ་མཆོག་དེར་གསོལ་བ་འདེབས། །པདྨའི་རིགས་ཅན་ཡོངས་ཀྱི་བདག་པོ་ཆེ། །རྒྱལ་བ་སྲས་བཅས་ཐུགས་རྗེ་གཅིག་བསྡུས་དཔལ། །ལག་ན་པདྨོས་བརྒྱན་པ་སྤྱན་རས་གཟིགས། །འཇིག་རྟེན་དབང་ཕྱུག་མཆོག་དེར་གསོལ་བ་འདེབས། །ཕྱོགས་དུས་རྒྱལ་བ་ཡོངས་དང་སངས་རྒྱས་སྟོང་། །མཐུ་སྟོབས་བྱིན་རླབས་གཅིག་བསྡུས་ཀོ་ཥའི་མཚོར། །རང་བྱུང་རྡོ་རྗེ་སྐུ་བརྙེས་པདྨ་འབྱུང་། །མ་ནོར་བླ་མ་མཆོག་དེར་གསོལ་བ་འདེབས། །ཁ་སྦྱོར་ཡན་ལག་བདེ་བ་ཆེན་པོའི་སྐུ། །གྲུབ་པའི་རྒྱལ་མོ་ཡེ་ཤེས་མཚོ་རྒྱལ་མ། །སྟོང་ཉིད་མཁའ་ལ་སྙིང་རྗེའི་གཏེར་འགྲོ་བ། །མཁའ་འགྲོ་ཡིད་བཞིན་ནོར་བུར་གསོལ་བ་འདེབས། །སྤང་རྟོགས་མཐར་ཕྱིན་རྒྱལ་བར་ཡོངས་གྲུབ་ཀྱང་། །གདུལ་བྱར་སྨན་པའི་གཟུགས་སྐུར་ཅིར་ཡང་འཆར། །འདྲེན་པ་ཡོངས་ཀྱི་གཙོ་མཆོག་བདེ་ཆེན་གླིང་། །རིག་འཛིན་འཁོར་ལོས་གྱུར་དེར་གསོལ་བ་འདེབས། །གང་གིས་རྗེས་བཟུང་ཐུགས་ལས་སྐྱེས་པའི་སྲས། །ལུང་རྟོགས་ཆོས་ཀྱི་དམ་པའི་གདུང་འཚོབ་བ། །རྣལ་འབྱོར་རྡོ་རྗེ་ཚེ་དཔག་ནོར་བུའི་སྡེ། །དྲིན་ཆེན་བླ་མ་མཆོག་དེར་གསོལ་བ་འདེབས། །སྨིན་དབང་ཆུ་རྒྱུན་གྲོལ་བྱེད་གདམས་པའི་གཏེར། །ལེགས་པར་སྩོལ་ནས་ཐར་པ་མཆོག་སྦྱིན་མཛད། །འགྲོ་བའི་འདྲེན་མཆོག་བཀའ་དྲིན་ཟླ་མེད་མགོན། །འདྲེན་མཆོག་རྩ་བའི་བླ་མར་གསོལ་བ་འདེབས། །ཡི་དམ་དཀྱིལ་འཁོར་ཡོངས་ཀྱི་གཙོ་བོ་མཆོག །ཀུན་རྫོབ་དོན་དམ་འཆི་མེད་རྡོ་རྗེ་ཚེ། །འགྱུར་མེད་དངོས་གྲུབ་སྩོལ་མཛད་ཚེ་དཔག་མེད། །གོས་དཀར་མགྱོགས་མར་བཅས་ལ་གསོལ་བ་འདེབས། །ཚེ་ཡི་བར་ཆད་སེལ་ཞིང་འཕྲིན་ལས་བསྒྲུབ། །ཚངས་པ་བརྒྱ་བྱིན་ཕྱོགས་སྐྱོང་རྒྱལ་ཆེన్བཞི། །བདག་སྐྱོབས་ལྷ་དང་དཀར་པོའི་ཆོས་བསྲུང་བའི། །དམ་ཅན་རྒྱ་མཚོའི་ཚོགས་ལ་གསོལ་བ་འདེབས། །དེ་ལྟར་ཚེ་ཡི་དཀྱིལ་འཁོར་བླ་མ་ལྷར། །རྩེ་གཅིག་གསོལ་བ་བཏབ་པའི་བྱིན་རླབས་ཀྱིས། །བདག་སོགས་སྐྱེ་བ་ཚེ་རབས་ཐམས་ཅད་དུ། །མཐོ་རིས་ཡོན་ཏན་འཕགས་ནོར་བདུན་གྱིས་ཕྱུག །དལ་འབྱོར་རྟེན་ཐོབ་བཤེས་གཉེན་དམ་པས་བཟུང་། །བསླབ་གསུམ་རྣམ་དག་ཐེག་ཆེན་ས་ལམ་གྱིས། །ཡོན་ཏན་མ་ལུས་མྱུར་ཐོབ་རྩལ་ཆེན་རྫོགས། །དོན་གཉིས་ཕུན་ཚོགས་རྒྱལ་བའི་གནས་དམ་པ། །བདུད་སྡེའི་བཞི་བཅོམ་འཆི་མེད་རྡོ་རྗེའི་སྐུ། །སྐལ་པ་དྲུག་ལྡན་མཐའ་ཡས་འགྲོ་བའི་དཔལ། །སྲིད་ཞི་ལས་འདས་དེ་བཞིན་གཤེགས་པའི་གནས། །བདེ་ཆེན་མགོན་པོའི་གོ་འཕང་ལ་འཁོད་ཤོག །<br>དེ་ལྟར་ཚེ་དང་ཡེ་ཤེས་དཔག་ཏུ་མེད་པའི་མན་ངག་འཆི་མེད་རྡོ་རྗེའི་རྒྱ་མདུད་ཀྱི་རྒྱུད་པའི་གསོལ་འདེབས་མི་ཤིག་དང་མ་ཡོངས་འགྲུབ་ཅེས་བྱ་བ་འདི་ནི་ཞ་ལུ་དགེ་སློང་རྡོ་རྗེ་འཛིན་པ་རིན་ཆེན་འཇམ་དཔལ་ཆོས་དར་གྱིས་ཡང་ནས་ཡང་དུ་གསུང་གིས་བསྐུལ་བར་རྟེན་རིག་འཛིན་ཚེ་དབང་ནོར་བུས་དྲག་པོ་ལྕགས་སྤྲེལ་ཆོ་འཕྲུལ་ཟླ་བའི་དམར་ཕྱོགས་ཚེས་བཅུའི་ཐུན་ཆ་ཤས་གཅིག་ཏུ་གློ་ལམ་དཀར་ནག་གི་དབུས་རྟག་བརྟན་རིན་པོ་ཆེ་དེ་དབུའི་སྐྱེད། བསམ་གཏན་སྒོམ་པའི་སྤྱིལ་པོ་འཆི་མེད་གཡུང་དྲུང་འཁྱིལ་བར་བྲིས་པ་སྟེ་དགེའོ། །སརྦ་མངྒ་ལཾ། </p>`, fullContentChinese: `<p class="chinese-text">壽修金剛結之祈請文〈不滅精粹成就〉<br>嗡阿吽啥<br>不滅精粹恆常堅固之，體性安住大樂轉輪者，<br>勝者海會化基無量光，聖尊掌壽怙主誠祈請。<br>蓮花種姓遍盡之至尊，諸佛菩薩悲意合一德，<br>蓮花手為莊嚴觀世音，聖尊世間自在誠祈請。<br>遍方諸時勝者千佛陀，威力加持合一苟卡措，<br>證得自生金剛身蓮師，聖尊無誤上師誠祈請。<br>和合體肢大樂之身相，成就聖母智慧措嘉母，<br>空性虛空往行悲意藏，空行如意寶珠誠祈請。<br>斷證究竟圓成勝者佛，任現成熟化機色身相，<br>一切導師勝首德欽林，聖尊持明輪圍誠祈請。<br>隨學其尊攝受之意子，教證殊勝正法紹繼者，<br>瑜伽金剛長壽珍寶部，聖尊大恩上師誠祈請。<br>熟灌水流解脫竅訣藏，善加授予恩賜勝解脫，<br>眾生勝導無比恩德怙，勝導根本上師誠祈請。<br>所有本尊壇城之勝首，世俗勝義無死金剛壽，<br>賜予不變成就長壽佛，併同白衣迅母誠祈請。<br>泯除壽命厄難事業成，梵天帝釋護方四天王，<br>己方佑神白善護法神，具誓護法海會誠祈請。<br>如是壽命壇城上師尊，專一進行祈請加持力，<br>吾等士夫一切生世中，善趣功德七勝財富足。<br>獲得暇滿能依師攝受，三學清淨大乘地道途，<br>功德無餘速得圓大力，二利圓滿勝者真淨處。<br>摧滅四魔無死金剛身，具六福緣無邊眾生福，<br>超越有寂善逝如來處，安置大樂怙主之果位。</p><div class="colophon">如是無量智壽佛之口訣，立題曰無死金剛結之傳承祈請文不滅圓成乃依夏魯比丘多傑珍巴仁欽蔣貝秋達屢屢以語勸請故，仁珍才旺諾布(持明壽自在寶)於威猛鐵猴年神變月之下弦初十一座部份間，於洛路農牧區交界中央，修定之無死堅固茅茨中所書，善哉！芒嘎朗！</div>`},
+            { id: 'prayer2', tibetanTitle: '༈ རྫོགས་ཆེན་དཀོན་མཆོག་སྤྱི་འདུས་བརྒྱུད་པའི་གསོལ་འདེབས་རྒྱུན་ཁྱེར་ཡིད་བཞིན་གཏེར་སྦྱིན་ཞེས་བྱ་བ་བཞུགས་སོ། །', chineseTitle: '大圓滿三寶總集傳承祈請日修賜如意藏', author: '才旺諾布', category: '祈請文', preview: '', tags: ['大圓滿', '三寶總集', '傳承祈請'], meta: { words: '', pages: '', readTime: '' }, fullContentTibetan: `<p class="tibetan-text">༈ རྫོགས་ཆེན་དཀོན་མཆོག་སྤྱི་འདུས་བརྒྱུད་པའི་གསོལ་འདེབས་རྒྱུན་ཁྱེར་ཡིད་བཞིན་གཏེར་སྦྱིན་ཞེས་བྱ་བ་བཞུགས་སོ། །<br>གུ་རུ་པདྨ་སིདྡྷི་ཧཱུྃ་ཧྲཱི༔ གདོད་ནས་བྱང་ཆུབ་སྤྲོས་བྲལ་བདེ་བ་ཆེ། །ཀུན་བཟང་འོད་དཔག་མེད་ལ་གསོལ་བ་འདེབས། །ཚད་མེད་སྙིང་རྗེའི་གཏེར་ཆེན་ཀུན་ཏུ་རྒྱས། །འཕགས་མཆོག་ནམ་མཁའི་རྒྱལ་པོར་གསོལ་བ་འདེབས། །རྒྱལ་ཀུན་ཡེ་ཤེས་འཕྲིན་ལས་གཅིག་བསྡུས་པ། །སངས་རྒྱས་པདྨ་འབྱུང་ལ་གསོལ་བ་འདེབས། །བདེ་ཆེན་གཉུག་མའི་ཆོས་དབྱིངས་ཞིང་གི་བདག །ཡེ་ཤེས་མཚོ་རྒྱལ་ཞབས་ལ་གསོལ་བ་འདེབས། །དྲི་མེད་འོད་གསལ་རྒྱས་པའི་རང་གཟུགས་ཉིད། །རིག་འཛིན་འཇའ་ཚོན་སྙིང་པོར་གསོལ་བ་འདེབས། །ཐོག་མེད་ཟང་ཐལ་བརྟུལ་ཞུགས་སྤྱོད་པའི་དཔལ། །རིག་འཛིན་བདུད་འདུལ་རྡོ་རྗེར་གསོལ་བ་འདེབས། །རྒྱུན་མཐའི་སར་བཞུགས་བྱང་སེམས་འགྲོ་བའི་མགོན། །རིག་འཛིན་ཀློང་གསལ་སྙིང་པོར་གསོལ་བ་འདེབས། །སྲིད་ཞི་སྤྱི་དཔལ་ཀུན་བཟང་སྒྱུ་འཕྲུལ་གར། །པདྨ་བདེ་ཆེན་གླིང་པར་གསོལ་བ་འདེབས། །སྙིགས་དུས་འགྲོ་འདུལ་དལ་བའི་འཕྲིན་ལས་པ། །རིག་འཛིན་ཚེ་དབང་ནོར་བུར་གསོལ་བ་འདེབས། །བདག་རྒྱུད་སྨིན་གྲོལ་མཛད་པའི་བཀའ་དྲིན་ཅན། །འདྲེན་མཆོག་རྩ་བའི་བླ་མར་གསོལ་བ་འདེབས། །ཡི་དམ་དཀྱིལ་འཁོར་རྒྱ་མཚོའི་གཙོ་བོ་མཆོག །གུ་རུ་ཞི་དང་དྲག་པོར་གསོལ་བ་འདེབས། །གནས་གསུམ་མཁའ་འགྲོ་ཡོངས་ཀྱི་སྤྱི་དཔལ་ཆེ། །ཌཱཀྐི་སིདྡྷ་མུ་ཁར་གསོལ་བ་འདེབས། །དེ་ལྟར་བླ་བསྒྲུབ་དཀོན་མཆོག་སྤྱི་འདུས་ཀྱི། །རྩ་བརྒྱུད་བླ་མ་ཡི་དམ་མཁའ་འགྲོ་མར། །རྩེ་གཅིག་གསོལ་བ་བཏབ་མཐུས་རྣལ་འབྱོར་བདག །དུས་འདི་ནས་བརྩམས་སྐྱེ་བ་ཇི་སྲིད་དུ། །དད་གུས་ཤེས་རབ་ལས་འབྲས་ཡིད་ཆེས་ལྡན། །དམ་པས་རྗེས་བཟུང་དབང་ཁྲིད་གདམས་པ་རྫོགས། །དམ་ཚིག་རྣམ་དག་བསྐྱེད་རྫོགས་ཡོན་ཏན་རྒྱས། །མཐོང་ཐོས་དྲན་རེག་འགྲོ་ཀུན་ཐར་ལམ་ལ། །འདྲེན་པའི་བྱེད་པོར་བདག་ཉིད་འགྱུར་བ་དང་། །མཐར་ཐུག་རང་དོན་ཆོས་ཀྱི་སྐུར་གྲོལ་ནས། །གཞན་དོན་གཟུགས་སྐུ་རྒྱུན་མི་ཆད་པ་ཡི། །ནམ་མཁའི་མཐའ་ཀླས་འགྲོ་བ་འདྲེན་བྱེད་པ། །མགོན་པོ་འོད་དཔག་མེད་དང་མཚུངས་པར་ཤོག །<br>དེ་ལྟར་བླ་བསྒྲུབ་གསོལ་འདེབས་ཡིད་བཞིན་གཏེར་སྦྱིན་ཞེས་བྱ་བ་འདི་ཡང་ས་ཕོ་རྟ་ཡི་ལོ་ཆོ་འཕྲུལ་ཟླ་བའི་དམར་ཕྱོགས་གང་བ་བོད་ཡུལ་དབུས་འགྱུར་བསམ་ཡས་ལྷུན་གྱིས་གྲུབ་པའི་གཙུག་ལག་ཁང་དབུས་སུ་རིག་འཛིན་ཚེ་དབང་ནོར་བུས་སྤོམ་རོང་རྗེ་འབངས་དད་པ་ཅན་གྱི་ངོར་བརྗོད་པ་དགེའོ། །དགེའོ། །དགེའོ། །བཀྲ་ཤིས།</p>`, fullContentChinese: `<p class="chinese-text">大圓滿三寶總集傳承祈請日修賜如意藏<br>古魯貝瑪悉地吽啥<br>本初菩提離戲大安樂，普賢無量光前我祈請。<br>無量慈悲大藏遍充滿，聖尊虛空王前我祈請。<br>諸佛智慧事業總集者，佛陀蓮花生前我祈請。<br>大樂本淨法界剎土主，智慧海生妃前我祈請。<br>無垢光明顯現自形相，持明虹光藏前我祈請。<br>無始通達瑜伽行之相，持明降魔金剛我祈請。<br>究竟地住菩薩度眾怙，持明朗薩藏前我祈請。<br>輪涅總嚴普賢幻化舞，蓮師大樂藏前我祈請。<br>濁世調伏緩行事業者，持明才旺諾布我祈請。<br>令我成熟解脫大恩者，勝導根本上師我祈請。<br>所有本尊壇城之勝首，上師寂忿尊前我祈請。<br>三處空行總集大莊嚴，空行成就母前我祈請。<br>如是上師三寶總集之，根傳上師本尊諸空行。<br>一心祈請加持瑜伽我，從今乃至生生世世中。<br>信敬智慧業果具信解，蒙受聖者攝受灌頂圓。<br>戒律清淨生圓功德增，見聞憶觸眾生解脫道。<br>願成引導之人自成就，究竟自利法身解脫已。<br>利他色身相續無間斷，如同虛空無邊度眾生。<br>願同怙主無量光佛陀。</p><div class="colophon">此上師修持祈請文名為賜如意藏者，於陽土馬年神變月下弦圓滿日，於前藏桑耶自成殿中央，持明才旺諾布為崩絨王臣信眾宣說。善哉！善哉！善哉！吉祥！</div>` },
+             { id: 'prayer3', tibetanTitle: '༄༅། །འཇམ་དཔལ་ནག་པོ་ཐུགས་ཀྱིས་ཡང་ཞུན་གྱི་བླ་མ་བརྒྱུད་པའི་གསོལ་འདེབས་སོ། །', chineseTitle: '黑文殊意精滴之上師傳承祈請文', author: '才旺諾布', category: '祈請文', preview: '', tags: ['黑文殊', '上師傳承', '祈請'], meta: { words: '', pages: '', readTime: '' }, fullContentTibetan: `<p class="tibetan-text">༄༅། །འཇམ་དཔལ་ནག་པོ་ཐུགས་ཀྱིས་ཡང་ཞུན་གྱི་བླ་མ་བརྒྱུད་པའི་གསོལ་འདེབས་སོ། །<br>ཨོཾ་ཨཱཿཧཱུྃ། ཀུན་བཟང་འཇམ་དཔལ་པདྨ་ཐོད་ཕྲེང་རྩལ། །མངའ་བདག་ཡབ་སྲས་ཡེ་ཤེས་མཚོ་རྒྱལ་མ། །ཟབ་གཏེར་མངའ་བདག་ཨོ་རྒྱན་སངས་རྒྱས་གླིང་། །རང་སྲས་བདུན་བརྒྱུད་བདེ་ཆེན་དར་རྒྱས་དང་། །བཀའ་དྲིན་མཚུངས་མེད་བདེ་ཆེན་རབ་གསལ་ཞབས། །རྩ་བའི་བླ་མ་དྲན་ཆོག་འཁོར་ལོའི་མགོན། །འཇམ་དཔལ་ཡང་ཞུན་སྨིན་གྲོལ་བརྒྱུད་པ་ཡི། །བླ་མ་རྣམ་དང་ཡི་དམ་ལྷག་པའི་ལྷར། །རྩེ་གཅིག་གསོལ་བ་བཏབ་པའི་མཐུ་སྟོབས་ཀྱིས། །ལས་བཞི་ལྷུན་གྲུབ་གྲུབ་པ་ཆེ་བརྒྱད་ཐོབ། །ཁྱད་པར་ཚེ་དབང་ཕྱག་རྒྱ་ཆེ་མཆོག་གྲུབ། །འཇམ་དཔལ་གོ་འཕང་ཚེ་འདིར་ཐོབ་བྱིན་རློབས། །<br>ཞེས་འཇམ་དཔལ་ནག་པོ་ཐུགས་ཀྱི་ཡང་ཞུན་གྱི་བླ་མ་བརྒྱུད་པའི་གསོལ་འདེབས་འདི་ཡང་རིག་པ་འཛིན་པ་ཚེ་དབང་ནོར་བུས་སྦྱར་བའོ། །སརྦ་མངྒ་ལཾ། །</p>`, fullContentChinese: `<p class="chinese-text">黑文殊意精滴之上師傳承祈請文<br>嗡阿吽<br>普賢文殊蓮師顱鬘力，主尊父子耶喜措嘉母，<br>深伏藏主鄔金桑傑林，自子七傳德欽達吉尊。<br>恩德無比德欽繞薩尊，根本上師憶起輪怙主，<br>文殊精滴成熟解脫傳，上師眾與本尊勝天尊。<br>一心祈請加持威力故，四業任運成就八大得，<br>尤以壽命手印大勝成，加持此生證得文殊位。</p><div class="colophon">此黑文殊心精華上師傳承祈請文乃持明才旺諾布所造。芒嘎朗！</div>` },
+            // For demonstration, I'll use the structure with placeholders for the rest of the long prayer texts
+            { id: 'prayer4', tibetanTitle: '༈ སྙན་བརྒྱུད་བླ་མ་ཡང་གསང་པདྨ་འོད་འབར་གྱི་བརྒྱུད་པའི་གསོལ་འདེབས་ཡིད་བཞིན་ཏོག་གི་ཕྲེང་བ་བཞུགས་སོ། །', chineseTitle: '耳傳上師極密蓮花光焰傳承祈請文 如意頂嚴鬘', author: '才旺諾布', category: '祈請文', preview: '', tags: ['耳傳', '蓮花光焰', '傳承祈請'], meta: { words: '', pages: '', readTime: '' }, fullContentTibetan: `<p class="tibetan-text">[Full Tibetan P4 Content Here...]</p>`, fullContentChinese: `<p class="chinese-text">[Full Chinese P4 Content Here...]</p><div class="colophon">[Colophon P4 Here...]</div>` },
+            { id: 'prayer5', tibetanTitle: '༈ རྫོགས་ཆེན་མཁའ་འགྲོ་སྙིང་ཐིག་གི་བརྒྱུད་པ་བླ་མའི་གསོལ་འདེབས་ངེས་དོན་སྙིང་པོའི་བཅུད་ལེན་ཞེས་བྱ་བ་བཞུགས་སོ། །', chineseTitle: '大圓滿空行心要傳承上師祈請文定解心髓甘露滴', author: '才旺諾布', category: '祈請文', preview: '', tags: ['大圓滿', '空行心要', '傳承祈請'], meta: { words: '', pages: '', readTime: '' }, fullContentTibetan: `<p class="tibetan-text">[Full Tibetan P5 Content Here...]</p>`, fullContentChinese: `<p class="chinese-text">[Full Chinese P5 Content Here...]</p><div class="colophon">[Colophon P5 Here...]</div>` },
+            { id: 'prayer6', tibetanTitle: '༈རྫོགས་ཆེན་མཁའ་འགྲོ་ཡང་ཞུན་གྱི་གསོལ་འདེབས་རྩ་གསུམ་བྱིན་རླབས་འདྲེན་པའི་ལྕགས་ཀྱུ་ཞེས་བྱ་བ་བཞུགས་སོ། །', chineseTitle: '大圓滿空行精華祈請文 三根本加持攝召鐵鉤', author: '才旺諾布', category: '祈請文', preview: '', tags: ['大圓滿', '空行精華', '三根本'], meta: { words: '', pages: '', readTime: '' }, fullContentTibetan: `<p class="tibetan-text">[Full Tibetan P6 Content Here...]</p>`, fullContentChinese: `<p class="chinese-text">[Full Chinese P6 Content Here...]</p><div class="colophon">[Colophon P6 Here...]</div>` },
+            { id: 'prayer7', tibetanTitle: '༈ བླ་མ་དགོངས་པ་འདུས་པའི་དབང་ལུང་མན་ངག་གི་རྒྱུད་པའི་བླ་མར་གསོལ་བ་འདེབས་པ་བྱིན་རླབས་སྙིང་པོའི་བཅུད་ལེན་ཞེས་བྱ་བ་བཞུགས་སོ། །', chineseTitle: '上師意集灌頂教言竅訣傳承上師祈請文 加持心要甘露滴', author: '才旺諾布', category: '祈請文', preview: '', tags: ['上師意集', '灌頂教言', '傳承祈請'], meta: { words: '', pages: '', readTime: '' }, fullContentTibetan: `<p class="tibetan-text">[Full Tibetan P7 Content Here...]</p>`, fullContentChinese: `<p class="chinese-text">[Full Chinese P7 Content Here...]</p><div class="colophon">[Colophon P7 Here...]</div>` },
+            { id: 'prayer8', tibetanTitle: ' ༈ བྱང་གཏེར་ཐུགས་བསྒྲུབ་ཡང་ཏིག་གཅེས་སྒྲོན་གྱི་ཁྲིད་ཀྱི་གསོལ་འདེབས་བྱིན་རླབས་འདྲེན་པའི་ལྕགས་ཀྱུ་ཞེས་བྱ་བ་བཞུགས་སོ། །', chineseTitle: '北伏藏意修精要寶燈引導祈請文攝召鐵鉤', author: '才旺諾布', category: '祈請文', preview: '', tags: ['北伏藏', '意修精要', '寶燈引導'], meta: { words: '', pages: '', readTime: '' }, fullContentTibetan: `<p class="tibetan-text">[Full Tibetan P8 Content Here...]</p>`, fullContentChinese: `<p class="chinese-text">[Full Chinese P8 Content Here...]</p><div class="colophon">[Colophon P8 Here...]</div>` }
+        ];
+
+        // --- Get DOM Elements (using 'El' suffix for clarity) ---
+        const documentsGridEl = document.getElementById('documentsGridEl');
+        const searchInputEl = document.getElementById('searchInputEl');
+        const totalCountEl = document.getElementById('totalCountEl');
+        
+        const documentModalEl = document.getElementById('documentModalEl');
+        const modalTitleEl = document.getElementById('modalTitleEl');
+        const modalTitleTibetanEl = document.getElementById('modalTitleTibetanEl');
+        const modalTibetanContentEl = document.getElementById('modalTibetanContentEl');
+        const modalChineseContentEl = document.getElementById('modalChineseContentEl');
+
+        const adminLoginModalEl = document.getElementById('adminLoginModalEl');
+        const adminLoginFormEl = document.getElementById('adminLoginFormEl');
+        const userSectionEl = document.getElementById('userSectionEl'); // Updated ID
+        const messageAreaEl = document.getElementById('messageAreaEl');
+
+        const articleFormModalEl = document.getElementById('articleFormModalEl');
+        const articleFormEl = document.getElementById('articleFormEl');
+        const articleFormModalTitleEl = document.getElementById('articleFormModalTitleEl');
+        const courseMenuContainerEl = document.getElementById('courseMenuContainer');
+        
+        const utilitySidebarEl = document.getElementById('utilitySidebarEl');
+        const favoritesListContainerEl = document.getElementById('favoritesListContainerEl');
+        const utilityModalEl = document.getElementById('utilityModalEl');
+        const utilityModalTitleEl = document.getElementById('utilityModalTitleEl');
+        const utilityModalBodyEl = document.getElementById('utilityModalBodyEl');
+
+        const modeSelectorScreenEl = document.getElementById('modeSelectorScreen');
+        const appContainerEl = document.getElementById('appContainer');
+        const mainContentAreaEl = document.getElementById('mainContentArea');
+        const leftSidebarEl = document.getElementById('sidebar');
+        const leftSidebarToggleEl = document.getElementById('leftSidebarToggle'); // Ensure this ID exists or add it
+
+        // --- State Variables ---
+        let currentView = 'grid'; 
+        let isAdminLoggedIn = false;
+        let currentOpenDocId = null;
+        let currentMode = ''; // 'read' or 'edit'
+        let guestFavorites = [];
+
+        const breadcrumbPathEl = document.getElementById('breadcrumbPath'); // Assuming this is within top-bar
+        const currentDocCategoryEl = document.getElementById('currentDocCategory');
+        const currentDocTitleEl = document.getElementById('currentDocTitle');
+
+
+        // --- Mode Management ---
+        function enterMode(mode) {
+            currentMode = mode;
+            modeSelectorScreenEl.style.display = 'none';
+            document.body.classList.add('app-active');
+            document.body.classList.remove('read-mode', 'edit-mode'); // Clear previous mode classes
+            document.body.classList.add(mode + '-mode');
+
+
+            if (mode === 'edit') {
+                adminLoginModalEl.classList.add('active');
+                 // Edit mode UI setup will happen after successful login
+            } else { // read mode
+                isAdminLoggedIn = false; // Ensure admin is logged out for read mode
+                setupReadModeUI();
+                loadInitialContent();
+            }
+        }
+
+        function showModeSelectorScreen() {
+            modeSelectorScreenEl.style.display = 'flex';
+            document.body.classList.remove('app-active', 'read-mode', 'edit-mode');
+            if (currentMode === 'edit' && isAdminLoggedIn) { // If admin was logged in
+                adminLogout(false); // Logout without redirecting to read mode
+            }
+            currentMode = '';
+            updateUserSectionUI(); // Update buttons for mode selector screen (e.g., hide everything or show only back)
+        }
+        
+        function setupReadModeUI() {
+            document.body.classList.remove('edit-mode');
+            document.body.classList.add('read-mode');
+            mainContentAreaEl.classList.remove('no-left-sidebar'); // Assuming left sidebar is default visible
+            if (utilitySidebarEl.classList.contains('open')) {
+                 mainContentAreaEl.classList.add('with-right-sidebar');
+            } else {
+                 mainContentAreaEl.classList.remove('with-right-sidebar');
+            }
+            leftSidebarEl.style.transform = 'translateX(0)'; // Ensure left sidebar is visible
+            updateUserSectionUI();
+        }
+
+        function setupEditModeUI() {
+            document.body.classList.remove('read-mode');
+            document.body.classList.add('edit-mode');
+            mainContentAreaEl.classList.remove('with-right-sidebar'); // No utility sidebar in edit mode
+            mainContentAreaEl.classList.remove('no-left-sidebar'); // Left sidebar visible
+            leftSidebarEl.style.transform = 'translateX(0)';
+            updateUserSectionUI();
+        }
+
+
+        // --- Data Management & Meta Calculation ---
+        function updateDocumentMeta(doc) {
+            const plainTibetan = doc.fullContentTibetan.replace(/<[^>]+>/g, "");
+            const plainChinese = doc.fullContentChinese.replace(/<[^>]+>/g, "");
+
+            const tibetanSyllables = plainTibetan.split(/[་\s]+/).filter(s => s.trim().length > 0).length;
+            const chineseChars = plainChinese.replace(/[^\u4e00-\u9fa5]/g, "").length;
+
+            doc.meta.words = `藏 ${tibetanSyllables} 音節 | 中 ${chineseChars} 字`;
+            
+            const readTimeMinutes = Math.ceil((chineseChars / 250) + (tibetanSyllables / 150)); // Adjusted rates
+            doc.meta.readTime = `閱讀約 ${readTimeMinutes} 分鐘`;
+            
+            // Page count is complex and usually not auto-calculated frontend; placeholder
+            doc.meta.pages = `${Math.ceil(readTimeMinutes / 5)} 頁 (估算)`; 
+
+            doc.preview = plainTibetan.substring(0, 80) + (plainTibetan.length > 80 ? '...' : '');
+        }
+
+        function processAllDocumentMeta() {
+            documentsData.forEach(doc => {
+                if (!doc.meta) doc.meta = {}; // Ensure meta object exists
+                updateDocumentMeta(doc);
+            });
+        }
+
+
+        function loadDocumentsData() {
+            const storedDocs = localStorage.getItem('sunbumDocuments');
+            if (storedDocs) {
+                documentsData = JSON.parse(storedDocs);
+            } else {
+                documentsData = JSON.parse(JSON.stringify(initialDocuments)); // Deep copy
+            }
+            processAllDocumentMeta(); // Calculate meta for all loaded/initial documents
+            saveDocumentsData(); // Save potentially updated meta for initial docs
+        }
+        function saveDocumentsData() {
+            localStorage.setItem('sunbumDocuments', JSON.stringify(documentsData));
+        }
+        function loadGuestFavorites() {
+            const storedFavorites = localStorage.getItem('guestFavorites');
+            guestFavorites = storedFavorites ? JSON.parse(storedFavorites) : [];
+        }
+        function saveGuestFavorites() {
+            localStorage.setItem('guestFavorites', JSON.stringify(guestFavorites));
+        }
+
+
+        // --- UI Rendering ---
+        function updateBreadcrumb(category, title) {
+            currentDocCategoryEl.textContent = category || '未知分類';
+            currentDocTitleEl.textContent = title || '未選文獻';
+        }
+
+        function renderDocuments(filteredDocuments) {
+            documentsGridEl.innerHTML = '';
+            const documentsToRender = filteredDocuments || documentsData;
+            totalCountEl.textContent = documentsToRender.length;
+
+            documentsToRender.forEach(doc => {
+                const card = document.createElement('div');
+                card.className = 'document-card';
+                
+                let actionButtonsHTML = '';
+                if (currentMode === 'edit' && isAdminLoggedIn) {
+                    actionButtonsHTML = `<button class="btn btn-secondary admin-only" onclick="openArticleFormModal('${doc.id}')">✏️ 編輯</button>`;
+                } else if (currentMode === 'read') {
+                     const isFavorited = guestFavorites.includes(doc.id);
+                    actionButtonsHTML = `<button class="btn btn-secondary reader-only" onclick="toggleFavorite('${doc.id}', this)">${isFavorited ? '💖 已收藏' : '❤️ 加入收藏'}</button>`;
+                }
+
+                card.innerHTML = `
+                    <h3 class="document-title">${doc.tibetanTitle.split('།')[0]}</h3>
+                    <div class="document-subtitle">${doc.chineseTitle}</div>
+                    <div class="document-meta">
+                        <div class="meta-item"><span>👤</span><span>${doc.author}</span></div>
+                        <div class="meta-item"><span>📄</span><span>${doc.meta.words}</span></div>
+                        <div class="meta-item"><span>📄</span><span>${doc.meta.pages}</span></div>
+                        <div class="meta-item"><span>⏱️</span><span>${doc.meta.readTime}</span></div>
+                        ${doc.tags && doc.tags.length > 0 ? `<div class="meta-item"><span>🏷️</span><span>${doc.tags.join(', ')}</span></div>` : ''}
+                    </div>
+                    <div class="document-preview">${doc.preview}</div>
+                    <div class="document-actions">
+                        <button class="btn btn-primary" onclick="openDocumentModal('${doc.id}')">📖 閱讀全文</button>
+                        ${actionButtonsHTML}
+                    </div>
+                `;
+                documentsGridEl.appendChild(card);
+            });
+            // applyViewMode(); // CSS grid handles layout, this might not be needed if it just toggles classes
+        }
+        
+        function openDocumentModal(docId) {
+            const doc = documentsData.find(d => d.id === docId);
+            if (doc) {
+                currentOpenDocId = docId;
+                modalTitleEl.textContent = doc.chineseTitle;
+                modalTitleTibetanEl.textContent = doc.tibetanTitle.split('།')[0];
+                
+                modalTibetanContentEl.innerHTML = `<h3>藏文原文</h3>${doc.fullContentTibetan}`; // Already has <p>
+                modalChineseContentEl.innerHTML = `<h3>中文翻譯</h3>${doc.fullContentChinese}`; // Already has <p> and <div class="colophon">
+                
+                documentModalEl.classList.add('active');
+                updateBreadcrumb(doc.category, doc.chineseTitle);
+                setActiveSidebarItem(docId);
+            }
+        }
+
+        function closeModal(modalId) {
+            const modalToClose = document.getElementById(modalId);
+            if (modalToClose) modalToClose.classList.remove('active');
+
+             if (modalId === 'documentModalEl') {
+                currentOpenDocId = null;
+                // Smart breadcrumb update logic (same as before)
+            }
+            if (modalId === 'articleFormModalEl') {
+                articleFormEl.reset(); 
+                document.getElementById('articleId').value = '';
+            }
+        }
+        
+        // --- Admin & User Section ---
+        adminLoginFormEl.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('adminUsername').value;
+            const password = document.getElementById('adminPassword').value;
+            if (username === 'admin' && password === 'password123') { // Replace with secure auth
+                isAdminLoggedIn = true;
+                closeModal('adminLoginModalEl');
+                showMessage('管理員登入成功！', 'success');
+                setupEditModeUI();
+                loadInitialContent(); // Reload content for edit mode (e.g., show edit buttons)
+            } else {
+                showMessage('用戶名或密碼錯誤。', 'error');
+            }
+        });
+
+        function adminLogout(switchToReadMode = true) {
+            isAdminLoggedIn = false;
+            if (switchToReadMode) {
+                currentMode = 'read';
+                setupReadModeUI();
+                loadInitialContent(); // Reload content for read mode
+                showMessage('管理員已登出。已切換至閱讀模式。', 'info');
+            } else {
+                updateUserSectionUI(); // Just update buttons if not switching mode (e.g. going to mode selector)
+            }
+        }
+
+        function updateUserSectionUI() {
+            userSectionEl.innerHTML = ''; 
+            
+            if (currentMode === 'edit' && isAdminLoggedIn) {
+                userSectionEl.innerHTML = `
+                    <button class="admin-btn admin-only" onclick="openArticleFormModal()">✨ 新增文獻</button>
+                    <div class="user-info admin-only">
+                        <span>管理員</span>
+                        <div class="user-avatar" title="管理員已登入">A</div>
+                    </div>
+                    <button class="login-btn admin-only" onclick="adminLogout()">登出管理</button>
+                `;
+            } else if (currentMode === 'read') {
+                 userSectionEl.innerHTML = `
+                    <button class="utility-toggle-btn reader-only" onclick="toggleSidebar('utilitySidebarEl')">🛠️ 工具</button>
+                 `;
+            }
+            
+            if (currentMode) { // If any mode is active, show "back to mode selection"
+                const backButton = document.createElement('button');
+                backButton.className = 'login-btn'; 
+                backButton.textContent = '返回模式選擇';
+                backButton.onclick = showModeSelectorScreen;
+                userSectionEl.appendChild(backButton);
+            }
+        }
+
+        function showMessage(msg, type = 'info') {
+            const messageEl = document.createElement('div');
+            messageEl.className = `message ${type}`;
+            messageEl.textContent = msg;
+            messageAreaEl.appendChild(messageEl);
+            setTimeout(() => {
+                messageEl.remove();
+            }, 3000);
+        }
+        
+
+        // --- Article Form (Add/Edit) ---
+        function openArticleFormModal(docIdToEdit = null) {
+            articleFormEl.reset();
+            document.getElementById('articleId').value = ''; 
+
+            if (docIdToEdit) {
+                const doc = documentsData.find(d => d.id === docIdToEdit);
+                if (doc) {
+                    articleFormModalTitleEl.textContent = '✏️ 編輯文獻';
+                    document.getElementById('articleId').value = doc.id;
+                    document.getElementById('articleTibetanTitle').value = doc.tibetanTitle;
+                    document.getElementById('articleChineseTitle').value = doc.chineseTitle;
+                    document.getElementById('articleAuthor').value = doc.author;
+                    document.getElementById('articleCategory').value = doc.category;
+                    document.getElementById('articleTags').value = doc.tags.join(', ');
+                    // Convert HTML back to plain text with newlines for textarea
+                    document.getElementById('articleFullContentTibetan').value = doc.fullContentTibetan.replace(/<p class="tibetan-text"[^>]*>/gi, '').replace(/<\/p>/gi, '').replace(/<br\s*\/?>/gi, '\n').trim();
+                    document.getElementById('articleFullContentChinese').value = doc.fullContentChinese.replace(/<p class="chinese-text"[^>]*>/gi, '').replace(/<\/p>/gi, '').replace(/<div class="colophon"[^>]*>/gi, '\n<div class="colophon">\n').replace(/<\/div>/gi, '\n</div>\n').replace(/<br\s*\/?>/gi, '\n').trim();
+                } else {
+                    showMessage('找不到要編輯的文獻。', 'error');
+                    return;
+                }
+            } else {
+                articleFormModalTitleEl.textContent = '📝 新增文獻';
+            }
+            articleFormModalEl.classList.add('active');
+        }
+
+        articleFormEl.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const articleId = document.getElementById('articleId').value;
+            
+            const tibetanContentRaw = document.getElementById('articleFullContentTibetan').value;
+            const chineseContentRaw = document.getElementById('articleFullContentChinese').value;
+
+            // Basic colophon handling: wrap content after specific marker or last part if no marker
+            let finalChineseContent = chineseContentRaw.replace(/\n/g, '<br>');
+            const colophonMarker = "---COLOPHON---"; // User can type this to mark start of colophon
+            const colophonIndex = finalChineseContent.indexOf(colophonMarker);
+
+            if (colophonIndex !== -1) {
+                const mainText = finalChineseContent.substring(0, colophonIndex);
+                const colophonText = finalChineseContent.substring(colophonIndex + colophonMarker.length);
+                finalChineseContent = `<p class="chinese-text">${mainText.trim()}</p><div class="colophon">${colophonText.trim()}</div>`;
+            } else {
+                 // If no marker, assume all is main text or handle more robustly if needed
+                finalChineseContent = `<p class="chinese-text">${finalChineseContent}</p>`;
+            }
+
+
+            const docPayload = {
+                id: articleId || 'doc_' + Date.now(),
+                tibetanTitle: document.getElementById('articleTibetanTitle').value,
+                chineseTitle: document.getElementById('articleChineseTitle').value,
+                author: document.getElementById('articleAuthor').value,
+                category: document.getElementById('articleCategory').value,
+                tags: document.getElementById('articleTags').value.split(',').map(tag => tag.trim()).filter(tag => tag),
+                fullContentTibetan: `<p class="tibetan-text">${tibetanContentRaw.replace(/\n/g, '<br>')}</p>`,
+                fullContentChinese: finalChineseContent, // Use processed Chinese content
+                meta: { words: '', pages: '', readTime: '' }, // Will be auto-calculated
+            };
+            
+            updateDocumentMeta(docPayload); // Calculate meta including preview
+
+            if (articleId) { // Editing existing
+                const docIndex = documentsData.findIndex(d => d.id === articleId);
+                if (docIndex > -1) {
+                    documentsData[docIndex] = docPayload;
+                    showMessage('文獻已成功更新！', 'success');
+                }
+            } else { // Adding new
+                documentsData.push(docPayload);
+                showMessage('文獻已成功新增！', 'success');
+            }
+            
+            saveDocumentsData();
+            renderSidebar(); 
+            renderDocuments(); 
+            closeModal('articleFormModalEl');
+        });
+
+
+        // --- Sidebar Rendering and Interaction ---
+        function renderSidebar() {
+            courseMenuContainerEl.innerHTML = '';
+            const categories = {};
+            const categoryOrder = ['傳記', '自傳', '道歌集', '信件', '祈請文']; // Define preferred order
+            const categoryIcons = { '傳記': '📚', '自傳': '🧘', '道歌集': '🎶', '信件': '📬', '祈請文': '🙏' };
+
+            documentsData.forEach(doc => {
+                if (!categories[doc.category]) categories[doc.category] = [];
+                categories[doc.category].push(doc);
+            });
+            
+            const sortedCategoryNames = [...new Set([...categoryOrder, ...Object.keys(categories)])];
+
+
+            sortedCategoryNames.forEach(categoryName => {
+                if (!categories[categoryName] || categories[categoryName].length === 0) return;
+
+                const categoryDocs = categories[categoryName];
+                const categoryDiv = document.createElement('div');
+                categoryDiv.className = 'course-category';
+
+                const header = document.createElement('div');
+                header.className = 'category-header collapsed'; // Start collapsed
+                header.onclick = function() { toggleCategory(this); };
+                header.innerHTML = `
+                    <span>${categoryIcons[categoryName] || '📖'} ${categoryName}</span>
+                    <span class="category-toggle">▼</span>`;
+                
+                const list = document.createElement('div');
+                list.className = 'course-list collapsed'; // Start collapsed
+
+                categoryDocs.forEach(doc => {
+                    const item = document.createElement('div');
+                    item.className = 'course-item';
+                    item.dataset.docId = doc.id;
+                    let displayTitle = doc.chineseTitle.length < 25 ? doc.chineseTitle : doc.tibetanTitle.split('།')[0];
+                     if (displayTitle.length > 22) displayTitle = displayTitle.substring(0,20) + "...";
+
+                    item.innerHTML = `
+                        <span>${displayTitle}</span>
+                        <span class="course-status pending">未開始</span>`; // Status can be enhanced later
+                    item.addEventListener('click', function() { openDocumentModal(doc.id); });
+                    list.appendChild(item);
+                });
+                categoryDiv.appendChild(header);
+                categoryDiv.appendChild(list);
+                courseMenuContainerEl.appendChild(categoryDiv);
+            });
+            
+            // Set active item after rendering
+            if (currentOpenDocId) setActiveSidebarItem(currentOpenDocId);
+            else if (documentsData.length > 0) setActiveSidebarItem(documentsData[0].id);
+        }
+        
+        function setActiveSidebarItem(docId) {
+             document.querySelectorAll('.course-item').forEach(item => {
+                item.classList.remove('active');
+                const itemDocId = item.dataset.docId;
+                const statusEl = item.querySelector('.course-status');
+
+                if (itemDocId === currentOpenDocId) {
+                    statusEl.className = 'course-status current';
+                    statusEl.textContent = '進行中';
+                } else {
+                    statusEl.className = 'course-status pending';
+                    statusEl.textContent = '未開始';
+                }
+
+                if (itemDocId === docId) {
+                    item.classList.add('active');
+                    const categoryList = item.closest('.course-list');
+                    if (categoryList && categoryList.classList.contains('collapsed')) {
+                        const categoryHeader = categoryList.previousElementSibling;
+                        if (categoryHeader) toggleCategory(categoryHeader); // Expand category
+                    }
+                }
+            });
+        }
+        
+        window.toggleCategory = function(headerElement) {
+            headerElement.classList.toggle('collapsed');
+            const list = headerElement.nextElementSibling;
+            list.classList.toggle('collapsed');
+        }
+        
+        window.toggleSidebar = function(sidebarId) {
+            const sidebarToToggle = document.getElementById(sidebarId);
+            sidebarToToggle.classList.toggle('open');
+
+            if (sidebarId === 'sidebar') { // Left sidebar
+                mainContentAreaEl.classList.toggle('no-left-sidebar', !sidebarToToggle.classList.contains('open'));
+                if (window.innerWidth <= 768) { // Mobile behavior
+                     if (sidebarToToggle.classList.contains('open')) {
+                        sidebarToToggle.style.transform = 'translateX(0)';
+                     } else {
+                        sidebarToToggle.style.transform = 'translateX(-100%)';
+                     }
+                }
+            } else if (sidebarId === 'utilitySidebarEl') { // Right sidebar
+                mainContentAreaEl.classList.toggle('with-right-sidebar', sidebarToToggle.classList.contains('open'));
+            }
+        }
+
+        // --- Search ---
+        searchInputEl.addEventListener('input', function() {
+            const searchTerm = searchInputEl.value.toLowerCase();
+            const filtered = documentsData.filter(doc => 
+                doc.tibetanTitle.toLowerCase().includes(searchTerm) ||
+                doc.chineseTitle.toLowerCase().includes(searchTerm) ||
+                doc.author.toLowerCase().includes(searchTerm) ||
+                (doc.tags && doc.tags.some(tag => tag.toLowerCase().includes(searchTerm))) ||
+                doc.fullContentTibetan.toLowerCase().includes(searchTerm) ||
+                doc.fullContentChinese.toLowerCase().includes(searchTerm)
+            );
+            renderDocuments(filtered);
+        });
+        
+        // --- View Mode (Grid/List) ---
+        document.getElementById('gridViewBtn').addEventListener('click', () => {
+            currentView = 'grid';
+            document.getElementById('gridViewBtn').classList.add('active');
+            document.getElementById('listViewBtn').classList.remove('active');
+            documentsGridEl.style.gridTemplateColumns = 'repeat(auto-fit, minmax(350px, 1fr))';
+        });
+        document.getElementById('listViewBtn').addEventListener('click', () => {
+            currentView = 'list';
+            document.getElementById('listViewBtn').classList.add('active');
+            document.getElementById('gridViewBtn').classList.remove('active');
+            documentsGridEl.style.gridTemplateColumns = '1fr';
+        });
+
+
+        // --- Guest Favorites ---
+        function toggleFavorite(docId, buttonElement) {
+            const index = guestFavorites.indexOf(docId);
+            if (index > -1) {
+                guestFavorites.splice(index, 1);
+                buttonElement.innerHTML = '❤️ 加入收藏';
+                showMessage('已從收藏移除。', 'info');
+            } else {
+                guestFavorites.push(docId);
+                buttonElement.innerHTML = '💖 已收藏';
+                showMessage('已加入收藏！', 'success');
+            }
+            saveGuestFavorites();
+            renderFavoritesList();
+        }
+
+        function showFavorites() {
+            const favListVisible = favoritesListContainerEl.style.display === 'block';
+            favoritesListContainerEl.style.display = favListVisible ? 'none' : 'block';
+            if (!favListVisible) renderFavoritesList();
+        }
+
+        function renderFavoritesList() {
+            favoritesListContainerEl.innerHTML = '';
+            if (guestFavorites.length === 0) {
+                favoritesListContainerEl.innerHTML = '<p>暫無收藏。</p>';
+                return;
+            }
+            guestFavorites.forEach(docId => {
+                const doc = documentsData.find(d => d.id === docId);
+                if (doc) {
+                    const item = document.createElement('div');
+                    item.className = 'favorite-item';
+                    item.textContent = doc.chineseTitle;
+                    item.onclick = () => {
+                        openDocumentModal(doc.id);
+                        if (window.innerWidth <= 768) toggleSidebar('utilitySidebarEl'); 
+                    };
+                    favoritesListContainerEl.appendChild(item);
+                }
+            });
+        }
+
+        // --- Utility Modals (Report Error, Donate) ---
+        function showUtilityModal(modalType, title) {
+            utilityModalTitleEl.textContent = title;
+            utilityModalBodyEl.innerHTML = ''; 
+
+            if (modalType === 'reportErrorModal') {
+                const currentDocForReport = currentOpenDocId ? documentsData.find(d => d.id === currentOpenDocId) : null;
+                const docTitleForReport = currentDocForReport ? currentDocForReport.chineseTitle : "未指定文獻";
+                utilityModalBodyEl.innerHTML = `
+                    <form id="reportErrorForm">
+                        <div class="form-group">
+                            <label for="errorDocTitle">文獻標題</label>
+                            <input type="text" id="errorDocTitle" class="form-control" value="${docTitleForReport}" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="errorDescription">錯誤描述</label>
+                            <textarea id="errorDescription" class="form-textarea" rows="4" placeholder="請詳細描述您發現的錯誤..." required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="errorEmail">您的電子郵件 (選填)</label>
+                            <input type="email" id="errorEmail" class="form-control" placeholder="方便我們回覆您">
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="width:100%;">提交回報</button>
+                    </form>
+                `;
+                document.getElementById('reportErrorForm').onsubmit = (e) => {
+                    e.preventDefault();
+                    // Add actual submission logic here (e.g., send to a server or mailto link)
+                    showMessage('感謝您的回報！我們會盡快處理。', 'success');
+                    closeModal('utilityModalEl');
+                };
+            } else if (modalType === 'donateModal') {
+                utilityModalBodyEl.innerHTML = `
+                    <p style="line-height: 1.8; margin-bottom: 1.5rem;">若您覺得本系統對您有所助益，並且希望護持系統的持續運作與內容擴充，歡迎隨喜贊助。您的每一份支持都是我們前進的動力。</p>
+                    <h4 style="margin-bottom: 0.5rem; color: #555;">贊助方式：</h4>
+                    <ul style="list-style-type: disc; margin-left: 20px; line-height: 1.6;">
+                        <li>銀行轉帳：[銀行名稱] [分行] 帳號：[您的銀行帳號] 戶名：[您的戶名]</li>
+                        <li>線上支付：[連結至您的線上支付平台，如 PayPal.me/yourname]</li>
+                    </ul>
+                    <p style="margin-top: 1.5rem; font-size:0.9em; color:#777;">感謝您的慷慨解囊，功德無量！</p>
+                `;
+            }
+            utilityModalEl.classList.add('active');
+        }
+
+        // --- Initialization ---
+        function loadInitialContent() {
+            loadDocumentsData(); // This now includes processAllDocumentMeta()
+            if (currentMode === 'read') {
+                loadGuestFavorites();
+            }
+            renderSidebar();
+            renderDocuments();
+            
+            if (documentsData.length > 0) {
+                const initialDocIdToDisplay = currentOpenDocId || (documentsData.find(d => d.id === 'mamo_secret') ? 'mamo_secret' : documentsData[0].id);
+                const initialDoc = documentsData.find(d => d.id === initialDocIdToDisplay);
+
+                if (initialDoc) {
+                     updateBreadcrumb(initialDoc.category, initialDoc.chineseTitle);
+                     setActiveSidebarItem(initialDoc.id);
+                } else if (documentsData.length > 0) { // Fallback to first doc if specific one not found
+                    updateBreadcrumb(documentsData[0].category, documentsData[0].chineseTitle);
+                    setActiveSidebarItem(documentsData[0].id);
+                } else {
+                     updateBreadcrumb('N/A', '無文獻');
+                }
+            } else {
+                updateBreadcrumb('N/A', '無文獻');
+            }
+        }
+        
+        // Start by showing mode selector
+        showModeSelectorScreen(); 
+        // updateUserSectionUI(); // Initial setup for top bar (e.g. only "back to mode select" if needed)
+
+    </script>
+</body>
+</html>

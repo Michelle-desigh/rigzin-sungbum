@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>才旺諾布全集閱讀系統</title>
+    <style>
+        /* 您的原始 CSS 樣式在這裡，我將其保持不變 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            display: flex;
+        }
+
+        /* 左側邊欄 */
+        .sidebar {
+            width: 300px;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255,255,255,0.2);
+            overflow-y: auto;
+            position: fixed;
+            height: 100vh;
+            left: 0;
+            top: 0;
+            z-index: 100;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.1);
+        }
+        .sidebar-header {
+            padding: 2rem 1.5rem 1rem;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .sidebar-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        .sidebar-subtitle {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        .course-menu {
+            padding: 1rem 0;
+        }
+        .course-category {
+            margin-bottom: 1rem;
+        }
+        .category-header {
+            padding: 0.75rem 1.5rem;
+            background: rgba(102, 126, 234, 0.1);
+            font-weight: 600;
+            color: #4c51bf;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .category-header:hover {
+            background: rgba(102, 126, 234, 0.15);
+        }
+        .category-toggle {
+            font-size: 0.8rem;
+            transition: transform 0.3s ease;
+        }
+        .category-header.collapsed .category-toggle {
+            transform: rotate(-90deg);
+        }
+        .course-list {
+            max-height: 500px; /* 預設展開的最大高度，可依實際內容調整 */
+            overflow: hidden;
+            transition: max-height 0.3s ease; /* 添加過渡效果 */
+        }
+        .course-list.collapsed {
+            max-height: 0; /* 收合狀態 */
+        }
+        .course-item {
+            padding: 0.75rem 1.5rem 0.75rem 2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .course-item:hover {
+            background: rgba(102, 126, 234, 0.05);
+            border-left-color: #667eea;
+        }
+        .course-item.active {
+            background: rgba(102, 126, 234, 0.1);
+            border-left-color: #667eea;
+            font-weight: 600;
+        }
+        .course-name {
+            font-size: 0.9rem;
+            color: #2d3748;
+        }
+        .course-status {
+            font-size: 0.7rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 10px;
+            background: #e2e8f0;
+            color: #64748b;
+        }
+        .course-status.completed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        .course-status.current {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        /* 主要內容區 */
+        .main-content {
+            flex: 1;
+            margin-left: 300px;
+            position: relative;
+        }
+        .top-bar {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .breadcrumb {
+            color: white;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        .user-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        .login-btn {
+            padding: 0.5rem 1.5rem;
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .login-btn:hover {
+            background: rgba(255,255,255,0.9);
+            color: #333;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .user-avatar:hover {
+            transform: scale(1.1);
+        }
+        .container {
+            padding: 2rem;
+            max-width: none;
+            margin: 0;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            color: white;
+        }
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+        }
+        .search-bar {
+            max-width: 600px;
+            margin: 0 auto 3rem;
+            position: relative;
+        }
+        .search-input {
+            width: 100%;
+            padding: 1rem 1.5rem 1rem 3rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        .search-input:focus {
+            outline: none;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+            transform: translateY(-2px);
+        }
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+            font-size: 1.2rem;
+        }
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            padding: 1rem 1.5rem;
+            border-radius: 15px;
+        }
+        .view-toggle {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .view-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .view-btn.active {
+            background: rgba(255,255,255,0.9);
+            color: #333;
+        }
+        .view-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        .stats {
+            color: white;
+            font-size: 0.9rem;
+        }
+        .documents-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        .document-card {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255,255,255,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        .document-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+        .document-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+        .document-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: #2d3748;
+            line-height: 1.3;
+        }
+        .document-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .document-preview {
+            font-family: 'Noto Serif Tibetan', serif;
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #4a5568;
+            margin-bottom: 1.5rem;
+            max-height: 120px;
+            overflow: hidden;
+            position: relative;
+        }
+        .document-preview::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 30px;
+            background: linear-gradient(transparent, rgba(255,255,255,0.95));
+        }
+        .document-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+        .btn-secondary {
+            background: rgba(0,0,0,0.05);
+            color: #666;
+        }
+        .btn-secondary:hover {
+            background: rgba(0,0,0,0.1);
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            margin: 2rem;
+            box-shadow: 0 20px 80px rgba(0,0,0,0.3);
+        }
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 20px 20px 0 0;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .modal-body {
+            padding: 2rem;
+        }
+        .close-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            opacity: 0.8;
+            transition: opacity 0.3s ease;
+        }
+        .close-btn:hover {
+            opacity: 1;
+        }
+        .text-content {
+            font-family: 'Noto Serif Tibetan', serif;
+            font-size: 1.2rem;
+            line-height: 2;
+            color: #2d3748;
+            white-space: pre-wrap;
+        }
+        .fade-in {
+            animation: fadeIn 0.6s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 250px;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            .sidebar.open { /* 新增的 CSS 規則 */
+                transform: translateX(0);
+            }
+            .main-content {
+                margin-left: 0;
+            }
+            .container {
+                padding: 1rem;
+            }
+            .header h1 {
+                font-size: 2rem;
+            }
+            .documents-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            .toolbar {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            .top-bar {
+                padding: 1rem;
+            }
+            .menu-toggle {
+                display: block !important;
+            }
+        }
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h2 class="sidebar-title">課程目錄</h2>
+            <p class="sidebar-subtitle">སློབ་ཚན་གྱི་དཀར་ཆག</p>
+        </div>
+        <nav class="course-menu">
+            <div class="course-category">
+                <div class="category-header" onclick="toggleCategory(this)">
+                    <span>📚 基礎教理</span>
+                    <span class="category-toggle">▼</span>
+                </div>
+                <div class="course-list">
+                    <div class="course-item active">
+                        <span class="course-name">四加行修法</span>
+                        <span class="course-status current">進行中</span>
+                    </div>
+                    <div class="course-item">
+                        <span class="course-name">皈依發心</span>
+                        <span class="course-status completed">已完成</span>
+                    </div>
+                    <div class="course-item">
+                        <span class="course-name">金剛薩埵淨障法</span>
+                        <span class="course-status">未開始</span>
+                    </div>
+                    <div class="course-item">
+                        <span class="course-name">供曼達累積福慧</span>
+                        <span class="course-status">未開始</span>
+                    </div>
+                </div>
+            </div>
+            <div class="course-category">
+                <div class="category-header" onclick="toggleCategory(this)">
+                    <span>🧘 密續修法</span>
+                    <span class="category-toggle">▼</span>
+                </div>
+                <div class="course-list">
+                    <div class="course-item">
+                        <span class="course-name">媽嫫秘密業之明點</span>
+                        <span class="course-status current">進行中</span>
+                    </div>
+                    <div class="course-item">
+                        <span class="course-name">龍欽心要</span>
+                        <span class="course-status">未開始</span>
+                    </div>
+                    <div class="course-item">
+                        <span class="course-name">大圓滿前行</span>
+                        <span class="course-status">未開始</span>
+                    </div>
+                </div>
+            </div>
+            <div class="course-category">
+                <div class="category-header" onclick="toggleCategory(this)">
+                    <span>📖 經典研讀</span>
+                    <span class="category-toggle">▼</span>
+                </div>
+                <div class="course-list">
+                    <div class="course-item">
+                        <span class="course-name">中觀根本論</span>
+                        <span class="course-status">未開始</span>
+                    </div>
+                    <div class="course-item">
+                        <span class="course-name">入菩薩行論</span>
+                        <span class="course-status">未開始</span>
+                    </div>
+                    <div class="course-item">
+                        <span class="course-name">普賢行願品</span>
+                        <span class="course-status completed">已完成</span>
+                    </div>
+                </div>
+            </div>
+            <div class="course-category">
+                <div class="category-header" onclick="toggleCategory(this)">
+                    <span>🔮 高階法門</span>
+                    <span class="category-toggle">▼</span>
+                </div>
+                <div class="course-list collapsed">
+                    <div class="course-item">
+                        <span class="course-name">大手印瑜伽</span>
+                        <span class="course-status">未開始</span>
+                    </div>
+                    <div class="course-item">
+                        <span class="course-name">那洛六法</span>
+                        <span class="course-status">未開始</span>
+                    </div>
+                    <div class="course-item">
+                        <span class="course-name">拙火瑜伽</span>
+                        <span class="course-status">未開始</span>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <div class="top-bar">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+                <div class="breadcrumb"> 首頁 > 密續修法 > 媽嫫秘密業之明點 </div>
+            </div>
+            <div class="user-actions">
+                <button class="login-btn" onclick="showLoginModal()"> 👤 登入 </button>
+            </div>
+        </div>
+
+        <div class="container">
+            <header class="header fade-in">
+                <h1>才旺諾布全集閱讀系統</h1>
+                <p>ཚེ་དབང་ནོར་བུའི་གསུང་འབུམ་ཀློག་སྟེགས།</p>
+            </header>
+
+            <div class="search-bar fade-in">
+                <div style="position: relative;">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" class="search-input" placeholder="搜尋文獻標題、內容或作者..." id="searchInput">
+                </div>
+            </div>
+
+            <div class="toolbar fade-in">
+                <div class="view-toggle">
+                    <button class="view-btn active" id="gridView">📇 卡片檢視</button>
+                    <button class="view-btn" id="listView">📋 清單檢視</button>
+                </div>
+                <div class="stats">
+                    總計 <span id="totalCount">2</span> 部文獻
+                </div>
+            </div>
+
+            <div class="documents-grid fade-in">
+                <div class="document-card">
+                    <h3 class="document-title">མ་མོ་གསང་བ་ལས་ཀྱི་ཐིག་ལེ།</h3>
+                    <div class="document-meta">
+                        <div class="meta-item">
+                            <span>📖</span> <span>媽嫫秘密業之明點</span>
+                        </div>
+                        <div class="meta-item">
+                            <span>👤</span> <span>སློབ་དཔོན་པདྨ་སཾ་བྷཱ་བ</span>
+                        </div>
+                        <div class="meta-item">
+                            <span>📄</span> <span>10 頁 | 約 1 萬字</span>
+                        </div>
+                        <div class="meta-item">
+                            <span>⏱️</span> <span>閱讀需要約 40 分鐘</span>
+                        </div>
+                    </div>
+                    <div class="document-preview">
+                        དཔལ་ལྡན་མཁའ་འགྲོའི་ཚོགས་བཅས་ལ། །རྣམ་པར་བཏུད་དེ་ཕྱག་འཚལ་ལོ། །དབྱིངས་དང་ཡེ་ཤེས་དབྱེར་མེད་པའི། །མཁའ་འགྲོ་དྲུག་ཅུ་རྩ་བརྒྱད་ཀྱི། །གཙོ་མོ་སྲིད་པ་བདེ་འགྲོའི་ཐུགས། །གནས་ལུགས་ཐབས་དང་མངོན་གྱུར་པའོ། །
+                    </div>
+                    <div class="document-actions">
+                        <button class="btn btn-primary" onclick="openDocument('mama-text')"> 📖 閱讀全文 </button>
+                        <button class="btn btn-secondary" onclick="shareDocument('mama-text')"> 🔗 分享 </button>
+                    </div>
+                </div>
+
+                <div class="document-card">
+                    <h3 class="document-title">ཀློང་ཆེན་སྙིང་ཐིག</h3>
+                    <div class="document-meta">
+                        <div class="meta-item">
+                            <span>📖</span> <span>龍欽心要</span>
+                        </div>
+                        <div class="meta-item">
+                            <span>👤</span> <span>ཀློང་ཆེན་རབ་འབྱམས</span>
+                        </div>
+                        <div class="meta-item">
+                            <span>📄</span> <span>待上傳</span>
+                        </div>
+                        <div class="meta-item">
+                            <span>⏱️</span> <span>預計閱讀時間待計算</span>
+                        </div>
+                    </div>
+                    <div class="document-preview">
+                        此文獻待上傳完整內容...
+                    </div>
+                    <div class="document-actions">
+                        <button class="btn btn-primary" onclick="alert('此文獻尚未上傳完整內容')"> 📖 閱讀全文 </button>
+                        <button class="btn btn-secondary" onclick="shareDocument('longchen')"> 🔗 分享 </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="modal" id="registerModal">
+        <div class="modal-content" style="max-width: 450px;">
+            <div class="modal-header">
+                <h2>會員註冊</h2>
+                <button class="close-btn" onclick="closeRegisterModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="registerForm" style="display: flex; flex-direction: column; gap: 1rem;">
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">姓名</label>
+                        <input type="text" id="registerName" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 8px;" placeholder="請輸入您的姓名" required>
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">電子郵件</label>
+                        <input type="email" id="registerEmail" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 8px;" placeholder="請輸入您的電子郵件" required>
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">密碼</label>
+                        <input type="password" id="registerPassword" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 8px;" placeholder="請輸入密碼（至少6位）" required minlength="6">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">確認密碼</label>
+                        <input type="password" id="confirmPassword" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 8px;" placeholder="請再次輸入密碼" required>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin: 0.5rem 0;">
+                        <input type="checkbox" id="agreeTerms" required>
+                        <label for="agreeTerms" style="font-size: 0.9rem;">我同意<a href="#" style="color: #667eea;">服務條款</a>和<a href="#" style="color: #667eea;">隱私政策</a></label>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;"> 註冊帳號 </button>
+                    <div style="text-align: center; margin-top: 1rem;">
+                        <span style="font-size: 0.9rem; color: #666;">已有帳號？</span>
+                        <a href="#" style="color: #667eea; text-decoration: none; font-weight: 600;" onclick="showLoginModal(); closeRegisterModal();">立即登入</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="loginModal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h2>用戶登入</h2>
+                <button class="close-btn" onclick="closeLoginModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="loginForm" style="display: flex; flex-direction: column; gap: 1rem;">
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">電子郵件</label>
+                        <input type="email" id="loginEmail" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 8px;" placeholder="請輸入您的電子郵件" required>
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">密碼</label>
+                        <input type="password" id="loginPassword" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 8px;" placeholder="請輸入密碼" required>
+                    </div>
+                    <div style="text-align: right; font-size: 0.9rem;">
+                        <a href="#" style="color: #667eea; text-decoration: none;">忘記密碼？</a>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;"> 登入 </button>
+                    <div style="text-align: center; margin-top: 1rem;">
+                        <span style="font-size: 0.9rem; color: #666;">還沒有帳號？</span>
+                        <a href="#" style="color: #667eea; text-decoration: none; font-weight: 600;" onclick="showRegisterModal(); closeLoginModal();">立即註冊</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 側邊欄開關 (響應式設計)
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            sidebar.classList.toggle('open');
+        }
+
+        // 課程類別展開/收合
+        function toggleCategory(element) {
+            const categoryHeader = element;
+            categoryHeader.classList.toggle('collapsed'); // 切換標頭的 collapsed class
+            const courseList = categoryHeader.nextElementSibling; // 獲取緊鄰的 course-list
+            if (courseList) { // 檢查 courseList 是否存在
+                courseList.classList.toggle('collapsed'); // 切換課程列表的 collapsed class
+            }
+        }
+
+        // 顯示登入模態框
+        function showLoginModal() {
+            const loginModal = document.getElementById('loginModal');
+            loginModal.classList.add('active');
+        }
+
+        // 關閉登入模態框
+        function closeLoginModal() {
+            const loginModal = document.getElementById('loginModal');
+            loginModal.classList.remove('active');
+        }
+
+        // 顯示註冊模態框
+        function showRegisterModal() {
+            const registerModal = document.getElementById('registerModal');
+            registerModal.classList.add('active');
+        }
+
+        // 關閉註冊模態框
+        function closeRegisterModal() {
+            const registerModal = document.getElementById('registerModal');
+            registerModal.classList.remove('active');
+        }
+
+        // 處理點擊模態框背景關閉
+        document.addEventListener('DOMContentLoaded', () => {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                modal.addEventListener('click', (event) => {
+                    // 如果點擊的是模態框本身 (而不是模態框內容)，則關閉
+                    if (event.target === modal) {
+                        modal.classList.remove('active');
+                    }
+                });
+            });
+
+            // 這裡可以放置其他需要在 DOMContentLoaded 時執行的代碼
+            // 例如：登入/註冊表單提交事件監聽器等
+            const loginForm = document.getElementById('loginForm');
+            if (loginForm) {
+                loginForm.addEventListener('submit', (event) => {
+                    event.preventDefault(); // 阻止表單預設提交行為
+                    alert('登入表單已提交！ (實際應用中應發送至後端)');
+                    // 在這裡添加實際的登入邏輯，例如發送 AJAX 請求
+                    closeLoginModal(); // 提交後關閉模態框
+                });
+            }
+
+            const registerForm = document.getElementById('registerForm');
+            if (registerForm) {
+                registerForm.addEventListener('submit', (event) => {
+                    event.preventDefault(); // 阻止表單預設提交行為
+                    
+                    const registerName = document.getElementById('registerName').value;
+                    const registerEmail = document.getElementById('registerEmail').value;
+                    const registerPassword = document.getElementById('registerPassword').value;
+                    const confirmPassword = document.getElementById('confirmPassword').value;
+                    const agreeTerms = document.getElementById('agreeTerms').checked;
+
+                    if (registerPassword !== confirmPassword) {
+                        alert('密碼和確認密碼不一致！');
+                        return;
+                    }
+
+                    if (!agreeTerms) {
+                        alert('您必須同意服務條款和隱私政策！');
+                        return;
+                    }
+
+                    // 這裡可以添加更複雜的密碼強度驗證和電子郵件格式驗證
+                    alert(`註冊成功！\n姓名: ${registerName}\n電子郵件: ${registerEmail}\n(實際應用中應發送至後端並處理響應)`);
+                    // 在這裡添加實際的註冊邏輯
+                    closeRegisterModal(); // 提交後關閉模態框
+                    // 可以選擇自動跳轉到登入模態框
+                    showLoginModal();
+                });
+            }
+        });
+
+        // 模擬 openDocument 和 shareDocument 函數，實際應用中會加載文獻內容或分享功能
+        function openDocument(documentId) {
+            alert(`正在打開文獻：${documentId}`);
+            // 這裡將是加載和顯示實際文獻內容的邏輯
+        }
+
+        function shareDocument(documentId) {
+            alert(`正在分享文獻：${documentId}`);
+            // 這裡將是實現分享功能的邏輯，例如複製連結到剪貼簿
+        }
+
+    </script>
+</body>
+</html>

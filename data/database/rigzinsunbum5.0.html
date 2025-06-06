@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>才旺諾布全集閱讀系統</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tibetan:wght@300;400;500;600;700&family=Noto+Serif+TC:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        @font-face {
+            font-family: 'Monlam Uni Chouk';
+            src: url('fonts/Monlam Uni Chouk.woff2') format('woff2'); /* 確保路徑正確 */
+            font-weight: normal; font-style: normal; font-display: swap;
+        }
+        @font-face {
+            font-family: 'WenDingCuXingKai';
+            src: url('fonts/文鼎粗行楷.woff2') format('woff2'); /* 確保路徑正確 */
+            font-weight: normal; font-style: normal; font-display: swap;
+        }
+        @font-face {
+            font-family: 'ACaslonPro';
+            src: url('fonts/ACaslonPro-Regular.woff2') format('woff2'); /* 假設字體文件名和路徑 */
+            font-weight: normal; font-style: normal; font-display: swap;
+        }
+        @font-face {
+            font-family: 'HuaKangFangSongW6';
+            src: url('fonts/HuaKangFangSongW6.woff2') format('woff2'); /* 假設字體文件名和路徑 */
+            font-weight: normal; font-style: normal; font-display: swap;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --glass-bg: rgba(20, 20, 30, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --text-light: rgba(240, 240, 255, 0.95);
+            --text-accent: #FFD700; /* 金色 */
+            --text-like: #e74c3c; /* 喜歡的紅色 */
+            --tibetan-title-font: 'Monlam Uni Chouk', 'Noto Sans Tibetan', serif;
+            --chinese-title-font: 'WenDingCuXingKai', 'Noto Serif TC', serif;
+            --english-font: 'ACaslonPro', 'Inter', sans-serif; /* 英文主要字體 */
+            --chinese-content-font: 'HuaKangFangSongW6', 'Noto Serif TC', serif; /* 中文內容字體 */
+            --border-radius-main: 10px;
+            --border-radius-small: 5px;
+        }
+
+        body {
+            font-family: var(--english-font); /* 預設用英文字體 */
+            background: url('background_literature.jpg') no-repeat center center;
+            background-size: cover;
+            min-height: 100vh;
+            color: var(--text-light);
+            display: flex;
+            flex-direction: column;
+            padding-top: 52px;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><defs><pattern id="books" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse"><rect width="20" height="80" x="10" y="10" fill="rgba(255,255,255,0.05)" rx="2"/><rect width="20" height="75" x="35" y="15" fill="rgba(255,255,255,0.03)" rx="2"/><rect width="20" height="70" x="60" y="20" fill="rgba(255,255,255,0.04)" rx="2"/></pattern></defs><rect width="100%" height="100%" fill="url(%23books)"/></svg>') repeat;
+            opacity: 0.3;
+            z-index: -1;
+        }
+
+        .top-nav {
+            background: rgba(10, 10, 20, 0.85);
+            padding: 8px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--glass-border);
+            height: 52px;
+        }
+
+        .nav-left { display: flex; gap: 10px; align-items: center; } /* Reduced gap slightly */
+        .nav-right { display: flex; gap: 8px; align-items: center; }
+        
+        .nav-item, .top-nav-btn {
+            color: var(--text-light); 
+            text-decoration: none; 
+            padding: 6px 10px;
+            border-radius: var(--border-radius-small); 
+            transition: background 0.2s, color 0.2s;
+            font-size: 14px; 
+            background: transparent; 
+            border: 1px solid transparent; 
+            cursor: pointer;
+            white-space: nowrap; /* Prevent buttons from wrapping */
+        }
+        #toggleSidebarBtn { font-size: 1.2rem; padding: 4px 8px; }
+        
+        .nav-item:hover, .top-nav-btn:hover { 
+            background: rgba(255, 255, 255, 0.1); 
+            color: white; 
+        }
+
+        /* ... (其他 fadeInUp, modeSelectorScreen, appContainer CSS 不變) ... */
+        #modeSelectorScreen { display: flex; flex-direction: column; align-items: center; justify-content: center; flex-grow: 1; text-align: center; position: relative; z-index: 10; }
+        .mode-selector-content { background: var(--glass-bg); backdrop-filter: blur(15px); border-radius: var(--border-radius-main); padding: 3rem 2.5rem; border: 1px solid var(--glass-border); box-shadow: 0 10px 35px rgba(0,0,0,0.3); animation: fadeInUp 0.8s ease-out; max-width: 800px; width: 90%;}
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(25px); } to { opacity: 1; transform: translateY(0); } }
+        .main-title {font-family: var(--chinese-title-font), 'Noto Serif TC', serif; font-size: 3.2rem; font-weight: bold; margin-bottom: 0.8rem; letter-spacing: 1px; background: linear-gradient(45deg, #fff, #e0e0ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; white-space: nowrap;}
+        .tibetan-subtitle {font-family: var(--tibetan-title-font), 'Noto Sans Tibetan', serif; font-size: 1.5rem; color: var(--text-light); margin-bottom: 1.2rem; opacity: 0.9;}
+        .english-subtitle { font-size: 1rem; color: var(--text-light); margin-bottom: 2rem; opacity: 0.8; font-style: italic; font-family: var(--english-font);}
+        .mode-buttons { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; margin-bottom: 1.5rem; }
+        .mode-button { padding: 0.9rem 2rem; font-size: 1rem; font-weight: 500; border: none; border-radius: 20px; cursor: pointer; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; overflow: hidden; background: rgba(255,255,255,0.15); color: white; border: 1px solid var(--glass-border); backdrop-filter: blur(8px); min-width: 160px;}
+        .mode-button:hover { transform: translateY(-5px) scale(1.03); box-shadow: 0 15px 30px rgba(0,0,0,0.25); background: rgba(255,255,255,0.25); }
+        #appContainer { display: none; width: 100%; flex-grow: 1; opacity: 0; animation: fadeIn 0.5s ease-out forwards; }
+        @keyframes fadeIn { to { opacity: 1; } }
+        body.app-active #appContainer { display: flex; }
+
+
+        .sidebar {
+            width: 300px;
+            background: var(--glass-bg); 
+            backdrop-filter: blur(20px); 
+            overflow-y: auto;
+            position: fixed; 
+            height: calc(100vh - 52px);
+            left: 0; 
+            top: 52px;
+            z-index: 200; /* Higher z-index */
+            border-right: 1px solid var(--glass-border);
+            transform: translateX(-100%); /* Initially hidden */
+            transition: transform 0.3s ease-out;
+            border-top-right-radius: var(--border-radius-main);
+        }
+        .sidebar.active {
+            transform: translateX(0);
+        }
+
+        .sidebar-header { padding: 1.8rem 1.5rem; }
+        .sidebar-title { font-family: var(--chinese-title-font); }
+        .sidebar-subtitle { font-family: var(--tibetan-title-font); }
+
+        .main-content {
+            flex: 1; 
+            margin-left: 0; /* Default, sidebar closed */
+            min-height: calc(100vh - 52px);
+            position: relative; 
+            transition: margin-left 0.3s ease-out, margin-right 0.3s ease-out;
+            padding: 1.5rem;
+            z-index: 50; /* Lower than sidebars */
+        }
+        .main-content.sidebar-active { /* Left sidebar active */
+            margin-left: 300px;
+        }
+        .main-content.with-right-sidebar { /* Right utility sidebar active */
+            margin-right: 300px; 
+        }
+        .main-content.sidebar-active.with-right-sidebar { /* Both active */
+            margin-left: 300px;
+            margin-right: 300px;
+        }
+
+
+        .utility-sidebar {
+            width: 300px;
+            background: var(--glass-bg); 
+            backdrop-filter: blur(20px); 
+            overflow-y: auto;
+            position: fixed; 
+            height: calc(100vh - 52px);
+            right: 0; 
+            top: 52px;
+            z-index: 190; /* Higher than main, lower than left sidebar if overlapping */
+            border-left: 1px solid var(--glass-border);
+            transition: transform 0.3s ease-out;
+            border-top-left-radius: var(--border-radius-main);
+            transform: translateX(100%); /* Initially hidden */
+        }
+        .utility-sidebar.active {
+            transform: translateX(0);
+        }
+        /* ... (utility-sidebar-header, title, content, item styles as before) ... */
+        .utility-sidebar-header { padding: 1.8rem 1.5rem; position: relative; border-bottom: 1px solid var(--glass-border); }
+        .utility-sidebar-title { font-family: var(--chinese-title-font); margin: 0; color: var(--text-light); }
+        .utility-sidebar-content { padding: 1rem; }
+        .utility-item { padding: 0.8rem 1rem; margin: 0.3rem 0; background: rgba(255, 255, 255, 0.05); border-radius: var(--border-radius-small); cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 0.8rem; color: var(--text-light); }
+        .utility-item:hover { background: rgba(255, 255, 255, 0.15); transform: translateX(5px); }
+        .utility-item-icon { font-size: 1.2rem; width: 1.5rem; text-align: center; }
+        #favoritesListContainerEl .favorite-item { padding: 0.6rem 0.8rem; margin-bottom: 0.3rem; background: rgba(255,255,255,0.08); border-radius: var(--border-radius-small); font-size:0.9em; cursor:pointer; transition: background 0.2s;}
+        #favoritesListContainerEl .favorite-item:hover { background: rgba(255,255,255,0.15); }
+
+
+        /* ... (container, header, search, stats-bar, view-controls styles as before) ... */
+        .container { max-width: 1300px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 2.5rem; color: white; }
+        .header h1 { font-family: var(--chinese-title-font); font-size: 2.8rem; }
+        .header .tibetan-subtitle-header { font-family: var(--tibetan-title-font); font-size: 1.6rem; margin-top: -0.5rem; }
+        .header p:not(.tibetan-subtitle-header) { font-family: var(--english-font); }
+        .search-section { max-width: 650px; margin: 0 auto 2.5rem; }
+        .search-container { position: relative; border-radius: var(--border-radius-small); }
+        .search-input { width: 100%; padding: 0.8rem 1rem 0.8rem 3rem; font-size: 1rem; background: rgba(255, 255, 255, 0.1); border: 1px solid var(--glass-border); border-radius: var(--border-radius-small); color: var(--text-light); font-family: var(--english-font);}
+        .search-input::placeholder { color: rgba(255, 255, 255, 0.6); }
+        .search-icon { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); font-size: 1.1rem; color: rgba(255, 255, 255, 0.6); }
+        .stats-bar { background: var(--glass-bg); backdrop-filter: blur(15px); border: 1px solid var(--glass-border); border-radius: var(--border-radius-main); padding: 1rem 1.5rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .view-controls { display: flex; gap: 0.5rem; }
+        .view-btn { padding: 0.6rem 1rem; font-size: 0.85rem; border-radius: var(--border-radius-small); border: 1px solid var(--glass-border); background: transparent; color: var(--text-light); cursor: pointer; transition: all 0.2s; }
+        .view-btn:hover, .view-btn.active { background: rgba(255, 255, 255, 0.2); color: white; }
+
+        .documents-grid {
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); /* Slightly wider min for cards */
+            gap: 1.5rem; 
+            margin-bottom: 2rem;
+        }
+
+        .document-card {
+            background: rgba(30,30,40,0.7);
+            backdrop-filter: blur(15px);
+            border-radius: var(--border-radius-main); 
+            padding: 1.5rem;
+            border: 1px solid var(--glass-border);
+            transition: all 0.3s ease;
+            /* cursor: pointer; REMOVED: click handled by "read full" button */
+            display: flex;
+            flex-direction: column;
+        }
+
+        .document-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .document-title { 
+            font-size: 1.3rem; 
+            font-family: var(--tibetan-title-font);
+            margin-bottom: 0.5rem;
+        }
+        .document-subtitle { 
+            font-size: 1.1rem; 
+            font-family: var(--chinese-title-font);
+            margin-bottom: 0.5rem;
+            color: var(--text-accent);
+        }
+        .document-meta { 
+            font-size: 0.85rem;
+            opacity: 0.8;
+            margin-bottom: 1rem;
+            font-family: var(--english-font); /* Meta info in English font */
+        }
+        .document-preview { 
+            font-size: 0.9rem; 
+            padding: 0.8rem; 
+            border-radius: var(--border-radius-small);
+            background: rgba(0, 0, 0, 0.2);
+            margin-bottom: 1rem;
+            opacity: 0.9;
+            line-height: 1.5;
+            flex-grow: 1; 
+            max-height: 100px; 
+            overflow: hidden;
+            font-family: var(--chinese-content-font); /* Preview in Chinese content font */
+        }
+        .document-card-actions {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            margin-top: auto; 
+        }
+        .like-btn {
+            background: none;
+            border: none;
+            color: var(--text-light);
+            font-size: 1.5rem; /* Larger heart icon */
+            cursor: pointer;
+            padding: 0.3rem;
+            margin-left: auto; /* Push to the right */
+            transition: color 0.2s, transform 0.2s;
+        }
+        .like-btn:hover {
+            transform: scale(1.1);
+        }
+        .like-btn.liked {
+            color: var(--text-like); /* Red when liked */
+        }
+
+
+        /* ... (btn, admin-only, reader-only, modal, modal-content, modal-close styles as before) ... */
+        .btn { padding: 0.7rem 1.5rem; font-size: 0.9rem; border-radius: var(--border-radius-small); justify-content: center; text-align: center; border: 1px solid var(--glass-border); background: rgba(255, 255, 255, 0.1); color: var(--text-light); cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-flex; align-items: center; }
+        .btn:hover { background: rgba(255, 255, 255, 0.2); color: white; }
+        .admin-only { display: none !important; } 
+        .reader-only { display: none !important; }
+        body.edit-mode .admin-only { display: inline-flex !important; }
+        body.read-mode .reader-only { display: block !important; }
+        body.read-mode .top-nav-btn.reader-only { display: inline-flex !important; } /* For buttons in nav */
+        body.read-mode .document-card-actions .reader-only { display: inline-flex !important; } /* For like button */
+
+
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 2000; justify-content: center; align-items: center;}
+        .modal.active { display: flex; }
+        .modal-content { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--border-radius-main); padding: 2rem; max-width: 90vw; max-height: 90vh; overflow-y: auto; position: relative; display: flex; flex-direction: column; }
+        .modal-close { position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: var(--text-light); font-size: 1.5rem; cursor: pointer; z-index: 10; }
+        
+        /* Error Report Modal Specific Styles */
+        #reportErrorModal .modal-content { max-width: 500px; }
+        #reportErrorForm label { display: block; margin-bottom: 0.5rem; font-weight: 500; }
+        #reportErrorForm input, #reportErrorForm textarea {
+            width: 100%;
+            padding: 0.8rem;
+            margin-bottom: 1rem;
+            border-radius: var(--border-radius-small);
+            border: 1px solid var(--glass-border);
+            background: rgba(255,255,255,0.1);
+            color: var(--text-light);
+            font-family: var(--english-font);
+        }
+        #reportErrorForm textarea { min-height: 120px; font-family: var(--chinese-content-font); }
+
+
+        /* ... (footer styles as before) ... */
+        footer { text-align: center; padding: 2rem; background: rgba(0, 0, 0, 0.2); color: var(--text-light); font-size: 0.9rem; }
+        .social-links { margin-bottom: 1rem; }
+        .social-links a { color: var(--text-light); text-decoration: none; margin: 0 1rem; padding: 0.5rem; border-radius: var(--border-radius-small); transition: background 0.2s; }
+        .social-links a:hover { background: rgba(255, 255, 255, 0.1); }
+
+
+        /* Language Switcher and Modal Content Styles (with font updates) */
+        .language-switcher-modal { margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--glass-border); display: flex; gap: 0.5rem; flex-wrap: wrap; }
+        .language-switcher-modal button { padding: 0.5rem 1rem; font-size: 0.9rem; border-radius: var(--border-radius-small); border: 1px solid var(--glass-border); background: rgba(255, 255, 255, 0.1); color: var(--text-light); cursor: pointer; font-family: var(--english-font); }
+        .language-switcher-modal button:hover { background: rgba(255, 255, 255, 0.2); }
+        .language-switcher-modal button.active { background: var(--text-accent); color: #333; font-weight: bold; border-color: var(--text-accent); }
+
+        #modalHeaderContent { margin-bottom: 1rem; }
+        .modal-document-title-zh { font-family: var(--chinese-title-font); margin-bottom: 0.2rem; font-size: 1.8rem; }
+        .modal-document-title-bo { font-family: var(--tibetan-title-font); margin-bottom: 0.2rem; opacity: 0.9; font-size: 1.4rem;}
+        .modal-document-title-en { font-style: italic; margin-bottom: 0.5rem; opacity: 0.8; font-size: 1rem; font-family: var(--english-font); }
+        
+        .language-content-container { line-height: 1.8; font-size: 1rem; flex-grow: 1; overflow-y: auto; min-height: 100px; }
+        .language-content { margin-bottom: 1.5rem; }
+        .language-content h4 { font-family: var(--chinese-title-font); margin-bottom: 0.5rem; color: var(--text-accent); font-size: 1.2rem; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 0.3rem; }
+        .tibetan-text, .tibetan-text p { font-family: 'Noto Sans Tibetan', serif; } /* Ensure p inside also gets Tibetan font */
+        .chinese-text, .chinese-text p { font-family: var(--chinese-content-font); } /* Chinese content font */
+        .english-text, .english-text p { font-family: var(--english-font); } /* English font */
+        
+        #modalLanguageSeparator, #modalLanguageSeparator2 { border: 0; height: 1px; background: var(--glass-border); margin: 1.5rem 0; }
+        #modalMetaContent { margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--glass-border); font-size: 0.9em; opacity: 0.8; flex-shrink: 0; font-family: var(--english-font); }
+
+
+        @media (max-width: 768px) {
+            body { padding-top: 48px; } /* Adjusted for potentially taller nav on mobile if items wrap */
+            .top-nav { height: auto; padding: 6px 10px; flex-wrap: wrap; justify-content: center; }
+            .nav-left { gap: 5px; margin-bottom: 5px; width: auto; justify-content: flex-start; order:1; flex-grow: 1;} /* Let hamburger be first */
+            #toggleSidebarBtn { order: -1; margin-right: auto;} /* Hamburger first */
+            .nav-right { width: auto; justify-content: flex-end; order:2; flex-grow: 1; }
+            .nav-item, .top-nav-btn { font-size: 13px; padding: 5px 8px; }
+
+            .sidebar { width: 260px; height: calc(100vh - 48px); top: 48px; } /* Adjust top if nav height changes */
+            .main-content.sidebar-active { margin-left: 260px; }
+            
+            .utility-sidebar { width: 260px; height: calc(100vh - 48px); top: 48px; }
+            .main-content.with-right-sidebar { margin-right: 260px; }
+            .main-content.sidebar-active.with-right-sidebar { margin-left: 260px; margin-right: 260px;}
+
+
+            .main-title { font-size: 2.2rem; white-space: normal; }
+            .mode-selector-content { padding: 2rem 1.5rem; }
+            .documents-grid { grid-template-columns: 1fr; } /* Single column on mobile */
+            .modal-content { max-width: 95vw; max-height: 95vh; padding: 1.5rem; }
+            .main-title { font-size: 2.5rem; } 
+            .tibetan-subtitle { font-size: 1.3rem; }
+            .english-subtitle { font-size: 0.9rem; }
+        }
+         /* Ensure scrollbar styling is consistent for dark theme */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
+
+    </style>
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <nav class="top-nav">
+        <div class="nav-left" id="navLeftLinks">
+            <button class="top-nav-btn" id="toggleSidebarBtn" onclick="toggleLeftSidebar()">☰</button>
+            <a href="javascript:void(0)" class="nav-item" onclick="showModeSelectorScreen()">回首頁</a>
+            <a href="javascript:void(0)" class="nav-item" onclick="showInfo('關於我們')">關於我們</a>
+            <a href="javascript:void(0)" class="nav-item" onclick="showInfo('編者的話')">編者的話</a>
+            <a href="javascript:void(0)" class="nav-item" onclick="showInfo('參考資源')">參考資源</a>
+        </div>
+        <div class="nav-right" id="navRightControls">
+            {/* Content dynamically set by JS */}
+        </div>
+    </nav>
+
+    <div id="modeSelectorScreen">
+        <div class="mode-selector-content">
+            <h1 class="main-title">才旺諾布全集閱讀系統</h1>
+            <p class="tibetan-subtitle">༄༅། །ཚེ་དབང་ནོར་བུའི་གསུང་འབུམ་ཀློག་སྟེགས།</p>
+            <p class="english-subtitle">Tsewang Norbu Complete Works Reading System</p>
+            <div class="mode-buttons">
+                <button class="mode-button" onclick="enterMode('read')">📖 開始閱讀</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="appContainer">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2 class="sidebar-title">課程目錄</h2>
+                <p class="sidebar-subtitle">སློབ་ཚན་གྱི་དཀར་ཆག</p>
+            </div>
+            <nav class="course-menu" id="courseMenuContainer">
+                <div style="padding: 1rem; color: var(--text-light); opacity: 0.8;">載入中...</div>
+            </nav>
+        </aside>
+
+        <main class="main-content" id="mainContentArea">
+             <div class="container">
+                <header class="header">
+                    <h1>才旺諾布全集閱讀系統</h1>
+                    <p class="tibetan-subtitle-header">༄༅། །ཚེ་དབང་ནོར་བུའི་གསུང་འབུམ་ཀློག་སྟེགས།</p>
+                    <p>Tsewang Norbu Complete Works Reading System</p>
+                </header>
+                <div class="search-section">
+                    <div class="search-container">
+                        <span class="search-icon">⌕</span>
+                        <input type="text" class="search-input" placeholder="搜尋文獻標題、內容或作者..." id="searchInputEl">
+                    </div>
+                </div>
+                <div class="stats-bar">
+                    <div class="view-controls">
+                        <button class="view-btn active" id="gridViewBtn">📇 卡片檢視</button>
+                        <button class="view-btn" id="listViewBtn">📋 清單檢視</button>
+                    </div>
+                    <div style="font-size: 0.9rem; opacity: 0.9;">總計 <strong id="totalCountEl">0</strong> 部文獻</div>
+                </div>
+                <div class="documents-grid" id="documentsGridEl">
+                </div>
+            </div>
+        </main>
+
+        <aside class="utility-sidebar" id="utilitySidebarEl">
+            <div class="utility-sidebar-header">
+                <h3 class="utility-sidebar-title">✆✉♡♥</h3>
+                <button class="modal-close" onclick="toggleUtilitySidebar()">×</button>
+            </div>
+            <div class="utility-sidebar-content">
+                <div class="utility-item" onclick="showFavorites()">
+                    <span class="utility-item-icon">♥</span> 已收藏文章
+                </div>
+                <div id="favoritesListContainerEl" style="display:none; padding: 0.5rem 1rem;">
+                    {/* Favorite items will be listed here */}
+                </div>
+                <div class="utility-item" onclick="openReportErrorModal()">
+                    <span class="utility-item-icon">✉︎</span> 回報錯字
+                </div>
+                <div class="utility-item" onclick="showUtilityModal('donateModal', '護持贊助')">
+                    <span class="utility-item-icon">💰</span> 護持贊助
+                </div>
+                <div class="utility-item" onclick="contactSupport()">
+                    <span class="utility-item-icon">✆</span> 聯繫客服
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Document Modal (structure mostly same) -->
+    <div class="modal" id="documentModal">
+        <div class="modal-content" style="max-width: 800px;">
+            <button class="modal-close" onclick="closeModal('documentModal')">×</button>
+            <div id="modalHeaderContent">
+                <h2 class="modal-document-title-zh">載入中...</h2>
+                <p class="modal-document-title-bo"></p>
+                <p class="modal-document-title-en"></p>
+            </div>
+            <div class="language-switcher-modal" id="languageSwitcherModal"></div>
+            <div class="language-content-container">
+                <div id="modalTibetanContentEl" class="language-content tibetan-text" style="display:none;"></div>
+                <hr id="modalLanguageSeparator" style="display:none;">
+                <div id="modalChineseContentEl" class="language-content chinese-text" style="display:none;"></div>
+                <hr id="modalLanguageSeparator2" style="display:none;"> 
+                <div id="modalEnglishContentEl" class="language-content english-text" style="display:none;"></div>
+            </div>
+            <div id="modalMetaContent"></div>
+        </div>
+    </div>
+
+    <!-- Admin Login Modal (structure same) -->
+    <div class="modal" id="adminLoginModal">
+        <div class="modal-content" style="max-width: 400px;">
+            <button class="modal-close" onclick="closeModal('adminLoginModal')">×</button>
+            <h2 style="margin-bottom: 1.5rem; text-align: center;">管理員登入</h2>
+            <form id="adminLoginForm">
+                <div style="margin-bottom: 1rem;">
+                    <label for="adminUsername" style="display: block; margin-bottom: 0.5rem;">用戶名：</label>
+                    <input type="text" id="adminUsername" required style="width: 100%; padding: 0.8rem; border-radius: var(--border-radius-small); border: 1px solid var(--glass-border); background: rgba(255,255,255,0.1); color: var(--text-light); font-family: var(--english-font);">
+                </div>
+                <div style="margin-bottom: 1.5rem;">
+                    <label for="adminPassword" style="display: block; margin-bottom: 0.5rem;">密碼：</label>
+                    <input type="password" id="adminPassword" required style="width: 100%; padding: 0.8rem; border-radius: var(--border-radius-small); border: 1px solid var(--glass-border); background: rgba(255,255,255,0.1); color: var(--text-light);">
+                </div>
+                <button type="submit" class="btn" style="width: 100%;">登入</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Error Report Modal -->
+    <div class="modal" id="reportErrorModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('reportErrorModal')">×</button>
+            <h2 style="margin-bottom: 1.5rem; text-align: center; font-family: var(--chinese-title-font);">回報錯字/問題</h2>
+            <form id="reportErrorForm">
+                <input type="hidden" id="errorReportDocId" value="">
+                <div>
+                    <label for="errorReportPageUrl">問題頁面 (自動填入):</label>
+                    <input type="text" id="errorReportPageUrl" readonly>
+                </div>
+                <div>
+                    <label for="errorReportContext">問題相關內容 (自動截取部分):</label>
+                    <textarea id="errorReportContext" rows="3" readonly></textarea>
+                </div>
+                <div>
+                    <label for="errorReportDescription">請描述您發現的問題 <span style="color:var(--text-accent)">*</span>:</label>
+                    <textarea id="errorReportDescription" rows="5" required placeholder="例如：第X段第Y行，某個字應為Z..."></textarea>
+                </div>
+                <div>
+                    <label for="errorReportEmail">您的Email (方便我們回覆，選填):</label>
+                    <input type="email" id="errorReportEmail" placeholder="your.email@example.com">
+                </div>
+                <button type="submit" class="btn" style="width: 100%;">提交回報</button>
+            </form>
+        </div>
+    </div>
+
+
+    <div id="messageArea" style="position: fixed; top: 70px; right: 20px; z-index: 3000;"></div>
+
+    <footer>
+        <div class="social-links">
+            <a href="https://www.facebook.com/rigzinchenpoassociation/?locale=zh_TW" target="_blank" title="Facebook">ⓕ</a>
+            <a href="http://www.rigzin-chenpo.org/index2.html" target="_blank" title="Website">🏠︎</a>
+        </div>
+        <div class="copyright">噶陀仁珍千寶 © 2025 才旺諾布全集 All Rights Reserved</div>
+    </footer>
+
+    <script>
+        // --- Global Variables ---
+        let currentMode = ''; 
+        let isAdminLoggedIn = false;
+        let currentOpenDocId = null; 
+        let isLeftSidebarActive = true; 
+        let favorites = []; // Array to store IDs of favorited documents
+
+        // Sample data (ensure Content... fields are rich text if needed)
+        let documentsData = [
+            {
+                id: "history_005",
+                tibetanTitle: "༄༅། །བུ་སྟོན་ཁ་ཆེས་མཛད་པའི་ཆོས་འབྱུང་རིན་པོ་ཆེའི་མཛོད།",
+                chineseTitle: "布敦大師所撰佛法源流寶藏錄",
+                englishTitle: "The Treasury of Religious History by Buton Rinchen Drub",
+                author: "才旺諾布 (節錄)",
+                category: "歷史",
+                tags: ["佛法源流", "布敦大師", "Buton", "西藏王統"],
+                ContentTibetan: "<p class='tibetan-text'>༄༅། །བུ་སྟོན་ཁ་ཆེས་མཛད་པའི་ཆོས་འབྱུང་རིན་པོ་ཆེའི་མཛོད་ལས། ག་པ་འཛིན་པ་ཚེ་དབང་ནོར་བུས་ཉེ་བར་བཏུས་པ་བཞུགས་སོ། །ཨོཾ་སྭ་སྟི།...</p>",
+                ContentChinese: "<p class='chinese-text'>嗡娑帝！頂禮我等導師、真實圓滿正覺、如來、應供、正遍知釋迦王！...</p><p class='chinese-text'>竊聞西藏王統之始末，據布敦仁欽竹大師所著《佛法源流寶藏》云：天竺國王色堅心王之子...</p>",
+                ContentEnglish: "<p class='english-text'>Om Svasti! Homage to our Teacher, the truly and completely Awakened One... </p><p class='english-text'>Regarding the history of the Tibetan royal lineage, according to Buton Rinchen Drub's 'Treasury of Religious History': A son of the Indian King Salsem...</p>",
+                availableLanguages: ["bo", "zh", "en"], status: "published",
+                meta: { "preview": "從布敦仁欽竹大師的《佛法源流寶藏》中節錄，講述西藏王統的歷史源流..." }
+            },
+            {
+                id: "prayer_001_dkr",
+                tibetanTitle: "༧དཔལ་༧སྐྱབས་རྗེ་དིལ་མགོ་མཁྱེན་བརྩེ་རིན་པོ་ཆེའི་གཏེར་ཆོས་དར་ཞིང་རྒྱས་པའི་གསོལ་འདེབས།",
+                chineseTitle: "頂果欽哲仁波切伏藏法弘揚祈願文",
+                englishTitle: "Prayer for the Spread of Dilgo Khyentse Rinpoche's Termas",
+                author: "珠席仁波切 (Trulshik Rinpoche)", category: "祈請文", tags: ["祈請", "頂果欽哲仁波切", "伏藏"],
+                ContentTibetan: "<p class='tibetan-text'>༄༅། །ཨེ་མ་ཧོ༔ བདེ་གཤེགས་བསྟན་པའི་སྙིང་པོ་ཀུན་འདུས་དཔལ༔<br>མཁྱེན་བརྩེ་ནུས་པའི་གཏེར་ཆེན་བརྙེས་པའི་མགོན༔...</p>",
+                ContentChinese: "<p class='chinese-text'>噯瑪吙！善逝教法心要總集德，<br>智悲力之大藏尋獲怙，...</p>",
+                ContentEnglish: "", availableLanguages: ["bo", "zh"], status: "published",
+                meta: { "preview": "噯瑪吙！善逝教法心要總集德，智悲力之大藏尋獲怙..." }
+            }
+        ];
+
+        // --- Sidebar Toggle ---
+        function toggleLeftSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContentArea');
+            const toggleBtn = document.getElementById('toggleSidebarBtn');
+            isLeftSidebarActive = !isLeftSidebarActive;
+            if (isLeftSidebarActive) {
+                sidebar.classList.add('active');
+                mainContent.classList.add('sidebar-active');
+                toggleBtn.innerHTML = '✕';
+            } else {
+                sidebar.classList.remove('active');
+                mainContent.classList.remove('sidebar-active');
+                toggleBtn.innerHTML = '☰';
+            }
+        }
+
+        // --- Mode Management (enterMode, showModeSelectorScreen, setupRead/EditMode as before) ---
+        function enterMode(mode) { /* ... Same as previous correct version ... */ 
+            console.log('Entering mode:', mode); currentMode = mode;
+            if (mode === 'edit') { if (!isAdminLoggedIn) { showModal('adminLoginModal'); return; } setupEditMode();
+            } else { setupReadMode(); }
+            document.getElementById('modeSelectorScreen').style.display = 'none'; document.getElementById('appContainer').style.display = 'flex'; document.body.classList.add('app-active');
+            document.body.classList.remove('read-mode', 'edit-mode'); document.body.classList.add(mode + '-mode');
+            updateNavControls(); loadContent();
+        }
+        function showModeSelectorScreen() { /* ... Same as previous correct version ... */
+            currentMode = ''; isAdminLoggedIn = false; 
+            document.getElementById('modeSelectorScreen').style.display = 'flex'; document.getElementById('appContainer').style.display = 'none'; document.body.classList.remove('app-active', 'read-mode', 'edit-mode');
+            updateNavControls();
+            // Ensure sidebars are reset if user goes back to home
+            if (document.getElementById('sidebar').classList.contains('active') && isLeftSidebarActive) toggleLeftSidebar(); // Close if open
+            if (document.getElementById('utilitySidebarEl').classList.contains('active')) toggleUtilitySidebar(); // Close if open
+        }
+        function setupReadMode() { /* ... Same as previous correct version, ensure admin-only hidden ... */ 
+            document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
+            // Ensure reader-only elements on cards are visible
+            renderDocuments(); // Re-render to show like buttons if they were hidden
+        }
+        function setupEditMode() { /* ... Same as previous correct version, ensure admin-only shown ... */ 
+            document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'inline-flex');
+             renderDocuments(); // Re-render to show edit/delete buttons
+        }
+
+
+        // --- Nav Controls (updateNavControls as before) ---
+        function updateNavControls() { /* ... Same as previous correct version ... */
+            const navRight = document.getElementById('navRightControls'); navRight.innerHTML = ''; 
+            if (currentMode === 'edit' && isAdminLoggedIn) {
+                navRight.innerHTML = `<button class="top-nav-btn admin-only" onclick="addNewDocument()">✨ 新增</button><div style="color:var(--text-light); display:flex; align-items:center; gap:0.3rem; font-size:13px;" class="admin-only"><span>管理員</span><div style="width:18px; height:18px; background:var(--text-accent); border-radius:50%; text-align:center; line-height:18px; font-weight:bold; font-size:11px;">A</div></div><button class="top-nav-btn admin-only" onclick="adminLogout()">登出</button>`;
+            } else if (currentMode === 'read') {
+                navRight.innerHTML = `<button class="top-nav-btn reader-only" onclick="showTools()">✆✉♡♥</button><button class="top-nav-btn" onclick="enterMode('edit')">登入</button>`;
+            } else { 
+                navRight.innerHTML = `<button class="top-nav-btn" onclick="showTools()">✆✉♡♥</button><button class="top-nav-btn" onclick="enterMode('edit')">登入</button>`;
+            }
+            document.querySelectorAll('.admin-only').forEach(el => el.style.display = (currentMode === 'edit' && isAdminLoggedIn) ? 'inline-flex' : 'none');
+            document.querySelectorAll('.reader-only').forEach(el => el.style.display = (currentMode === 'read') ? (el.tagName === 'BUTTON' ? 'inline-flex' : 'block') : 'none');
+        }
+
+        // --- Modal Functions (showModal, closeModal as before) ---
+        function showModal(modalId) { const modal = document.getElementById(modalId); if (modal) modal.classList.add('active');}
+        function closeModal(modalId) { const modal = document.getElementById(modalId); if (modal) modal.classList.remove('active'); if (modalId === 'documentModal') currentOpenDocId = null; }
+
+        // --- Admin Functions (adminLogout, addNewDocument - simplified, as before) ---
+        function adminLogout() { /* ... Same as previous ... */ 
+            isAdminLoggedIn = false; showMessage('已登出管理員模式', 'info'); currentMode = 'read';
+            document.body.classList.remove('edit-mode'); document.body.classList.add('read-mode');
+            setupReadMode(); updateNavControls(); renderDocuments();
+        }
+        function addNewDocument() { /* ... Using simplified prompt version for now ... */
+            const newId = "new_" + Date.now();
+            const newDocData = { id: newId, tibetanTitle: prompt("輸入新文檔的藏文標題:", "新藏文標題") || "未命名藏文文稿", chineseTitle: prompt("輸入新文檔的中文標題:", "新中文標題") || "未命名中文文稿", englishTitle: prompt("輸入新文檔的英文標題:", "New English Title") || "", author: prompt("輸入作者:", "管理員") || "未知作者", category: prompt("輸入分類:", "新分類") || "未分類", tags: (prompt("輸入標籤 (逗號分隔):", "新標籤,測試") || "").split(',').map(t=>t.trim()).filter(t=>t), ContentTibetan: `<p class='tibetan-text'>${prompt("輸入藏文內容:", "此處為藏文內容...")||""}</p>`, ContentChinese: `<p class='chinese-text'>${prompt("輸入中文內容:", "此處為中文內容...")||""}</p>`, ContentEnglish: `<p class='english-text'>${prompt("輸入英文內容:", "English content here...")||""}</p>`, availableLanguages: [], status: "draft", meta: { preview: "預覽..." } };
+            if (newDocData.ContentTibetan.replace(/<[^>]+>|\s+/g, '') !== '') newDocData.availableLanguages.push('bo'); if (newDocData.ContentChinese.replace(/<[^>]+>|\s+/g, '') !== '') newDocData.availableLanguages.push('zh'); if (newDocData.ContentEnglish.replace(/<[^>]+>|\s+/g, '') !== '') newDocData.availableLanguages.push('en');
+            if (!newDocData.chineseTitle && !newDocData.tibetanTitle) { showMessage('必須至少提供一個標題。', 'error'); return; }
+            documentsData.unshift(newDocData); renderDocuments(); renderSidebar(); showMessage(`文稿 "${newDocData.chineseTitle||newDocData.tibetanTitle}" 已新增。`, 'success'); openDocument(newId);
+        }
+
+        // --- Content Rendering (loadContent, renderSidebar, toggleCategory as before) ---
+        function loadContent() { renderDocuments(); renderSidebar(); }
+        function renderSidebar() { /* ... Same as previous correct version, with lang indicators ... */
+            const sidebarEl = document.getElementById('courseMenuContainer');
+            if (!documentsData || documentsData.length === 0) { sidebarEl.innerHTML = '<div style="padding:1rem;color:var(--text-light);opacity:0.8;">暫無目錄</div>'; return; }
+            const categories = {}; documentsData.forEach(doc => { const cat = doc.category || '未分類'; if (!categories[cat]) categories[cat] = []; categories[cat].push(doc); });
+            sidebarEl.innerHTML = Object.entries(categories).map(([category, docs]) => { const categoryId = `category-list-${category.replace(/[^a-zA-Z0-9\-_]/g, '')}`;
+            return `<div style="margin-bottom:1rem;"><h4 style="padding:0.8rem 1rem;background:rgba(255,255,255,0.1);margin:0;cursor:pointer;border-radius:var(--border-radius-small);" onclick="toggleCategory('${categoryId}')">${category} (${docs.length})</h4><div id="${categoryId}" style="padding-left:1rem;display:block;">${docs.map(doc => `<div style="padding:0.5rem 1rem;cursor:pointer;border-radius:var(--border-radius-small);margin:0.2rem 0;display:flex;justify-content:space-between;align-items:center;" onclick="openDocument('${doc.id}')" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='transparent'"><span style="flex-grow:1;">${doc.chineseTitle||doc.tibetanTitle||'無標題'}</span><span style="font-size:0.75em;opacity:0.6;margin-left:8px;white-space:nowrap;">[${doc.availableLanguages.join(',')}]</span></div>`).join('')}</div></div>`;
+            }).join('');
+        }
+        function toggleCategory(categoryId) { const catEl = document.getElementById(categoryId); if (catEl) catEl.style.display = catEl.style.display === 'none' ? 'block' : 'none'; }
+
+        // --- Document Card Rendering (renderDocuments) with Like Button ---
+        function renderDocuments(docsToRender = documentsData) {
+            const gridEl = document.getElementById('documentsGridEl');
+            const totalEl = document.getElementById('totalCountEl');
+            if (!docsToRender || docsToRender.length === 0) { /* ... no docs message ... */ 
+                gridEl.innerHTML = `<div style="text-align:center;padding:2rem;color:var(--text-light);opacity:0.8;">${currentMode==='edit'&&isAdminLoggedIn?'點擊上方 "✨ 新增" 來建立第一份文獻':'暫無文獻資料'}</div>`; totalEl.textContent='0'; return;
+            }
+            totalEl.textContent = docsToRender.length;
+            gridEl.innerHTML = docsToRender.map(doc => `
+                <div class="document-card"> 
+                    <h3 class="document-title">${doc.tibetanTitle || '無藏文標題'}</h3>
+                    <h4 class="document-subtitle">${doc.chineseTitle || '無中文標題'}</h4>
+                    <div class="document-meta">作者：${doc.author || '未知'} | 類別：${doc.category || '未分類'}</div>
+                    <div class="document-preview">${doc.meta?.preview || (doc.ContentChinese || doc.ContentTibetan || '').substring(0, 100).replace(/<[^>]+>/g, '')}...</div>
+                    <div class="document-card-actions">
+                        <a href="javascript:void(0)" class="btn" onclick="event.stopPropagation(); openDocument('${doc.id}');">閱讀全文</a>
+                        <button class="btn admin-only" onclick="event.stopPropagation(); editDocument('${doc.id}');" style="background: rgba(255, 215, 0, 0.2); border-color: var(--text-accent);">✎ 編輯</button>
+                        <button class="btn admin-only" onclick="event.stopPropagation(); deleteDocument('${doc.id}');" style="background: rgba(220, 53, 69, 0.2); border-color: #dc3545;">🗙 刪除</button>
+                        <button class="like-btn reader-only ${favorites.includes(doc.id) ? 'liked' : ''}" onclick="event.stopPropagation(); toggleFavorite('${doc.id}', this);" title="收藏">♥</button>
+                    </div>
+                </div>
+            `).join('');
+            // Explicitly set visibility after rendering
+            document.querySelectorAll('.document-card .admin-only').forEach(el => el.style.display = (currentMode === 'edit' && isAdminLoggedIn) ? 'inline-flex' : 'none');
+            document.querySelectorAll('.document-card .reader-only').forEach(el => el.style.display = (currentMode === 'read') ? 'inline-flex' : 'none');
+        }
+        
+        // --- Document Modal (updateLanguageSwitcher, showLanguage, openDocument as before) ---
+        function updateLanguageSwitcher(availableLangs, docId) { /* ... Same as previous correct version ... */ 
+            const switcherEl = document.getElementById('languageSwitcherModal'); switcherEl.innerHTML = '';
+            const langMap = { bo: '藏文', zh: '中文', en: 'English' };
+            const hasContent = (lang) => { const doc = documentsData.find(d => d.id === docId); if (!doc) return false; if (lang === 'bo') return doc.ContentTibetan && doc.ContentTibetan.replace(/<[^>]+>|\s+/g, '') !== ''; if (lang === 'zh') return doc.ContentChinese && doc.ContentChinese.replace(/<[^>]+>|\s+/g, '') !== ''; if (lang === 'en') return doc.ContentEnglish && doc.ContentEnglish.replace(/<[^>]+>|\s+/g, '') !== ''; return false; };
+            availableLangs.forEach(lang => { if (langMap[lang] && hasContent(lang)) { const btn = document.createElement('button'); btn.textContent = langMap[lang]; btn.onclick = () => showLanguage(docId, lang); btn.dataset.langCode = lang; switcherEl.appendChild(btn); }});
+            if (availableLangs.includes('bo')&&availableLangs.includes('zh')&&hasContent('bo')&&hasContent('zh')){ const btn=document.createElement('button');btn.textContent='藏中對照';btn.onclick=()=>showLanguage(docId,'bo-zh');btn.dataset.langCode='bo-zh';switcherEl.appendChild(btn);}
+            if (availableLangs.includes('bo')&&availableLangs.includes('en')&&hasContent('bo')&&hasContent('en')){ const btn=document.createElement('button');btn.textContent='藏英對照';btn.onclick=()=>showLanguage(docId,'bo-en');btn.dataset.langCode='bo-en';switcherEl.appendChild(btn);}
+            if (availableLangs.includes('zh')&&availableLangs.includes('en')&&hasContent('zh')&&hasContent('en')){ const btn=document.createElement('button');btn.textContent='中英對照';btn.onclick=()=>showLanguage(docId,'zh-en');btn.dataset.langCode='zh-en';switcherEl.appendChild(btn);}
+            if (switcherEl.children.length === 0) switcherEl.innerHTML = '<p style="opacity:0.7;">此文獻暫無內容可供顯示。</p>';
+        }
+        function showLanguage(docId, langCode) { /* ... Same as previous correct version ... */
+            const doc = documentsData.find(d => d.id === docId); if (!doc) return;
+            const tibetanDiv = document.getElementById('modalTibetanContentEl'), chineseDiv = document.getElementById('modalChineseContentEl'), englishDiv = document.getElementById('modalEnglishContentEl');
+            const sep1 = document.getElementById('modalLanguageSeparator'), sep2 = document.getElementById('modalLanguageSeparator2');
+            [tibetanDiv,chineseDiv,englishDiv].forEach(d=>d.style.display='none');[sep1,sep2].forEach(s=>s.style.display='none');
+            document.getElementById('languageSwitcherModal').querySelectorAll('button').forEach(b=>{b.classList.remove('active');if(b.dataset.langCode===langCode)b.classList.add('active');});
+            const hasBo=doc.ContentTibetan&&doc.ContentTibetan.replace(/<[^>]+>|\s+/g,'')!=='',hasZh=doc.ContentChinese&&doc.ContentChinese.replace(/<[^>]+>|\s+/g,'')!=='',hasEn=doc.ContentEnglish&&doc.ContentEnglish.replace(/<[^>]+>|\s+/g,'')!=='';
+            if(langCode==='bo'&&hasBo)tibetanDiv.style.display='block';else if(langCode==='zh'&&hasZh)chineseDiv.style.display='block';else if(langCode==='en'&&hasEn)englishDiv.style.display='block';
+            else if(langCode==='bo-zh'){if(hasBo)tibetanDiv.style.display='block';if(hasBo&&hasZh)sep1.style.display='block';if(hasZh)chineseDiv.style.display='block';}
+            else if(langCode==='bo-en'){if(hasBo)tibetanDiv.style.display='block';if(hasBo&&hasEn)sep1.style.display='block';if(hasEn)englishDiv.style.display='block';}
+            else if(langCode==='zh-en'){if(hasZh)chineseDiv.style.display='block';if(hasZh&&hasEn)sep1.style.display='block';if(hasEn)englishDiv.style.display='block';}
+        }
+        function openDocument(docId) { /* ... Same as previous correct version, with smart initial lang ... */
+            const doc = documentsData.find(d => d.id === docId); if (!doc) { showMessage('找不到該文件', 'error'); return; } currentOpenDocId = docId;
+            document.querySelector('#modalHeaderContent .modal-document-title-zh').textContent=doc.chineseTitle||'';document.querySelector('#modalHeaderContent .modal-document-title-bo').textContent=doc.tibetanTitle||'';document.querySelector('#modalHeaderContent .modal-document-title-en').textContent=doc.englishTitle||'';
+            const tD=document.getElementById('modalTibetanContentEl'),cD=document.getElementById('modalChineseContentEl'),eD=document.getElementById('modalEnglishContentEl');
+            const hB=doc.ContentTibetan&&doc.ContentTibetan.replace(/<[^>]+>|\s+/g,'')!=='',hZ=doc.ContentChinese&&doc.ContentChinese.replace(/<[^>]+>|\s+/g,'')!=='',hE=doc.ContentEnglish&&doc.ContentEnglish.replace(/<[^>]+>|\s+/g,'')!=='';
+            tD.innerHTML=hB?`<h4>藏文原文</h4>${doc.ContentTibetan}`:`<h4>藏文原文</h4><p style="opacity:0.7;">暫無藏文內容</p>`;cD.innerHTML=hZ?`<h4>中文翻譯</h4>${doc.ContentChinese}`:`<h4>中文翻譯</h4><p style="opacity:0.7;">暫無中文內容</p>`;eD.innerHTML=hE?`<h4>English Translation</h4>${doc.ContentEnglish}`:`<h4>English Translation</h4><p style="opacity:0.7;">No English content.</p>`;
+            document.getElementById('modalMetaContent').innerHTML=`<strong>作者：</strong>${doc.author||'未知'} | <strong>類別：</strong>${doc.category||'未分類'}${(doc.tags&&doc.tags.length)?` | <strong>標籤：</strong>${doc.tags.join(', ')}`:''}`;
+            updateLanguageSwitcher(doc.availableLanguages,docId);
+            let iLC='';if(hB&&hZ)iLC='bo-zh';else if(hB)iLC='bo';else if(hZ)iLC='zh';else if(hE)iLC='en';
+            const sE=document.getElementById('languageSwitcherModal');
+            if(iLC&&doc.availableLanguages.some(l=>iLC.includes(l)))showLanguage(docId,iLC);else if(sE.children.length>0&&sE.children[0].dataset)showLanguage(docId,sE.children[0].dataset.langCode);
+            showModal('documentModal');
+        }
+
+        // --- Utility Functions (showMessage, showInfo, showTools, toggleUtilitySidebar, showUtilityModal, contactSupport, editDocument - simplified, deleteDocument as before) ---
+        function showMessage(text, type = 'info') { /* ... Same as previous ... */ 
+            const msgArea = document.getElementById('messageArea'), msgEl = document.createElement('div');
+            msgEl.style.cssText = `background:${type==='error'?'rgba(220,53,69,0.9)':type==='success'?'rgba(40,167,69,0.9)':'rgba(23,162,184,0.9)'};color:white;padding:1rem 1.5rem;border-radius:var(--border-radius-small);margin-bottom:0.5rem;backdrop-filter:blur(10px);animation:slideInRight 0.3s ease-out;box-shadow:0 5px 15px rgba(0,0,0,0.2);`;
+            msgEl.textContent=text;msgArea.appendChild(msgEl);setTimeout(()=>{msgEl.style.animation='slideOutRight 0.3s ease-out forwards';setTimeout(()=> {if(msgArea.contains(msgEl))msgArea.removeChild(msgEl);},300);},3000);
+        }
+        function showInfo(title) { showMessage(`${title} 功能開發中...`, 'info'); }
+        function showTools() { toggleUtilitySidebar(); }
+        function toggleUtilitySidebar() { /* ... Same as previous ... */ 
+            const sidebar = document.getElementById('utilitySidebarEl'), mainContent = document.getElementById('mainContentArea');
+            const isActive = sidebar.classList.contains('active');
+            if (isActive) { sidebar.classList.remove('active'); mainContent.classList.remove('with-right-sidebar'); setTimeout(() => sidebar.style.display = 'none', 300); /* Hide after transition */
+            } else { sidebar.style.display = 'block'; setTimeout(() => { sidebar.classList.add('active'); mainContent.classList.add('with-right-sidebar'); }, 10); }
+        }
+        function showUtilityModal(modalType, title) { showMessage(`${title} 功能開發中...`, 'info'); }
+        function contactSupport() { showMessage('聯繫客服功能開發中...', 'info'); }
+        function editDocument(docId) { /* ... Simplified prompt version ... */ 
+            const doc = documentsData.find(d=>d.id===docId); if(!doc){showMessage('找不到文件','error');return;}
+            const nCT = prompt("編輯中文標題:",doc.chineseTitle); if(nCT!==null)doc.chineseTitle=nCT;
+            // ... more prompts for other fields if needed ...
+            renderDocuments(); renderSidebar(); if(currentOpenDocId===docId && document.getElementById('documentModal').classList.contains('active'))openDocument(docId);
+            showMessage(`文稿 "${doc.chineseTitle||doc.tibetanTitle}" 已更新(範例)。`, 'success');
+        }
+        function deleteDocument(docId) { /* ... Same as previous with confirmation ... */
+            const doc=documentsData.find(d=>d.id===docId);if(!doc){showMessage('找不到要刪除的文檔','error');return;}
+            if(confirm(`確定要永久刪除文稿 "${doc.chineseTitle||doc.tibetanTitle}" 嗎？此操作無法復原。`)){
+            documentsData=documentsData.filter(d=>d.id!==docId);renderDocuments();renderSidebar();showMessage('文檔已刪除','success');
+            if(currentOpenDocId===docId)closeModal('documentModal');removeFavorite(docId);updateFavoritesList();}
+        }
+
+        // --- Favorites Functionality ---
+        function loadFavorites() { // Load from localStorage on startup
+            const storedFavorites = localStorage.getItem('sunbumFavorites');
+            if (storedFavorites) {
+                favorites = JSON.parse(storedFavorites);
+            }
+        }
+        function saveFavorites() {
+            localStorage.setItem('sunbumFavorites', JSON.stringify(favorites));
+        }
+        function toggleFavorite(docId, btnElement) {
+            const index = favorites.indexOf(docId);
+            if (index > -1) { // Already favorited, unfavorite
+                favorites.splice(index, 1);
+                btnElement.classList.remove('liked');
+                showMessage('已取消收藏', 'info');
+            } else { // Not favorited, favorite
+                favorites.push(docId);
+                btnElement.classList.add('liked');
+                showMessage('已加入收藏!', 'success');
+            }
+            saveFavorites();
+            updateFavoritesList();
+        }
+        function removeFavorite(docId) { // Called when deleting a document
+            const index = favorites.indexOf(docId);
+            if (index > -1) {
+                favorites.splice(index, 1);
+                saveFavorites();
+            }
+        }
+        function updateFavoritesList() {
+            const container = document.getElementById('favoritesListContainerEl');
+            if (favorites.length === 0) {
+                container.innerHTML = '<p style="opacity:0.7;">暫無收藏。</p>';
+                return;
+            }
+            container.innerHTML = favorites.map(favId => {
+                const doc = documentsData.find(d => d.id === favId);
+                return doc ? `<div class="favorite-item" onclick="openDocument('${doc.id}'); toggleUtilitySidebar();">${doc.chineseTitle || doc.tibetanTitle || '未知文稿'}</div>` : '';
+            }).join('');
+        }
+        function showFavorites() {
+            const favContainer = document.getElementById('favoritesListContainerEl');
+            favContainer.style.display = favContainer.style.display === 'none' ? 'block' : 'none';
+            if (favContainer.style.display === 'block') updateFavoritesList();
+        }
+
+        // --- Error Report Modal ---
+        function openReportErrorModal() {
+            const form = document.getElementById('reportErrorForm');
+            form.reset(); // Clear previous entries
+            document.getElementById('errorReportPageUrl').value = window.location.href;
+            
+            let context = "";
+            if (currentOpenDocId && document.getElementById('documentModal').classList.contains('active')) {
+                const doc = documentsData.find(d => d.id === currentOpenDocId);
+                if (doc) {
+                    document.getElementById('errorReportDocId').value = currentOpenDocId;
+                    // Try to get some context from the currently viewed language
+                    const activeLangBtn = document.querySelector('#languageSwitcherModal button.active');
+                    let contentToSample = "";
+                    if (activeLangBtn) {
+                        const langCode = activeLangBtn.dataset.langCode;
+                        if (langCode.includes('bo') && doc.ContentTibetan) contentToSample = doc.ContentTibetan;
+                        else if (langCode.includes('zh') && doc.ContentChinese) contentToSample = doc.ContentChinese;
+                        else if (langCode.includes('en') && doc.ContentEnglish) contentToSample = doc.ContentEnglish;
+                    }
+                    if (!contentToSample && doc.ContentChinese) contentToSample = doc.ContentChinese; // Fallback
+                    if (contentToSample) {
+                        context = contentToSample.replace(/<[^>]+>/g, ' ').trim().substring(0, 150) + "...";
+                    }
+                }
+            } else {
+                 document.getElementById('errorReportDocId').value = "N/A (非特定文稿)";
+                 context = "用戶在主列表頁面回報問題。";
+            }
+            document.getElementById('errorReportContext').value = context || "無法自動截取內容。";
+            showModal('reportErrorModal');
+        }
+        document.getElementById('reportErrorForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const docId = document.getElementById('errorReportDocId').value;
+            const pageUrl = document.getElementById('errorReportPageUrl').value;
+            const context = document.getElementById('errorReportContext').value;
+            const description = document.getElementById('errorReportDescription').value;
+            const email = document.getElementById('errorReportEmail').value;
+
+            if (!description.trim()) {
+                showMessage('請填寫問題描述！', 'error');
+                return;
+            }
+            // Here, you would typically send this data to a server or email service
+            console.log("Error Report Submitted:", { docId, pageUrl, context, description, email });
+            showMessage('感謝您的回報！我們將盡快處理。', 'success');
+            closeModal('reportErrorModal');
+        });
+
+
+        // --- Event Listeners (DOMContentLoaded) ---
+        document.addEventListener('DOMContentLoaded', function() {
+            loadFavorites(); // Load favorites from localStorage
+
+            // Admin login form (as before)
+            document.getElementById('adminLoginForm').addEventListener('submit', function(e) { /* ... Same as previous ... */ 
+                e.preventDefault(); const u=document.getElementById('adminUsername').value,p=document.getElementById('adminPassword').value;
+                if(u==='admin'&&p==='password123'){isAdminLoggedIn=true;closeModal('adminLoginModal');showMessage('管理員登入成功！','success');enterMode('edit');}else{showMessage('用戶名或密碼錯誤','error');}
+            });
+
+            // Search functionality (as before)
+            document.getElementById('searchInputEl').addEventListener('input', function() { /* ... Same as previous ... */ 
+                const sT=this.value.toLowerCase().trim();if(!sT){renderDocuments(documentsData);return;}
+                const filt=documentsData.filter(d=>(d.tibetanTitle&&d.tibetanTitle.toLowerCase().includes(sT))||(d.chineseTitle&&d.chineseTitle.toLowerCase().includes(sT))||(d.englishTitle&&d.englishTitle.toLowerCase().includes(sT))||(d.author&&d.author.toLowerCase().includes(sT))||(d.ContentTibetan&&d.ContentTibetan.toLowerCase().includes(sT))||(d.ContentChinese&&d.ContentChinese.toLowerCase().includes(sT))||(d.ContentEnglish&&d.ContentEnglish.toLowerCase().includes(sT))||(d.tags&&d.tags.some(t=>t.toLowerCase().includes(sT))));
+                renderDocuments(filt);document.getElementById('totalCountEl').textContent=filt.length;
+                if(filt.length===0)document.getElementById('documentsGridEl').innerHTML='<div style="text-align:center;padding:2rem;color:var(--text-light);opacity:0.8;">未找到與 "'+sT+'" 相關的文獻</div>';
+            });
+
+            // View mode buttons (as before, grid/list messages simplified)
+            document.getElementById('gridViewBtn').addEventListener('click', function() { /* ... Same as previous ... */ 
+                this.classList.add('active');document.getElementById('listViewBtn').classList.remove('active');
+                document.getElementById('documentsGridEl').style.gridTemplateColumns='repeat(auto-fit,minmax(320px,1fr))';
+            });
+            document.getElementById('listViewBtn').addEventListener('click', function() { /* ... Same as previous ... */
+                this.classList.add('active');document.getElementById('gridViewBtn').classList.remove('active');
+                document.getElementById('documentsGridEl').style.gridTemplateColumns='1fr';showMessage('清單檢視功能開發中...','info');
+            });
+
+            // Close modals with backdrop click or Escape key (as before)
+            document.querySelectorAll('.modal').forEach(m=>{m.addEventListener('click',function(e){if(e.target===this)closeModal(this.id);});});
+            document.addEventListener('keydown',function(e){if(e.key==="Escape")document.querySelectorAll('.modal.active').forEach(m=>closeModal(m.id));});
+
+            // Initialize
+            if (window.innerWidth <= 768) isLeftSidebarActive = false; else isLeftSidebarActive = true;
+            isLeftSidebarActive = !isLeftSidebarActive; toggleLeftSidebar(); // Set initial state
+            
+            showModeSelectorScreen(); 
+            updateNavControls(); 
+        });
+
+        // CSS Keyframes (as before)
+        const styleSheet = document.createElement('style');
+        styleSheet.textContent = `@keyframes slideInRight{from{transform:translateX(100%);opacity:0;}to{transform:translateX(0);opacity:1;}}@keyframes slideOutRight{from{transform:translateX(0);opacity:1;}to{transform:translateX(100%);opacity:0;}}`;
+        document.head.appendChild(styleSheet);
+<script>
+        // --- Global Variables ---
+        let documentsData = [];
+        let currentMode = '';
+        let isAdminLoggedIn = false;
+        let currentOpenDocId = null;
+        let isLeftSidebarActive = window.innerWidth > 768; // Default open on desktop
+        let favorites = [];
+        let dataLoaded = false;
+
+        // --- DOM Elements (確保 ID 與 HTML 匹配) ---
+        const navLeftLinksEl = document.getElementById('navLeftLinks');
+        const navRightControlsEl = document.getElementById('navRightControls');
+        const modeSelectorScreenEl = document.getElementById('modeSelectorScreen');
+        const appContainerEl = document.getElementById('appContainer');
+        const adminLoginModalEl = document.getElementById('adminLoginModal');
+        const adminLoginFormEl = document.getElementById('adminLoginForm');
+        const messageAreaEl = document.getElementById('messageArea'); // 確保 HTML 中有此 ID
+        const sidebarEl = document.getElementById('sidebar');
+        const mainContentAreaEl = document.getElementById('mainContentArea');
+        const utilitySidebarEl = document.getElementById('utilitySidebarEl');
+        const courseMenuContainerEl = document.getElementById('courseMenuContainer');
+        const documentsGridEl = document.getElementById('documentsGridEl');
+        const totalCountEl = document.getElementById('totalCountEl');
+        const searchInputEl = document.getElementById('searchInputEl');
+        const documentModalEl = document.getElementById('documentModal');
+        const modalHeaderContentEl = document.getElementById('modalHeaderContent'); // For modal titles
+        const languageSwitcherModalEl = document.getElementById('languageSwitcherModal');
+        const modalTibetanContentEl = document.getElementById('modalTibetanContentEl');
+        const modalChineseContentEl = document.getElementById('modalChineseContentEl');
+        const modalEnglishContentEl = document.getElementById('modalEnglishContentEl');
+        const modalLanguageSeparatorEl = document.getElementById('modalLanguageSeparator');
+        const modalLanguageSeparator2El = document.getElementById('modalLanguageSeparator2');
+        const modalMetaContentEl = document.getElementById('modalMetaContent');
+        const infoModalEl = document.getElementById('infoModalEl'); // 假設您有這個通用資訊彈窗
+        const infoModalTitleEl = document.getElementById('infoModalTitleEl');
+        const infoModalBodyEl = document.getElementById('infoModalBodyEl');
+        const reportErrorModalEl = document.getElementById('reportErrorModal');
+        const reportErrorFormEl = document.getElementById('reportErrorForm');
+        const favoritesListContainerEl = document.getElementById('favoritesListContainerEl');
+        // ... (其他可能需要的 DOM 元素)
+
+        const API_BASE_URL = ''; // 同源
+
+        // --- Core Functions (Mode, Nav, Data Loading, Modals) ---
+
+        function showMessage(text, type = 'info') {
+            // ... (showMessage 函數不變) ...
+        }
+
+        async function showInfoModalFromFile(title, filePath, isAboutUs = false) {
+            // ... (showInfoModalFromFile 函數，確保 fetch 路徑正確，例如 fetch(`./${filePath}`) 或 fetch(filePath))
+            // 記得處理 .txt 檔案的 response.text()
+        }
+        window.showInfo = showInfoModalFromFile; // 使其可從 HTML onclick 調用
+
+        function toggleLeftSidebar() {
+            // ... (toggleLeftSidebar 函數不變) ...
+        }
+        window.toggleLeftSidebar = toggleLeftSidebar;
+
+        function toggleUtilitySidebar() {
+            // ... (toggleUtilitySidebar 函數不變) ...
+        }
+        window.toggleUtilitySidebar = toggleUtilitySidebar;
+
+
+        function updateNavControls() {
+            // ... (updateNavControls 函數，確保按鈕的 onclick 調用的是已定義的全局函數) ...
+            // 例如： homeBtn.onclick = showModeSelectorScreen; // 而不是 "showModeSelectorScreen()"
+        }
+
+        function setupReadModeUI() { /* ... */ }
+        function setupEditModeUI() { /* ... */ }
+
+        function enterMode(mode) {
+            // ... (enterMode 函數，確保在適當時候調用 loadInitialContentIfNeeded) ...
+        }
+        window.enterMode = enterMode;
+
+        function showModeSelectorScreen() {
+            // ... (showModeSelectorScreen 函數) ...
+        }
+        window.showModeSelectorScreen = showModeSelectorScreen;
+
+        async function loadDocumentsData() { /* ... (使用 fetch 從 /api/documents 獲取) ... */ }
+        function processAllDocumentMeta() { /* ... (處理 meta 數據) ... */ }
+        async function loadInitialContentIfNeeded() { /* ... (調用 loadDocumentsData) ... */ }
+
+        function renderSidebar() { /* ... (渲染側邊欄) ... */ }
+        function toggleCategory(categoryId) { /* ... */ }
+        window.toggleCategory = toggleCategory;
+
+        function renderDocuments(docsToRender = documentsData) { /* ... (渲染文獻卡片) ... */ }
+
+        function openDocument(docId) { /* ... (打開文獻彈窗) ... */ }
+        window.openDocument = openDocument;
+        function updateLanguageSwitcher(availableLangs, docId) { /* ... */ }
+        function showLanguage(docId, langCode) { /* ... */ }
+        window.showLanguage = showLanguage;
+
+        function showModal(modalId) { /* ... */ }
+        function closeModal(modalId) { /* ... */ }
+        window.closeModal = closeModal;
+
+        // --- Admin Functions (API calls) ---
+        function adminLogin() { // 由 adminLoginForm 的 submit 事件觸發
+             // ... (獲取用戶名密碼)
+            // 假設登入成功:
+            // isAdminLoggedIn = true;
+            // closeModal('adminLoginModal');
+            // showMessage('管理員登入成功！', 'success');
+            // enterMode('edit'); // 直接進入編輯模式
+        }
+        function adminLogout() { /* ... */ }
+        window.adminLogout = adminLogout;
+
+        async function addNewDocument() { /* ... (使用 fetch POST 到 /api/documents) ... */ }
+        window.addNewDocument = addNewDocument; // 如果有按鈕直接調用
+        async function editDocument(docId) { /* ... (使用 fetch PUT 到 /api/documents/:id) ... */ }
+        window.editDocument = editDocument;
+        async function deleteDocument(docId) { /* ... (使用 fetch DELETE 到 /api/documents/:id) ... */ }
+        window.deleteDocument = deleteDocument;
+
+
+        // --- Favorites ---
+        function loadFavorites() { /* ... */ }
+        function saveFavorites() { /* ... */ }
+        function toggleFavorite(docId, btnElement) { /* ... */ }
+        window.toggleFavorite = toggleFavorite;
+        function removeFavorite(docId) { /* ... */ }
+        function updateFavoritesList() { /* ... */ }
+        function showFavorites() { /* ... */ }
+        window.showFavorites = showFavorites;
+
+        // --- Error Report ---
+        function openReportErrorModal() { /* ... */ }
+        window.openReportErrorModal = openReportErrorModal;
+        // (reportErrorForm submit listener)
+
+        // --- Utility Modal & Contact ---
+        function showUtilityModal(modalType, title) { /* ... */ }
+        window.showUtilityModal = showUtilityModal;
+        function contactSupport() { /* ... */ }
+        window.contactSupport = contactSupport;
+
+
+        // --- Event Listeners & Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log("Frontend DOM fully loaded. Initializing...");
+            loadFavorites();
+            showModeSelectorScreen(); // 初始顯示模式選擇
+
+            // 確保所有按鈕的事件監聽器在這裡綁定，或者它們的 onclick 屬性引用的是全局函數
+            document.getElementById('adminLoginForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const username = document.getElementById('adminUsername').value;
+                const password = document.getElementById('adminPassword').value;
+                // 模擬登入
+                if (username === 'admin' && password === 'password123') {
+                    isAdminLoggedIn = true;
+                    closeModal('adminLoginModal');
+                    showMessage('管理員登入成功！', 'success');
+                    enterMode('edit'); // 觸發編輯模式的 UI 和數據加載
+                } else {
+                    showMessage('用戶名或密碼錯誤', 'error');
+                }
+            });
+
+            document.getElementById('searchInputEl').addEventListener('input', function() {
+                // ... 搜索邏輯 ...
+            });
+            document.getElementById('gridViewBtn').addEventListener('click', function() {
+                // ... 網格視圖 ...
+            });
+            document.getElementById('listViewBtn').addEventListener('click', function() {
+                // ... 列表視圖 ...
+            });
+            document.getElementById('reportErrorForm').addEventListener('submit', function(e) {
+                // ... 錯誤回報提交 ...
+            });
+
+
+            // Close modals with backdrop click or Escape key
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.addEventListener('click', function(event) {
+                    if (event.target === this) { // Click on backdrop
+                        closeModal(this.id);
+                    }
+                });
+            });
+            document.addEventListener('keydown', function(event) {
+                if (event.key === "Escape") {
+                    document.querySelectorAll('.modal.active').forEach(modal => closeModal(modal.id));
+                }
+            });
+
+            // Initial sidebar state based on screen width
+            if (window.innerWidth <= 768) {
+                isLeftSidebarActive = false; // Start closed on mobile
+                document.getElementById('sidebar').classList.remove('active');
+                document.getElementById('mainContentArea').classList.remove('sidebar-active');
+                document.getElementById('toggleSidebarBtn').innerHTML = '☰';
+            } else {
+                isLeftSidebarActive = true; // Start open on desktop
+                document.getElementById('sidebar').classList.add('active');
+                document.getElementById('mainContentArea').classList.add('sidebar-active');
+                document.getElementById('toggleSidebarBtn').innerHTML = '✕';
+            }
+            // 初次加載時，modeSelectorScreen 會先顯示，所以 updateNavControls 也應該在那時被調用
+        });
+
+        // (CSS Keyframes and other final setup)
+        const styleSheet = document.createElement('style');
+        styleSheet.textContent = `@keyframes slideInRight{ /* ... */ } @keyframes slideOutRight{ /* ... */ }`;
+        document.head.appendChild(styleSheet);
+
+    </script>
+</body>
+</html>

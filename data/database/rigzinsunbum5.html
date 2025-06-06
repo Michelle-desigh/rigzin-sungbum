@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>才旺諾布全集閱讀系統</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tibetan:wght@300;400;500;600;700&family=Noto+Serif+TC:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        @font-face {
+            font-family: 'Monlam Uni Chouk';
+            src: url('fonts/Monlam Uni Chouk.woff2') format('woff2');
+            font-weight: normal; font-style: normal; font-display: swap;
+        }
+        @font-face {
+            font-family: 'WenDingCuXingKai';
+            src: url('fonts/文鼎粗行楷.woff2') format('woff2');
+            font-weight: normal; font-style: normal; font-display: swap;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --glass-bg: rgba(20, 20, 30, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --text-light: rgba(240, 240, 255, 0.95);
+            --text-accent: #FFD700;
+            --tibetan-title-font: 'Monlam Uni Chouk', 'Noto Sans Tibetan', serif;
+            --chinese-title-font: 'WenDingCuXingKai', 'Noto Serif TC', serif;
+            --border-radius-main: 10px;
+            --border-radius-small: 5px;
+        }
+
+        body {
+            font-family: 'Inter', 'Microsoft YaHei', 'PingFang TC', sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            color: var(--text-light);
+            display: flex;
+            flex-direction: column;
+            padding-top: 52px;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><defs><pattern id="books" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse"><rect width="20" height="80" x="10" y="10" fill="rgba(255,255,255,0.05)" rx="2"/><rect width="20" height="75" x="35" y="15" fill="rgba(255,255,255,0.03)" rx="2"/><rect width="20" height="70" x="60" y="20" fill="rgba(255,255,255,0.04)" rx="2"/></pattern></defs><rect width="100%" height="100%" fill="url(%23books)"/></svg>') repeat;
+            opacity: 0.3;
+            z-index: -1;
+        }
+
+        .top-nav {
+            background: rgba(10, 10, 20, 0.85);
+            padding: 8px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--glass-border);
+            height: 52px;
+        }
+
+        .nav-left { display: flex; gap: 12px; align-items: center; }
+        .nav-right { display: flex; gap: 8px; align-items: center; }
+        
+        .nav-item, .top-nav-btn {
+            color: var(--text-light); 
+            text-decoration: none; 
+            padding: 6px 10px;
+            border-radius: var(--border-radius-small); 
+            transition: background 0.2s, color 0.2s;
+            font-size: 14px; 
+            background: transparent; 
+            border: 1px solid transparent; 
+            cursor: pointer;
+        }
+        
+        .nav-item:hover, .top-nav-btn:hover { 
+            background: rgba(255, 255, 255, 0.1); 
+            color: white; 
+        }
+
+        #modeSelectorScreen { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            flex-grow: 1; 
+            text-align: center; 
+            position: relative; 
+            z-index: 10; 
+        }
+
+        .mode-selector-content {
+            background: var(--glass-bg); 
+            backdrop-filter: blur(15px); 
+            border-radius: var(--border-radius-main);
+            padding: 3rem 2.5rem; 
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 10px 35px rgba(0,0,0,0.3); 
+            animation: fadeInUp 0.8s ease-out;
+            max-width: 800px; 
+            width: 90%;
+        }
+
+        @keyframes fadeInUp { 
+            from { opacity: 0; transform: translateY(25px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+
+        .main-title {
+            font-family: var(--chinese-title-font), 'Noto Serif TC', serif; 
+            font-size: 3.2rem;
+            font-weight: bold; 
+            margin-bottom: 0.8rem; 
+            letter-spacing: 1px;
+            background: linear-gradient(45deg, #fff, #e0e0ff); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent;
+            white-space: nowrap;
+        }
+
+        .tibetan-subtitle {
+            font-family: var(--tibetan-title-font), 'Noto Sans Tibetan', serif; 
+            font-size: 1.5rem;
+            color: var(--text-light); 
+            margin-bottom: 1.2rem; 
+            opacity: 0.9;
+        }
+
+        .english-subtitle { 
+            font-size: 1rem; 
+            color: var(--text-light); 
+            margin-bottom: 2rem; 
+            opacity: 0.8; 
+            font-style: italic; 
+        }
+
+        .mode-buttons { 
+            display: flex; 
+            gap: 1rem; 
+            flex-wrap: wrap; 
+            justify-content: center; 
+            margin-bottom: 1.5rem; 
+        }
+
+        .mode-button {
+            padding: 0.9rem 2rem; 
+            font-size: 1rem; 
+            font-weight: 500; 
+            border: none;
+            border-radius: 20px; 
+            cursor: pointer; 
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative; 
+            overflow: hidden; 
+            background: rgba(255,255,255,0.15); 
+            color: white;
+            border: 1px solid var(--glass-border); 
+            backdrop-filter: blur(8px); 
+            min-width: 160px;
+        }
+
+        .mode-button:hover { 
+            transform: translateY(-5px) scale(1.03); 
+            box-shadow: 0 15px 30px rgba(0,0,0,0.25); 
+            background: rgba(255,255,255,0.25); 
+        }
+
+        #appContainer { 
+            display: none; 
+            width: 100%; 
+            flex-grow: 1; 
+            opacity: 0; 
+            animation: fadeIn 0.5s ease-out forwards; 
+        }
+
+        @keyframes fadeIn { to { opacity: 1; } }
+        
+        body.app-active #appContainer { display: flex; }
+
+        .sidebar {
+            width: 300px;
+            background: var(--glass-bg); 
+            backdrop-filter: blur(20px); 
+            overflow-y: auto;
+            position: fixed; 
+            height: calc(100vh - 52px);
+            left: 0; 
+            top: 52px;
+            z-index: 100; 
+            border-right: 1px solid var(--glass-border);
+            transition: transform 0.3s ease-out;
+            border-top-right-radius: var(--border-radius-main);
+        }
+
+        .sidebar-header { padding: 1.8rem 1.5rem; }
+        .sidebar-title { font-family: var(--chinese-title-font); }
+        .sidebar-subtitle { font-family: var(--tibetan-title-font); }
+
+        .main-content {
+            flex: 1; 
+            margin-left: 300px;
+            min-height: calc(100vh - 52px);
+            position: relative; 
+            transition: margin-left 0.3s ease-out;
+            padding: 1.5rem;
+        }
+
+        .main-content.no-left-sidebar { margin-left: 0; }
+        .main-content.with-right-sidebar { margin-right: 300px; }
+
+        .utility-sidebar {
+            width: 300px;
+            background: var(--glass-bg); 
+            backdrop-filter: blur(20px); 
+            overflow-y: auto;
+            position: fixed; 
+            height: calc(100vh - 52px);
+            right: 0; 
+            top: 52px;
+            z-index: 100; 
+            border-left: 1px solid var(--glass-border);
+            transition: transform 0.3s ease-out;
+            border-top-left-radius: var(--border-radius-main);
+            transform: translateX(100%);
+        }
+
+        .utility-sidebar.active {
+            transform: translateX(0);
+        }
+
+        .utility-sidebar-header { 
+            padding: 1.8rem 1.5rem; 
+            position: relative;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .utility-sidebar-title { 
+            font-family: var(--chinese-title-font); 
+            margin: 0;
+            color: var(--text-light);
+        }
+
+        .utility-sidebar-content {
+            padding: 1rem;
+        }
+
+        .utility-item {
+            padding: 0.8rem 1rem;
+            margin: 0.3rem 0;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: var(--border-radius-small);
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            color: var(--text-light);
+        }
+
+        .utility-item:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateX(5px);
+        }
+
+        .utility-item-icon {
+            font-size: 1.2rem;
+            width: 1.5rem;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 1300px; 
+            margin: 0 auto;
+        }
+
+        .header { 
+            text-align: center; 
+            margin-bottom: 2.5rem; 
+            color: white; 
+        }
+
+        .header h1 { 
+            font-family: var(--chinese-title-font); 
+            font-size: 2.8rem; 
+        }
+
+        .header .tibetan-subtitle-header { 
+            font-family: var(--tibetan-title-font); 
+            font-size: 1.6rem; 
+            margin-top: -0.5rem; 
+        }
+
+        .search-section { 
+            max-width: 650px; 
+            margin: 0 auto 2.5rem; 
+        }
+
+        .search-container { 
+            position: relative;
+            border-radius: var(--border-radius-small); 
+        }
+
+        .search-input { 
+            width: 100%;
+            padding: 0.8rem 1rem 0.8rem 3rem; 
+            font-size: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius-small);
+            color: var(--text-light);
+        }
+
+        .search-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .search-icon { 
+            position: absolute;
+            left: 1rem; 
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .stats-bar {
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius-main); 
+            padding: 1rem 1.5rem; 
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .view-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .view-btn {
+            padding: 0.6rem 1rem; 
+            font-size: 0.85rem; 
+            border-radius: var(--border-radius-small);
+            border: 1px solid var(--glass-border);
+            background: transparent;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .view-btn:hover,
+        .view-btn.active {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .documents-grid {
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem; 
+            margin-bottom: 2rem;
+        }
+
+        .document-card {
+            background: rgba(30,30,40,0.7);
+            backdrop-filter: blur(15px);
+            border-radius: var(--border-radius-main); 
+            padding: 1.5rem;
+            border: 1px solid var(--glass-border);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .document-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .document-title { 
+            font-size: 1.3rem; 
+            font-family: var(--tibetan-title-font);
+            margin-bottom: 0.5rem;
+        }
+
+        .document-subtitle { 
+            font-size: 1.1rem; 
+            font-family: var(--chinese-title-font);
+            margin-bottom: 0.5rem;
+            color: var(--text-accent);
+        }
+
+        .document-meta { 
+            font-size: 0.85rem;
+            opacity: 0.8;
+            margin-bottom: 1rem;
+        }
+
+        .document-preview { 
+            font-size: 0.9rem; 
+            padding: 0.8rem; 
+            border-radius: var(--border-radius-small);
+            background: rgba(0, 0, 0, 0.2);
+            margin-bottom: 1rem;
+            opacity: 0.9;
+            line-height: 1.5;
+            flex-grow: 1; /* Allow preview to take available space */
+            max-height: 100px; /* Limit preview height */
+            overflow: hidden;
+        }
+        .document-card-actions {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            margin-top: auto; /* Pushes actions to the bottom */
+        }
+
+
+        .btn {
+            padding: 0.7rem 1.5rem; 
+            font-size: 0.9rem; 
+            border-radius: var(--border-radius-small);
+            justify-content: center; 
+            text-align: center;
+            border: 1px solid var(--glass-border);
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-light);
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex; /* Use inline-flex for better alignment if icons are used */
+            align-items: center;
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .admin-only { display: none !important; } 
+        .reader-only { display: none !important; }
+        
+        body.edit-mode .admin-only { display: inline-flex !important; }
+        body.read-mode .reader-only { display: block !important; }
+        body.read-mode .top-nav-btn.reader-only { display: inline-flex !important; }
+
+        .modal { 
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active { display: flex; }
+
+        .modal-content { 
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius-main);
+            padding: 2rem;
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow-y: auto; /* Overall modal scroll if content too tall */
+            position: relative;
+            display: flex;
+            flex-direction: column; /* Stack header, switcher, content, meta */
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            color: var(--text-light);
+            font-size: 1.5rem;
+            cursor: pointer;
+            z-index: 10; /* Ensure close button is above other modal content */
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(0, 0, 0, 0.2);
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .social-links {
+            margin-bottom: 1rem;
+        }
+
+        .social-links a {
+            color: var(--text-light);
+            text-decoration: none;
+            margin: 0 1rem;
+            padding: 0.5rem;
+            border-radius: var(--border-radius-small);
+            transition: background 0.2s;
+        }
+
+        .social-links a:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Language Switcher Styles */
+        .language-switcher-modal {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        .language-switcher-modal button {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            border-radius: var(--border-radius-small);
+            border: 1px solid var(--glass-border);
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-light);
+            cursor: pointer;
+        }
+        .language-switcher-modal button:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .language-switcher-modal button.active {
+            background: var(--text-accent);
+            color: #333;
+            font-weight: bold;
+            border-color: var(--text-accent);
+        }
+
+        /* Modal Content Styles */
+        #modalHeaderContent { margin-bottom: 1rem; }
+        .modal-document-title-zh { font-family: var(--chinese-title-font); margin-bottom: 0.2rem; font-size: 1.8rem; }
+        .modal-document-title-bo { font-family: var(--tibetan-title-font); margin-bottom: 0.2rem; opacity: 0.9; font-size: 1.4rem;}
+        .modal-document-title-en { font-style: italic; margin-bottom: 0.5rem; opacity: 0.8; font-size: 1rem; } /* Reduced margin */
+        
+        .language-content-container {
+            line-height: 1.8; 
+            font-size: 1rem;
+            flex-grow: 1; /* Allows this container to take up available vertical space */
+            overflow-y: auto; /* Scroll only this part if content overflows */
+            min-height: 100px; /* Ensure it has some height even if content is short */
+        }
+        .language-content { margin-bottom: 1.5rem; }
+        .language-content h4 { /* Sub-heading for language section */
+            font-family: var(--chinese-title-font);
+            margin-bottom: 0.5rem;
+            color: var(--text-accent);
+            font-size: 1.2rem;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            padding-bottom: 0.3rem;
+        }
+        .tibetan-text { font-family: 'Noto Sans Tibetan', serif; }
+        .chinese-text { font-family: 'Noto Serif TC', serif; }
+        .english-text { font-family: 'Inter', sans-serif; }
+        
+        #modalLanguageSeparator, #modalLanguageSeparator2 {
+            border: 0;
+            height: 1px;
+            background: var(--glass-border);
+            margin: 1.5rem 0;
+        }
+        #modalMetaContent {
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--glass-border);
+            font-size: 0.9em;
+            opacity: 0.8;
+            flex-shrink: 0; /* Prevent meta from shrinking too much */
+        }
+
+
+        @media (max-width: 768px) {
+            body { padding-top: 48px; }
+            .top-nav { height: auto; padding: 6px 10px; flex-wrap: wrap; }
+            .nav-left { gap: 5px; margin-bottom: 5px; width: 100%; justify-content: center;}
+            .nav-right { width: 100%; justify-content: center; }
+            .nav-item, .top-nav-btn { font-size: 13px; padding: 5px 8px; }
+            .sidebar { width: 260px; height: calc(100vh - 48px); top: 48px; }
+            .main-content { margin-left: 0; padding: 1rem; }
+            body.app-active .main-content.sidebar-open { margin-left: 260px; }
+            .main-title { font-size: 2.2rem; white-space: normal; }
+            .mode-selector-content { padding: 2rem 1.5rem; }
+            .documents-grid { grid-template-columns: 1fr; }
+            .modal-content { max-width: 95vw; max-height: 95vh; padding: 1.5rem; }
+            .main-title { font-size: 2.5rem; } /* Adjusted for smaller screens */
+            .tibetan-subtitle { font-size: 1.3rem; }
+            .english-subtitle { font-size: 0.9rem; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <nav class="top-nav">
+        <div class="nav-left" id="navLeftLinks">
+            <a href="javascript:void(0)" class="nav-item" onclick="showModeSelectorScreen()">回首頁</a>
+            <a href="javascript:void(0)" class="nav-item" onclick="showInfo('關於我們')">關於我們</a>
+            <a href="javascript:void(0)" class="nav-item" onclick="showInfo('編者的話')">編者的話</a>
+            <a href="javascript:void(0)" class="nav-item" onclick="showInfo('參考資源')">參考資源</a>
+        </div>
+        <div class="nav-right" id="navRightControls">
+            <button class="top-nav-btn" onclick="showTools()">🛠️ 工具</button>
+            <button class="top-nav-btn" onclick="enterMode('edit')">登入</button>
+        </div>
+    </nav>
+
+    <div id="modeSelectorScreen">
+        <div class="mode-selector-content">
+            <h1 class="main-title">才旺諾布全集閱讀系統</h1>
+            <p class="tibetan-subtitle">༄༅། །ཚེ་དབང་ནོར་བུའི་གསུང་འབུམ་ཀློག་སྟེགས།</p>
+            <p class="english-subtitle">Tsewang Norbu Complete Works Reading System</p>
+            <div class="mode-buttons">
+                <button class="mode-button" onclick="enterMode('read')">📖 進入閱讀系統</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="appContainer">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2 class="sidebar-title">課程目錄</h2>
+                <p class="sidebar-subtitle">སློབ་ཚན་གྱི་དཀར་ཆག</p>
+            </div>
+            <nav class="course-menu" id="courseMenuContainer">
+                <div style="padding: 1rem; color: var(--text-light); opacity: 0.8;">
+                    載入中...
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content" id="mainContentArea">
+            <div class="container">
+                <header class="header">
+                    <h1>才旺諾布全集閱讀系統</h1>
+                    <p class="tibetan-subtitle-header">ཚེ་དབང་ནོར་བུའི་གསུང་འབུམ་ཀློག་སྟེགས།</p>
+                    <p>Tsewang Norbu Complete Works Reading System</p>
+                </header>
+                
+                <div class="search-section">
+                    <div class="search-container">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" class="search-input" placeholder="搜尋文獻標題、內容或作者..." id="searchInputEl">
+                    </div>
+                </div>
+                
+                <div class="stats-bar">
+                    <div class="view-controls">
+                        <button class="view-btn active" id="gridViewBtn">📇 卡片檢視</button>
+                        <button class="view-btn" id="listViewBtn">📋 清單檢視</button>
+                    </div>
+                    <div style="font-size: 0.9rem; opacity: 0.9;">總計 <strong id="totalCountEl">0</strong> 部文獻</div>
+                </div>
+                
+                <div class="documents-grid" id="documentsGridEl">
+                    <!-- Document cards will be rendered here -->
+                </div>
+            </div>
+        </main>
+
+        <aside class="utility-sidebar" id="utilitySidebarEl" style="display: none;">
+            <div class="utility-sidebar-header">
+                <h3 class="utility-sidebar-title">工具選單</h3>
+                <button class="modal-close" onclick="toggleUtilitySidebar()" style="position: absolute; top: 1rem; right: 1rem;">×</button>
+            </div>
+            <div class="utility-sidebar-content">
+                <div class="utility-item" onclick="showFavorites()">
+                    <span class="utility-item-icon">♥</span> 已收藏文章
+                </div>
+                <div id="favoritesListContainerEl" style="display:none; padding: 1rem;">
+                    <p>暫無收藏。</p>
+                </div>
+                <div class="utility-item" onclick="showUtilityModal('reportErrorModal', '回報錯字')">
+                    <span class="utility-item-icon">✉︎</span> 回報錯字
+                </div>
+                <div class="utility-item" onclick="showUtilityModal('donateModal', '護持贊助')">
+                    <span class="utility-item-icon">💰</span> 護持贊助
+                </div>
+                <div class="utility-item" onclick="contactSupport()">
+                    <span class="utility-item-icon">✆</span> 聯繫客服
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Document Modal -->
+    <div class="modal" id="documentModal">
+        <div class="modal-content" style="max-width: 800px;">
+            <button class="modal-close" onclick="closeModal('documentModal')">×</button>
+            
+            <div id="modalHeaderContent">
+                <h2 class="modal-document-title-zh">載入中...</h2>
+                <p class="modal-document-title-bo"></p>
+                <p class="modal-document-title-en"></p>
+            </div>
+
+            <div class="language-switcher-modal" id="languageSwitcherModal">
+                <!-- Language buttons will be injected here -->
+            </div>
+
+            <div class="language-content-container">
+                <div id="modalTibetanContentEl" class="language-content tibetan-text" style="display:none;"></div>
+                <hr id="modalLanguageSeparator" style="display:none;">
+                <div id="modalChineseContentEl" class="language-content chinese-text" style="display:none;"></div>
+                <hr id="modalLanguageSeparator2" style="display:none;"> 
+                <div id="modalEnglishContentEl" class="language-content english-text" style="display:none;"></div>
+            </div>
+            
+            <div id="modalMetaContent">
+                <!-- Meta info like author, category will be injected here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Login Modal -->
+    <div class="modal" id="adminLoginModal">
+        <div class="modal-content" style="max-width: 400px;">
+            <button class="modal-close" onclick="closeModal('adminLoginModal')">×</button>
+            <h2 style="margin-bottom: 1.5rem; text-align: center;">管理員登入</h2>
+            <form id="adminLoginForm">
+                <div style="margin-bottom: 1rem;">
+                    <label for="adminUsername" style="display: block; margin-bottom: 0.5rem;">用戶名：</label>
+                    <input type="text" id="adminUsername" required style="width: 100%; padding: 0.8rem; border-radius: var(--border-radius-small); border: 1px solid var(--glass-border); background: rgba(255,255,255,0.1); color: var(--text-light);">
+                </div>
+                <div style="margin-bottom: 1.5rem;">
+                    <label for="adminPassword" style="display: block; margin-bottom: 0.5rem;">密碼：</label>
+                    <input type="password" id="adminPassword" required style="width: 100%; padding: 0.8rem; border-radius: var(--border-radius-small); border: 1px solid var(--glass-border); background: rgba(255,255,255,0.1); color: var(--text-light);">
+                </div>
+                <button type="submit" class="btn" style="width: 100%;">登入</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="messageArea" style="position: fixed; top: 70px; right: 20px; z-index: 3000;"></div>
+
+    <footer>
+        <div class="social-links">
+            <a href="https://www.facebook.com/rigzinchenpoassociation/?locale=zh_TW" target="_blank" title="Facebook">FB</a>
+            <a href="http://www.rigzin-chenpo.org/index2.html" target="_blank" title="Website">🌐</a>
+        </div>
+        <div class="copyright">噶陀仁珍千寶 © 2025 才旺諾布全集 All Rights Reserved</div>
+    </footer>
+
+    <script>
+        // --- Global Variables ---
+        let currentMode = ''; // 'read', 'edit'
+        let isAdminLoggedIn = false;
+        let currentOpenDocId = null; // To keep track of the currently open document in modal
+
+        // Sample data - in a real app, this would come from a backend/JSON file
+        let documentsData = [
+            {
+                id: "history_005",
+                tibetanTitle: "༄༅། །བུ་སྟོན་ཁ་ཆེས་མཛད་པའི་ཆོས་འབྱུང་རིན་པོ་ཆེའི་མཛོད།",
+                chineseTitle: "布敦大師所撰佛法源流寶藏錄",
+                englishTitle: "The Treasury of Religious History by Buton Rinchen Drub",
+                author: "才旺諾布 (節錄)",
+                category: "歷史",
+                tags: ["佛法源流", "布敦大師", "Buton", "西藏王統"],
+                ContentTibetan: "<p class='tibetan-text'>༄༅། །བུ་སྟོན་ཁ་ཆེས་མཛད་པའི་ཆོས་འབྱུང་རིན་པོ་ཆེའི་མཛོད་ལས། ག་པ་འཛིན་པ་ཚེ་དབང་ནོར་བུས་ཉེ་བར་བཏུས་པ་བཞུགས་སོ། །ཨོཾ་སྭ་སྟི། བདག་ཅག་རྣམས་ཀྱི་སྟོན་པ་ཡང་དག་པར་རྫོགས་པའི་སངས་རྒྱས་དེ་བཞིན་གཤེགས་པ་དགྲ་བཅོམ་པ་མངོན་པར་ཤེས་པའི་ཤཱཀྱའི་རྒྱལ་པོ་དེ་ལ་ཕྱག་འཚལ་ལོ། །རྒྱ་གར་འཕགས་པའི་ཡུལ་དུ་རྒྱལ་བའི་བསྟན་པ་རིན་པོ་ཆེ་ཇི་ལྟར་དར་ཚུལ་ནི། སྟོན་པ་ཐུགས་རྗེ་ཅན་དེས་དང་པོར་བྱང་ཆུབ་ཏུ་ཐུགས་བསྐྱེད། བར་དུ་བསྐལ་ཆེན་གྲངས་མེད་གསུམ་དུ་ཚོགས་བསགས། ཐ་མར་མངོན་པར་རྫོགས་པར་སངས་རྒྱས་ནས། དམ་པའི་ཆོས་ཀྱི་འཁོར་ལོ་རིམ་པ་གསུམ་དུ་བསྐོར་ཏེ། ལྷ་དང་མི་ལ་སོགས་པའི་གདུལ་བྱ་རྣམས་སྨིན་གྲོལ་གྱི་ལམ་ལ་བཀོད་ནས། མཐར་གྱིས་སྐུ་མྱ་ངན་ལས་འདས་པའི་ཚུལ་བསྟན་ཏོ།།</p>",
+                ContentChinese: "<p class='chinese-text'>嗡娑帝！頂禮我等導師、真實圓滿正覺、如來、應供、正遍知釋迦王！於印度聖境，佛陀珍貴教法弘傳之方式為：大悲導師最初發菩提心，中集三大阿僧祇劫資糧，最終現證圓滿佛果後，三轉妙法輪，將天人等所化眾生安置於成熟解脫之道，最後示現涅槃。</p><p class='chinese-text'>竊聞西藏王統之始末，據布敦仁欽竹大師所著《佛法源流寶藏》云：天竺國王色堅心王之子，具相好者，降生於雪域天幕之巔，後至贊塘四門，是為聶赤贊普。其後有天王七代，末代斯日贊普時，有本教師贊米波且者...</p>",
+                ContentEnglish: "<p class='english-text'>Om Svasti! Homage to our Teacher, the truly and completely Awakened One, the Tathagata, the Arhat, the Perfectly Omniscient King of the Shakyas! In the noble land of India, the way the precious teaching of the Buddha spread is as follows: The compassionate Teacher first generated bodhicitta, then accumulated merit for three countless great eons, and finally, having manifestly and completely awakened to buddhahood, he turned the wheel of the sublime Dharma three times, placing gods, humans, and other disciples on the path of ripening and liberation, and finally demonstrated the state of passing into parinirvana.</p><p class='english-text'>Regarding the history of the Tibetan royal lineage, according to Buton Rinchen Drub's 'Treasury of Religious History': A son of the Indian King Salsem, endowed with auspicious marks, was born at the peak of the celestial canopy of the snowy land. He later arrived at the four gates of Zangthang and became Nyatri Tsenpo. Following him were seven celestial kings. During the time of the last of these, Siri Tsenpo, there was a Bon teacher named Tsenmi Poche...</p>",
+                availableLanguages: ["bo", "zh", "en"],
+                status: "published",
+                meta: { "preview": "從布敦仁欽竹大師的《佛法源流寶藏》中節錄，講述西藏王統的歷史源流..." }
+            },
+            {
+                id: "prayer_001_dkr",
+                tibetanTitle: "༧དཔལ་༧སྐྱབས་རྗེ་དིལ་མགོ་མཁྱེན་བརྩེ་རིན་པོ་ཆེའི་གཏེར་ཆོས་དར་ཞིང་རྒྱས་པའི་གསོལ་འདེབས།",
+                chineseTitle: "頂果欽哲仁波切伏藏法弘揚祈願文",
+                englishTitle: "Prayer for the Spread of Dilgo Khyentse Rinpoche's Termas",
+                author: "珠席仁波切 (Trulshik Rinpoche)",
+                category: "祈請文",
+                tags: ["祈請", "頂果欽哲仁波切", "伏藏"],
+                ContentTibetan: "<p class='tibetan-text'>༄༅། །ཨེ་མ་ཧོ༔ བདེ་གཤེགས་བསྟན་པའི་སྙིང་པོ་ཀུན་འདུས་དཔལ༔<br>མཁྱེན་བརྩེ་ནུས་པའི་གཏེར་ཆེན་བརྙེས་པའི་མགོན༔<br>འོད་གསལ་རྡོ་རྗེ་སྙིང་པོའི་བསྟན་པ་འདི༔<br>ཕྱོགས་དུས་ཀུན་ཏུ་དར་རྒྱས་འབར་གྱུར་ཅིག༔</p>",
+                ContentChinese: "<p class='chinese-text'>噯瑪吙！善逝教法心要總集德，<br>智悲力之大藏尋獲怙，<br>哦瑟多傑寧波此教法，<br>祈願普皆弘盛燃十方。</p>",
+                ContentEnglish: "", // No English content for this one
+                availableLanguages: ["bo", "zh"],
+                status: "published",
+                meta: { "preview": "噯瑪吙！善逝教法心要總集德，智悲力之大藏尋獲怙..." }
+            }
+        ];
+
+        // --- Mode Management Functions ---
+        function enterMode(mode) {
+            console.log('Entering mode:', mode);
+            currentMode = mode;
+            
+            if (mode === 'edit') {
+                if (!isAdminLoggedIn) {
+                    showModal('adminLoginModal');
+                    return; // Don't proceed further if login is required but not done
+                }
+                setupEditMode();
+            } else { // 'read' mode
+                setupReadMode();
+            }
+            
+            // Common actions for entering any app mode (read or edit after login)
+            document.getElementById('modeSelectorScreen').style.display = 'none';
+            document.getElementById('appContainer').style.display = 'flex';
+            document.body.classList.add('app-active');
+            
+            document.body.classList.remove('read-mode', 'edit-mode'); // Clear previous mode classes
+            document.body.classList.add(mode + '-mode'); // Add current mode class
+
+            updateNavControls();
+            loadContent(); // Load/reload content based on the new mode
+        }
+
+        function showModeSelectorScreen() {
+            currentMode = '';
+            isAdminLoggedIn = false; // Log out if returning to mode selector
+            document.getElementById('modeSelectorScreen').style.display = 'flex';
+            document.getElementById('appContainer').style.display = 'none';
+            document.body.classList.remove('app-active', 'read-mode', 'edit-mode');
+            updateNavControls(); // Reset nav controls to default (login button)
+        }
+
+        function setupReadMode() {
+            document.getElementById('mainContentArea').classList.remove('no-left-sidebar', 'with-right-sidebar');
+            if (document.getElementById('sidebar').style.transform !== 'translateX(0px)') {
+                 document.getElementById('mainContentArea').classList.add('no-left-sidebar');
+            }
+            // Ensure admin-only elements are hidden if switching from edit mode
+            document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
+        }
+
+        function setupEditMode() {
+            // Assuming sidebar is always shown in edit mode, or handle its state
+            document.getElementById('mainContentArea').classList.remove('no-left-sidebar', 'with-right-sidebar');
+            if (document.getElementById('sidebar').style.transform !== 'translateX(0px)') {
+                 document.getElementById('mainContentArea').classList.add('no-left-sidebar');
+            }
+            // Ensure admin-only elements are visible
+            document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'inline-flex');
+        }
+
+        // --- Navigation Functions ---
+        function updateNavControls() {
+            const navRight = document.getElementById('navRightControls');
+            navRight.innerHTML = ''; // Clear current controls
+
+            if (currentMode === 'edit' && isAdminLoggedIn) {
+                navRight.innerHTML = `
+                    <button class="top-nav-btn admin-only" onclick="addNewDocument()">✨ 新增</button>
+                    <div style="color:var(--text-light); display:flex; align-items:center; gap:0.3rem; font-size:13px;" class="admin-only">
+                        <span>管理員</span>
+                        <div style="width:18px; height:18px; background:var(--text-accent); border-radius:50%; text-align:center; line-height:18px; font-weight:bold; font-size:11px;">A</div>
+                    </div>
+                    <button class="top-nav-btn admin-only" onclick="adminLogout()">登出</button>`;
+            } else if (currentMode === 'read') {
+                navRight.innerHTML = `
+                    <button class="top-nav-btn reader-only" onclick="showTools()">🛠️ 工具</button>
+                    <button class="top-nav-btn" onclick="enterMode('edit')">登入</button> 
+                `; // Keep login button for read mode
+            } else { // Initial state or after logout from mode selector
+                navRight.innerHTML = `
+                    <button class="top-nav-btn" onclick="showTools()">🛠️ 工具</button>
+                    <button class="top-nav-btn" onclick="enterMode('edit')">登入</button>`;
+            }
+             // Ensure correct display based on mode classes
+            document.querySelectorAll('.admin-only').forEach(el => el.style.display = (currentMode === 'edit' && isAdminLoggedIn) ? 'inline-flex' : 'none');
+            document.querySelectorAll('.reader-only').forEach(el => el.style.display = (currentMode === 'read') ? (el.tagName === 'BUTTON' ? 'inline-flex' : 'block') : 'none');
+
+        }
+
+        // --- Modal Functions ---
+        function showModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) modal.classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) modal.classList.remove('active');
+            if (modalId === 'documentModal') {
+                currentOpenDocId = null; // Reset when closing document modal
+            }
+        }
+
+        // --- Admin Functions ---
+        function adminLogout() {
+            isAdminLoggedIn = false;
+            showMessage('已登出管理員模式', 'info');
+            // Decide where to go after logout. Option 1: Back to mode selector. Option 2: Switch to read mode.
+            // Let's go to read mode for now, as it's less disruptive if user was viewing content.
+            currentMode = 'read';
+            document.body.classList.remove('edit-mode');
+            document.body.classList.add('read-mode');
+            setupReadMode(); // Apply read mode UI
+            updateNavControls(); // Update nav to show login button again
+            renderDocuments(); // Re-render to hide edit/delete buttons on cards
+        }
+
+        function addNewDocument() {
+            // This is a placeholder. In a real app, you'd show a form to input new document details.
+            const newDoc = {
+                id: "new_" + Date.now(),
+                tibetanTitle: "新文檔標題 (藏)",
+                chineseTitle: "新增的測試文檔 (中)",
+                englishTitle: "New Test Document (En)",
+                author: "管理員",
+                category: "測試",
+                tags: ["新增", "測試"],
+                ContentTibetan: "<p class='tibetan-text'>請在此輸入藏文內容...</p>",
+                ContentChinese: "<p class='chinese-text'>請在此輸入中文內容...</p>",
+                ContentEnglish: "<p class='english-text'>Please enter English content here...</p>",
+                availableLanguages: ["bo", "zh", "en"], // Default to all, can be edited
+                status: "draft", // Default status
+                meta: { "preview": "新文檔預覽將在此自動生成或手動輸入..." }
+            };
+            
+            documentsData.unshift(newDoc); // Add to the beginning of the array
+            renderDocuments();
+            renderSidebar();
+            showMessage('新文檔草稿已建立 (範例)', 'success');
+            openDocument(newDoc.id); // Optionally open the new document for immediate editing (if editor implemented)
+            // Or, just highlight it in the list
+        }
+
+        // --- Content Functions ---
+        function loadContent() {
+            // In a real app, this might fetch data if not already loaded
+            renderDocuments();
+            renderSidebar();
+        }
+
+        function renderDocuments(docsToRender = documentsData) {
+            const gridEl = document.getElementById('documentsGridEl');
+            const totalEl = document.getElementById('totalCountEl');
+            
+            if (!docsToRender || docsToRender.length === 0) {
+                gridEl.innerHTML = `<div style="text-align: center; padding: 2rem; color: var(--text-light); opacity: 0.8;">${currentMode === 'edit' && isAdminLoggedIn ? '點擊上方 "✨ 新增" 來建立第一份文獻' : '暫無文獻資料'}</div>`;
+                totalEl.textContent = '0';
+                return;
+            }
+
+            totalEl.textContent = docsToRender.length;
+            
+            gridEl.innerHTML = docsToRender.map(doc => `
+                <div class="document-card" onclick="openDocument('${doc.id}')">
+                    <h3 class="document-title">${doc.tibetanTitle || '無藏文標題'}</h3>
+                    <h4 class="document-subtitle">${doc.chineseTitle || '無中文標題'}</h4>
+                    <div class="document-meta">作者：${doc.author || '未知'} | 類別：${doc.category || '未分類'}</div>
+                    <div class="document-preview">${doc.meta?.preview || (doc.ContentChinese || doc.ContentTibetan || '').substring(0, 100).replace(/<[^>]+>/g, '')}...</div>
+                    <div class="document-card-actions">
+                        <a href="javascript:void(0)" class="btn" onclick="event.stopPropagation(); openDocument('${doc.id}');">閱讀全文</a>
+                        <button class="btn admin-only" onclick="event.stopPropagation(); editDocument('${doc.id}');" style="background: rgba(255, 215, 0, 0.2); border-color: var(--text-accent);">✏️ 編輯</button>
+                        <button class="btn admin-only" onclick="event.stopPropagation(); deleteDocument('${doc.id}');" style="background: rgba(220, 53, 69, 0.2); border-color: #dc3545;">🗑️ 刪除</button>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Explicitly set visibility of admin buttons after rendering
+            document.querySelectorAll('.document-card .admin-only').forEach(el => {
+                el.style.display = (currentMode === 'edit' && isAdminLoggedIn) ? 'inline-flex' : 'none';
+            });
+        }
+
+
+        function renderSidebar() {
+            const sidebarEl = document.getElementById('courseMenuContainer');
+            
+            if (!documentsData || documentsData.length === 0) {
+                sidebarEl.innerHTML = '<div style="padding: 1rem; color: var(--text-light); opacity: 0.8;">暫無目錄</div>';
+                return;
+            }
+
+            // Group by category
+            const categories = {};
+            documentsData.forEach(doc => {
+                const cat = doc.category || '未分類';
+                if (!categories[cat]) categories[cat] = [];
+                categories[cat].push(doc);
+            });
+
+            sidebarEl.innerHTML = Object.entries(categories).map(([category, docs]) => {
+                // Create a more robust ID for the category element
+                const categoryId = `category-list-${category.replace(/[^a-zA-Z0-9\-_]/g, '')}`;
+                return `
+                <div style="margin-bottom: 1rem;">
+                    <h4 style="padding: 0.8rem 1rem; background: rgba(255,255,255,0.1); margin: 0; cursor: pointer; border-radius: var(--border-radius-small);" onclick="toggleCategory('${categoryId}')">
+                        ${category} (${docs.length})
+                    </h4>
+                    <div id="${categoryId}" style="padding-left: 1rem; display: block;"> <!-- Default to block or load state -->
+                        ${docs.map(doc => `
+                            <div style="padding: 0.5rem 1rem; cursor: pointer; border-radius: var(--border-radius-small); margin: 0.2rem 0; display: flex; justify-content: space-between; align-items: center;" 
+                                 onclick="openDocument('${doc.id}')" 
+                                 onmouseover="this.style.background='rgba(255,255,255,0.1)'" 
+                                 onmouseout="this.style.background='transparent'">
+                                <span style="flex-grow: 1;">${doc.chineseTitle || doc.tibetanTitle || '無標題'}</span>
+                                <span style="font-size:0.75em; opacity:0.6; margin-left: 8px; white-space: nowrap;">[${doc.availableLanguages.join(',')}]</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `}).join('');
+        }
+
+        function toggleCategory(categoryId) {
+            const categoryEl = document.getElementById(categoryId);
+            if (categoryEl) {
+                categoryEl.style.display = categoryEl.style.display === 'none' ? 'block' : 'none';
+            }
+        }
+        
+        function updateLanguageSwitcher(availableLangs, docId) {
+            const switcherEl = document.getElementById('languageSwitcherModal');
+            switcherEl.innerHTML = ''; // Clear existing buttons
+
+            const langMap = { bo: '藏文', zh: '中文', en: 'English' };
+            const hasContent = (lang) => {
+                const doc = documentsData.find(d => d.id === docId);
+                if (!doc) return false;
+                if (lang === 'bo') return doc.ContentTibetan && doc.ContentTibetan.replace(/<[^>]+>|\s+/g, '') !== '';
+                if (lang === 'zh') return doc.ContentChinese && doc.ContentChinese.replace(/<[^>]+>|\s+/g, '') !== '';
+                if (lang === 'en') return doc.ContentEnglish && doc.ContentEnglish.replace(/<[^>]+>|\s+/g, '') !== '';
+                return false;
+            };
+            
+            availableLangs.forEach(lang => {
+                if (langMap[lang] && hasContent(lang)) { // Only show button if content exists
+                    const btn = document.createElement('button');
+                    btn.textContent = langMap[lang];
+                    btn.onclick = () => showLanguage(docId, lang);
+                    btn.dataset.langCode = lang;
+                    switcherEl.appendChild(btn);
+                }
+            });
+
+            // Add combination buttons if applicable and both have content
+            if (availableLangs.includes('bo') && availableLangs.includes('zh') && hasContent('bo') && hasContent('zh')) {
+                const btn = document.createElement('button');
+                btn.textContent = '藏中對照';
+                btn.onclick = () => showLanguage(docId, 'bo-zh');
+                btn.dataset.langCode = 'bo-zh';
+                switcherEl.appendChild(btn);
+            }
+            if (availableLangs.includes('bo') && availableLangs.includes('en') && hasContent('bo') && hasContent('en')) {
+                const btn = document.createElement('button');
+                btn.textContent = '藏英對照';
+                btn.onclick = () => showLanguage(docId, 'bo-en');
+                btn.dataset.langCode = 'bo-en';
+                switcherEl.appendChild(btn);
+            }
+            if (availableLangs.includes('zh') && availableLangs.includes('en') && hasContent('zh') && hasContent('en')) {
+                const btn = document.createElement('button');
+                btn.textContent = '中英對照';
+                btn.onclick = () => showLanguage(docId, 'zh-en');
+                btn.dataset.langCode = 'zh-en';
+                switcherEl.appendChild(btn);
+            }
+            if (switcherEl.children.length === 0) {
+                switcherEl.innerHTML = '<p style="opacity: 0.7;">此文獻暫無內容可供顯示。</p>';
+            }
+        }
+
+        function showLanguage(docId, langCode) {
+            const doc = documentsData.find(d => d.id === docId);
+            if (!doc) return;
+
+            const tibetanDiv = document.getElementById('modalTibetanContentEl');
+            const chineseDiv = document.getElementById('modalChineseContentEl');
+            const englishDiv = document.getElementById('modalEnglishContentEl');
+            const separator = document.getElementById('modalLanguageSeparator');
+            const separator2 = document.getElementById('modalLanguageSeparator2');
+
+            [tibetanDiv, chineseDiv, englishDiv].forEach(div => div.style.display = 'none');
+            [separator, separator2].forEach(sep => sep.style.display = 'none');
+
+            const switcherEl = document.getElementById('languageSwitcherModal');
+            switcherEl.querySelectorAll('button').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.langCode === langCode) btn.classList.add('active');
+            });
+            
+            const hasTibetan = doc.ContentTibetan && doc.ContentTibetan.replace(/<[^>]+>|\s+/g, '') !== '';
+            const hasChinese = doc.ContentChinese && doc.ContentChinese.replace(/<[^>]+>|\s+/g, '') !== '';
+            const hasEnglish = doc.ContentEnglish && doc.ContentEnglish.replace(/<[^>]+>|\s+/g, '') !== '';
+
+            if (langCode === 'bo' && hasTibetan) tibetanDiv.style.display = 'block';
+            else if (langCode === 'zh' && hasChinese) chineseDiv.style.display = 'block';
+            else if (langCode === 'en' && hasEnglish) englishDiv.style.display = 'block';
+            else if (langCode === 'bo-zh') {
+                if (hasTibetan) tibetanDiv.style.display = 'block';
+                if (hasTibetan && hasChinese) separator.style.display = 'block';
+                if (hasChinese) chineseDiv.style.display = 'block';
+            } else if (langCode === 'bo-en') {
+                if (hasTibetan) tibetanDiv.style.display = 'block';
+                if (hasTibetan && hasEnglish) separator.style.display = 'block';
+                if (hasEnglish) englishDiv.style.display = 'block';
+            } else if (langCode === 'zh-en') {
+                if (hasChinese) chineseDiv.style.display = 'block';
+                if (hasChinese && hasEnglish) separator.style.display = 'block'; // Assuming Chinese content comes first in this combo
+                if (hasEnglish) englishDiv.style.display = 'block';
+            }
+        }
+
+
+        function openDocument(docId) {
+            const doc = documentsData.find(d => d.id === docId);
+            if (!doc) {
+                showMessage('找不到該文件', 'error');
+                return;
+            }
+            currentOpenDocId = docId;
+
+            document.querySelector('#modalHeaderContent .modal-document-title-zh').textContent = doc.chineseTitle || '';
+            document.querySelector('#modalHeaderContent .modal-document-title-bo').textContent = doc.tibetanTitle || '';
+            document.querySelector('#modalHeaderContent .modal-document-title-en').textContent = doc.englishTitle || '';
+            
+            const tibetanDiv = document.getElementById('modalTibetanContentEl');
+            const chineseDiv = document.getElementById('modalChineseContentEl');
+            const englishDiv = document.getElementById('modalEnglishContentEl');
+            const hasTibetan = doc.ContentTibetan && doc.ContentTibetan.replace(/<[^>]+>|\s+/g, '') !== '';
+            const hasChinese = doc.ContentChinese && doc.ContentChinese.replace(/<[^>]+>|\s+/g, '') !== '';
+            const hasEnglish = doc.ContentEnglish && doc.ContentEnglish.replace(/<[^>]+>|\s+/g, '') !== '';
+
+            tibetanDiv.innerHTML = hasTibetan ? `<h4>藏文原文</h4>${doc.ContentTibetan}` : `<h4>藏文原文</h4><p style="opacity:0.7;">暫無藏文內容</p>`;
+            chineseDiv.innerHTML = hasChinese ? `<h4>中文翻譯</h4>${doc.ContentChinese}` : `<h4>中文翻譯</h4><p style="opacity:0.7;">暫無中文內容</p>`;
+            englishDiv.innerHTML = hasEnglish ? `<h4>English Translation</h4>${doc.ContentEnglish}` : `<h4>English Translation</h4><p style="opacity:0.7;">No English content available.</p>`;
+            
+            document.getElementById('modalMetaContent').innerHTML = `
+                <strong>作者：</strong>${doc.author || '未知'} | 
+                <strong>類別：</strong>${doc.category || '未分類'}
+                ${doc.tags ? ` | <strong>標籤：</strong>${doc.tags.join(', ')}` : ''}
+            `;
+            
+            updateLanguageSwitcher(doc.availableLanguages, docId);
+
+            // Determine initial language display
+            let initialLangCode = '';
+            if (hasTibetan && hasChinese) initialLangCode = 'bo-zh';
+            else if (hasTibetan) initialLangCode = 'bo';
+            else if (hasChinese) initialLangCode = 'zh';
+            else if (hasEnglish) initialLangCode = 'en';
+            // Add more fallbacks if needed, e.g., bo-en, zh-en
+
+            if (initialLangCode && doc.availableLanguages.some(lang => initialLangCode.includes(lang))) {
+                 showLanguage(docId, initialLangCode);
+            } else if (switcherEl.children.length > 0 && switcherEl.children[0].dataset) { // Fallback to first available button if initial logic fails
+                 showLanguage(docId, switcherEl.children[0].dataset.langCode);
+            } else {
+                // If no content and no buttons, all will remain hidden by showLanguage logic
+                // or updateLanguageSwitcher might show "no content" message.
+            }
+            
+            showModal('documentModal');
+        }
+
+
+        // --- Utility Functions ---
+        function showMessage(text, type = 'info') {
+            const messageArea = document.getElementById('messageArea');
+            const messageEl = document.createElement('div');
+            messageEl.style.cssText = `
+                background: ${type === 'error' ? 'rgba(220, 53, 69, 0.9)' : type === 'success' ? 'rgba(40, 167, 69, 0.9)' : 'rgba(23, 162, 184, 0.9)'};
+                color: white;
+                padding: 1rem 1.5rem;
+                border-radius: var(--border-radius-small);
+                margin-bottom: 0.5rem;
+                backdrop-filter: blur(10px);
+                animation: slideInRight 0.3s ease-out;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            `;
+            messageEl.textContent = text;
+            
+            messageArea.appendChild(messageEl);
+            
+            setTimeout(() => {
+                messageEl.style.animation = 'slideOutRight 0.3s ease-out forwards';
+                setTimeout(() => { if (messageArea.contains(messageEl)) messageArea.removeChild(messageEl); }, 300);
+            }, 3000);
+        }
+
+        function showInfo(title) {
+            showMessage(`${title} 功能開發中...`, 'info');
+        }
+
+        function showTools() {
+            toggleUtilitySidebar();
+        }
+
+        function toggleUtilitySidebar() {
+            const sidebar = document.getElementById('utilitySidebarEl');
+            const mainContent = document.getElementById('mainContentArea');
+            
+            if (sidebar.classList.contains('active')) {
+                sidebar.classList.remove('active');
+                mainContent.classList.remove('with-right-sidebar');
+                sidebar.style.display = 'none'; // Hide after transition
+            } else {
+                sidebar.style.display = 'block'; // Show before transition for smooth animation
+                setTimeout(() => { // Timeout to allow display:block to take effect before transform
+                    sidebar.classList.add('active');
+                    mainContent.classList.add('with-right-sidebar');
+                }, 10);
+            }
+        }
+
+        function showFavorites() {
+            const favContainer = document.getElementById('favoritesListContainerEl');
+            if (favContainer.style.display === 'none') {
+                favContainer.style.display = 'block';
+                // In a real app, you'd fetch and display favorites here
+                showMessage('收藏列表功能開發中...', 'info');
+            } else {
+                favContainer.style.display = 'none';
+            }
+        }
+
+        function showUtilityModal(modalType, title) {
+            // This could be used to open specific modals for reportError, donate, etc.
+            // For now, just a message.
+            showMessage(`${title} 功能開發中...`, 'info');
+        }
+
+        function contactSupport() {
+            showMessage('聯繫客服功能開發中...', 'info');
+        }
+
+        function editDocument(docId) {
+            const doc = documentsData.find(d => d.id === docId);
+            if (!doc) {
+                showMessage('找不到該文件', 'error');
+                return;
+            }
+            showMessage(`編輯文檔功能開發中：${doc.chineseTitle || doc.tibetanTitle}`, 'info');
+            // In a real app, this would open an editor interface for the document.
+            // For example, openDocument(docId) and then switch the modal to an edit view.
+        }
+
+        function deleteDocument(docId) {
+            const doc = documentsData.find(d => d.id === docId);
+            if (!doc) {
+                showMessage('找不到要刪除的文檔', 'error');
+                return;
+            }
+            if (confirm(`確定要永久刪除文稿 "${doc.chineseTitle || doc.tibetanTitle}" 嗎？此操作無法復原。`)) {
+                documentsData = documentsData.filter(d => d.id !== docId);
+                renderDocuments();
+                renderSidebar();
+                showMessage('文檔已刪除', 'success');
+                if (currentOpenDocId === docId) { // If the deleted doc was open in modal
+                    closeModal('documentModal');
+                }
+            }
+        }
+
+        // --- Event Listeners ---
+        document.addEventListener('DOMContentLoaded', function() {
+            // Admin login form
+            document.getElementById('adminLoginForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const username = document.getElementById('adminUsername').value;
+                const password = document.getElementById('adminPassword').value;
+                
+                // Replace with actual authentication logic
+                if (username === 'admin' && password === 'password123') {
+                    isAdminLoggedIn = true;
+                    closeModal('adminLoginModal');
+                    showMessage('管理員登入成功！', 'success');
+                    enterMode('edit'); // Directly enter edit mode after successful login
+                } else {
+                    showMessage('用戶名或密碼錯誤', 'error');
+                }
+            });
+
+            // Search functionality
+            const searchInputEl = document.getElementById('searchInputEl');
+            searchInputEl.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase().trim();
+                
+                if (!searchTerm) {
+                    renderDocuments(documentsData); // Show all if search is empty
+                    return;
+                }
+                
+                const filtered = documentsData.filter(doc =>
+                    (doc.tibetanTitle && doc.tibetanTitle.toLowerCase().includes(searchTerm)) ||
+                    (doc.chineseTitle && doc.chineseTitle.toLowerCase().includes(searchTerm)) ||
+                    (doc.englishTitle && doc.englishTitle.toLowerCase().includes(searchTerm)) ||
+                    (doc.author && doc.author.toLowerCase().includes(searchTerm)) ||
+                    (doc.ContentTibetan && doc.ContentTibetan.toLowerCase().includes(searchTerm)) ||
+                    (doc.ContentChinese && doc.ContentChinese.toLowerCase().includes(searchTerm)) ||
+                    (doc.ContentEnglish && doc.ContentEnglish.toLowerCase().includes(searchTerm)) ||
+                    (doc.tags && doc.tags.some(tag => tag.toLowerCase().includes(searchTerm)))
+                );
+                
+                renderDocuments(filtered);
+                const totalEl = document.getElementById('totalCountEl');
+                totalEl.textContent = filtered.length; // Update count for filtered results
+                 if (filtered.length === 0) {
+                    document.getElementById('documentsGridEl').innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--text-light); opacity: 0.8;">未找到與 "'+searchTerm+'" 相關的文獻</div>';
+                }
+            });
+
+            // View mode buttons
+            document.getElementById('gridViewBtn').addEventListener('click', function() {
+                this.classList.add('active');
+                document.getElementById('listViewBtn').classList.remove('active');
+                document.getElementById('documentsGridEl').style.gridTemplateColumns = 'repeat(auto-fit, minmax(300px, 1fr))'; // Or your default grid
+                // Potentially re-render if list view had different card structure
+                showMessage('切換到卡片檢視', 'info');
+            });
+
+            document.getElementById('listViewBtn').addEventListener('click', function() {
+                this.classList.add('active');
+                document.getElementById('gridViewBtn').classList.remove('active');
+                // Example for list view - could also change card structure in renderDocuments
+                document.getElementById('documentsGridEl').style.gridTemplateColumns = '1fr'; 
+                showMessage('清單檢視功能開發中...', 'info');
+            });
+
+            // Close modals when clicking on the backdrop (the modal element itself)
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === this) { // Check if the click is on the modal backdrop itself
+                        closeModal(this.id);
+                    }
+                });
+            });
+            
+            // Keyboard shortcut for closing modals (Escape key)
+            document.addEventListener('keydown', function(e) {
+                if (e.key === "Escape") {
+                    document.querySelectorAll('.modal.active').forEach(modal => closeModal(modal.id));
+                }
+            });
+
+            // Initialize
+            showModeSelectorScreen(); // Start with the mode selector screen
+            // loadContent(); // Initial load of documents and sidebar - moved to enterMode
+            updateNavControls(); // Set initial nav controls
+        });
+
+        // Add CSS keyframe animations (already present in your original code)
+        const styleSheet = document.createElement('style');
+        styleSheet.textContent = `
+            @keyframes slideInRight {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOutRight {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(styleSheet);
+    </script>
+</body>
+</html>
