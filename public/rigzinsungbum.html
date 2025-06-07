@@ -1,0 +1,2096 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>才旺諾布文集閱覽館</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tibetan:wght@300;400;500;600;700&family=Noto+Serif+TC:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --glass-bg: rgba(20, 20, 30, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --text-light: rgba(240, 240, 255, 0.95);
+            --text-accent: #FFD700;
+            --text-like: #e74c3c;
+            --tibetan-title-font: 'Noto Sans Tibetan', serif;
+            --chinese-title-font: 'Noto Serif TC', serif;
+            --english-font: 'Inter', sans-serif;
+            --chinese-content-font: 'Noto Serif TC', serif;
+            --border-radius-main: 10px;
+            --border-radius-small: 5px;
+        }
+
+        body {
+            font-family: var(--english-font);
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 50%, #2c3e50 100%);
+            min-height: 100vh;
+            color: var(--text-light);
+            display: flex;
+            flex-direction: column;
+            padding-top: 60px;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><defs><pattern id="books" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse"><rect width="20" height="80" x="10" y="10" fill="rgba(255,255,255,0.05)" rx="2"/><rect width="20" height="75" x="35" y="15" fill="rgba(255,255,255,0.03)" rx="2"/><rect width="20" height="70" x="60" y="20" fill="rgba(255,255,255,0.04)" rx="2"/></pattern></defs><rect width="100%" height="100%" fill="url(%23books)"/></svg>') repeat;
+            opacity: 0.3;
+            z-index: -1;
+        }
+
+        .top-nav {
+            background: rgba(10, 10, 20, 0.9);
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--glass-border);
+            height: 60px;
+        }
+
+        .nav-left { display: flex; gap: 15px; align-items: center; }
+        .nav-right { display: flex; gap: 10px; align-items: center; }
+        
+        .nav-item, .top-nav-btn {
+            color: var(--text-light); 
+            text-decoration: none; 
+            padding: 8px 15px;
+            border-radius: var(--border-radius-small); 
+            transition: all 0.3s ease;
+            font-size: 14px; 
+            background: transparent; 
+            border: 1px solid transparent; 
+            cursor: pointer;
+            white-space: nowrap;
+            user-select: none;
+        }
+        
+        #toggleSidebarBtn { 
+            font-size: 1.3rem; 
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--glass-border);
+        }
+        
+        .nav-item:hover, .top-nav-btn:hover { 
+            background: rgba(255, 255, 255, 0.15); 
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .nav-item:active, .top-nav-btn:active {
+            transform: translateY(0);
+        }
+
+        #modeSelectorScreen { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            flex-grow: 1; 
+            text-align: center; 
+            position: relative; 
+            z-index: 10; 
+            padding: 2rem;
+        }
+
+        .mode-selector-content { 
+            background: var(--glass-bg); 
+            backdrop-filter: blur(15px); 
+            border-radius: var(--border-radius-main); 
+            padding: 3rem 2.5rem; 
+            border: 1px solid var(--glass-border); 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3); 
+            animation: fadeInUp 0.8s ease-out; 
+            max-width: 800px; 
+            width: 90%;
+        }
+
+        @keyframes fadeInUp { 
+            from { opacity: 0; transform: translateY(30px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+
+        .main-title {
+            font-family: var(--chinese-title-font); 
+            font-size: 3.2rem; 
+            font-weight: bold; 
+            margin-bottom: 1rem; 
+            letter-spacing: 2px; 
+            background: linear-gradient(45deg, #fff, #e0e0ff, var(--text-accent)); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+            background-clip: text;
+        }
+
+        .tibetan-subtitle {
+            font-family: var(--tibetan-title-font); 
+            font-size: 1.6rem; 
+            color: var(--text-light); 
+            margin-bottom: 1rem; 
+            opacity: 0.9;
+        }
+
+        .english-subtitle { 
+            font-size: 1.1rem; 
+            color: var(--text-light); 
+            margin-bottom: 2.5rem; 
+            opacity: 0.8; 
+            font-style: italic; 
+            font-family: var(--english-font);
+        }
+
+        .mode-buttons { 
+            display: flex; 
+            gap: 1.5rem; 
+            flex-wrap: wrap; 
+            justify-content: center; 
+            margin-bottom: 1.5rem; 
+        }
+
+        .mode-button { 
+            padding: 1rem 2.5rem; 
+            font-size: 1.1rem; 
+            font-weight: 600; 
+            border: none; 
+            border-radius: 25px; 
+            cursor: pointer; 
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            position: relative; 
+            overflow: hidden; 
+            background: rgba(255,255,255,0.15); 
+            color: white; 
+            border: 2px solid var(--glass-border); 
+            backdrop-filter: blur(8px); 
+            min-width: 180px;
+            user-select: none;
+        }
+
+        .mode-button:hover { 
+            transform: translateY(-8px) scale(1.05); 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3); 
+            background: rgba(255,255,255,0.25);
+            border-color: var(--text-accent);
+        }
+
+        .mode-button:active {
+            transform: translateY(-4px) scale(1.02);
+        }
+
+        #appContainer { 
+            display: none; 
+            width: 100%; 
+            flex-grow: 1; 
+            opacity: 0; 
+            animation: fadeIn 0.6s ease-out forwards; 
+        }
+
+        @keyframes fadeIn { to { opacity: 1; } }
+        body.app-active #appContainer { display: flex; }
+
+        .sidebar {
+            width: 300px;
+            background: var(--glass-bg); 
+            backdrop-filter: blur(20px); 
+            overflow-y: auto;
+            position: fixed; 
+            height: calc(100vh - 60px);
+            left: 0; 
+            top: 60px;
+            z-index: 200;
+            border-right: 1px solid var(--glass-border);
+            transform: translateX(-100%);
+            transition: transform 0.3s ease-out;
+        }
+
+        .sidebar.active {
+            transform: translateX(0);
+        }
+
+        .sidebar-header { 
+            padding: 2rem 1.5rem; 
+            border-bottom: 1px solid var(--glass-border);
+        }
+        
+        .sidebar-title { 
+            font-family: var(--chinese-title-font); 
+            font-size: 1.4rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .sidebar-subtitle { 
+            font-family: var(--tibetan-title-font); 
+            opacity: 0.8;
+            font-size: 1rem;
+        }
+
+        .main-content {
+            flex: 1; 
+            margin-left: 0;
+            min-height: calc(100vh - 60px);
+            position: relative; 
+            transition: all 0.3s ease-out;
+            padding: 2rem;
+            z-index: 50;
+        }
+
+        .main-content.sidebar-active {
+            margin-left: 300px;
+        }
+
+        .main-content.with-right-sidebar {
+            margin-right: 300px; 
+        }
+
+        .main-content.sidebar-active.with-right-sidebar {
+            margin-left: 300px;
+            margin-right: 300px;
+        }
+
+        .utility-sidebar {
+            width: 300px;
+            background: var(--glass-bg); 
+            backdrop-filter: blur(20px); 
+            overflow-y: auto;
+            position: fixed; 
+            height: calc(100vh - 60px);
+            right: 0; 
+            top: 60px;
+            z-index: 190;
+            border-left: 1px solid var(--glass-border);
+            transition: transform 0.3s ease-out;
+            transform: translateX(100%);
+        }
+
+        .utility-sidebar.active {
+            transform: translateX(0);
+        }
+
+        .utility-sidebar-header { 
+            padding: 2rem 1.5rem; 
+            position: relative; 
+            border-bottom: 1px solid var(--glass-border); 
+        }
+
+        .utility-sidebar-title { 
+            font-family: var(--chinese-title-font); 
+            margin: 0; 
+            color: var(--text-light);
+            font-size: 1.4rem; 
+        }
+
+        .utility-sidebar-content { padding: 1.5rem; }
+
+        .utility-item { 
+            padding: 1rem; 
+            margin: 0.5rem 0; 
+            background: rgba(255, 255, 255, 0.08); 
+            border-radius: var(--border-radius-small); 
+            cursor: pointer; 
+            transition: all 0.3s ease; 
+            display: flex; 
+            align-items: center; 
+            gap: 1rem; 
+            color: var(--text-light);
+            user-select: none;
+        }
+
+        .utility-item:hover { 
+            background: rgba(255, 255, 255, 0.2); 
+            transform: translateX(8px);
+        }
+
+        .utility-item-icon { 
+            font-size: 1.3rem; 
+            width: 2rem; 
+            text-align: center; 
+        }
+
+        .container { max-width: 1400px; margin: 0 auto; }
+
+        .header { 
+            text-align: center; 
+            margin-bottom: 3rem; 
+            color: white; 
+        }
+
+        .header h1 { 
+            font-family: var(--chinese-title-font); 
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .tibetan-subtitle-header { 
+            font-family: var(--tibetan-title-font); 
+            font-size: 1.8rem; 
+            margin-bottom: 0.5rem;
+            opacity: 0.9;
+        }
+
+        .header p:not(.tibetan-subtitle-header) { 
+            font-family: var(--english-font);
+            font-size: 1.1rem;
+            opacity: 0.8;
+        }
+
+        .search-section { 
+            max-width: 700px; 
+            margin: 0 auto 3rem; 
+        }
+
+        .search-container { 
+            position: relative; 
+            border-radius: var(--border-radius-small); 
+        }
+
+        .search-input { 
+            width: 100%; 
+            padding: 1rem 1.2rem 1rem 3.5rem; 
+            font-size: 1.1rem; 
+            background: rgba(255, 255, 255, 0.1); 
+            border: 2px solid var(--glass-border); 
+            border-radius: var(--border-radius-small); 
+            color: var(--text-light); 
+            font-family: var(--english-font);
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--text-accent);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .search-input::placeholder { 
+            color: rgba(255, 255, 255, 0.6); 
+        }
+
+        .search-icon { 
+            position: absolute; 
+            left: 1.2rem; 
+            top: 50%; 
+            transform: translateY(-50%); 
+            font-size: 1.2rem; 
+            color: rgba(255, 255, 255, 0.6); 
+        }
+
+        .stats-bar { 
+            background: var(--glass-bg); 
+            backdrop-filter: blur(15px); 
+            border: 1px solid var(--glass-border); 
+            border-radius: var(--border-radius-main); 
+            padding: 1.5rem 2rem; 
+            margin-bottom: 2rem; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
+
+        .view-controls { display: flex; gap: 0.8rem; }
+
+        .view-btn { 
+            padding: 0.8rem 1.5rem; 
+            font-size: 0.9rem; 
+            border-radius: var(--border-radius-small); 
+            border: 1px solid var(--glass-border); 
+            background: transparent; 
+            color: var(--text-light); 
+            cursor: pointer; 
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+
+        .view-btn:hover, .view-btn.active { 
+            background: rgba(255, 255, 255, 0.2); 
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .documents-grid {
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem; 
+            margin-bottom: 2rem;
+        }
+
+        .document-card {
+            background: rgba(30,30,40,0.8);
+            backdrop-filter: blur(15px);
+            border-radius: var(--border-radius-main); 
+            padding: 2rem;
+            border: 1px solid var(--glass-border);
+            transition: all 0.4s ease;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .document-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--primary-gradient);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .document-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .document-card:hover::before {
+            opacity: 1;
+        }
+
+        .document-title { 
+            font-size: 1.4rem; 
+            font-family: var(--tibetan-title-font);
+            margin-bottom: 0.8rem;
+            line-height: 1.4;
+        }
+
+        .document-subtitle { 
+            font-size: 1.2rem; 
+            font-family: var(--chinese-title-font);
+            margin-bottom: 0.8rem;
+            color: var(--text-accent);
+            line-height: 1.4;
+        }
+
+        .document-meta { 
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 1.2rem;
+            font-family: var(--english-font);
+        }
+
+        .document-preview { 
+            font-size: 0.95rem; 
+            padding: 1rem; 
+            border-radius: var(--border-radius-small);
+            background: rgba(0, 0, 0, 0.3);
+            margin-bottom: 1.5rem;
+            opacity: 0.9;
+            line-height: 1.6;
+            flex-grow: 1; 
+            max-height: 120px; 
+            overflow: hidden;
+            font-family: var(--chinese-content-font);
+        }
+
+        .document-card-actions {
+            display: flex;
+            gap: 0.8rem;
+            align-items: center;
+            margin-top: auto; 
+        }
+
+        .like-btn {
+            background: none;
+            border: none;
+            color: var(--text-light);
+            font-size: 1.6rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            margin-left: auto;
+            transition: all 0.3s ease;
+            border-radius: 50%;
+            user-select: none;
+        }
+
+        .like-btn:hover {
+            transform: scale(1.2);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .like-btn.liked {
+            color: var(--text-like);
+            animation: heartBeat 0.6s ease;
+        }
+
+        @keyframes heartBeat {
+            0%, 50%, 100% { transform: scale(1); }
+            25%, 75% { transform: scale(1.3); }
+        }
+
+        .btn { 
+            padding: 0.8rem 1.8rem; 
+            font-size: 0.95rem; 
+            border-radius: var(--border-radius-small); 
+            justify-content: center; 
+            text-align: center; 
+            border: 1px solid var(--glass-border); 
+            background: rgba(255, 255, 255, 0.1); 
+            color: var(--text-light); 
+            cursor: pointer; 
+            transition: all 0.3s ease; 
+            text-decoration: none; 
+            display: inline-flex; 
+            align-items: center;
+            user-select: none;
+            font-weight: 500;
+        }
+
+        .btn:hover { 
+            background: rgba(255, 255, 255, 0.2); 
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .admin-only { display: none !important; } 
+        .reader-only { display: none !important; }
+        body.edit-mode .admin-only { display: inline-flex !important; }
+        body.read-mode .reader-only { display: block !important; }
+        body.read-mode .top-nav-btn.reader-only { display: inline-flex !important; }
+        body.read-mode .document-card-actions .reader-only { display: inline-flex !important; }
+
+        .modal { 
+            display: none; 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(0, 0, 0, 0.8); 
+            z-index: 2000; 
+            justify-content: center; 
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal.active { 
+            display: flex; 
+            animation: modalFadeIn 0.3s ease-out;
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content { 
+            background: var(--glass-bg); 
+            backdrop-filter: blur(20px); 
+            border: 1px solid var(--glass-border); 
+            border-radius: var(--border-radius-main); 
+            padding: 2.5rem; 
+            max-width: 90vw; 
+            max-height: 90vh; 
+            overflow-y: auto; 
+            position: relative; 
+            display: flex; 
+            flex-direction: column;
+            animation: modalSlideIn 0.4s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from { transform: translateY(-30px) scale(0.9); opacity: 0; }
+            to { transform: translateY(0) scale(1); opacity: 1; }
+        }
+
+        .modal-close { 
+            position: absolute; 
+            top: 1.5rem; 
+            right: 1.5rem; 
+            background: rgba(255, 255, 255, 0.1); 
+            border: 1px solid var(--glass-border);
+            color: var(--text-light); 
+            font-size: 1.5rem; 
+            cursor: pointer; 
+            z-index: 10;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: rotate(90deg);
+        }
+
+        /* Form styles */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-light);
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 1rem;
+            border-radius: var(--border-radius-small);
+            border: 1px solid var(--glass-border);
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-light);
+            font-family: var(--english-font);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--text-accent);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+            font-family: var(--chinese-content-font);
+        }
+
+        /* Loading states */
+        .loading {
+            pointer-events: none;
+            opacity: 0.6;
+            position: relative;
+        }
+
+        .loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--text-accent);
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        /* Message area */
+        #messageArea {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 3000;
+            max-width: 400px;
+        }
+
+        .message {
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: var(--border-radius-small);
+            margin-bottom: 0.5rem;
+            border-left: 4px solid var(--text-accent);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            animation: slideInRight 0.4s ease-out;
+        }
+
+        .message.error {
+            border-left-color: #e74c3c;
+        }
+
+        .message.success {
+            border-left-color: #27ae60;
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes slideOutRight {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body { padding-top: 60px; }
+            
+            .top-nav { 
+                padding: 8px 15px;
+                flex-wrap: wrap; 
+            }
+            
+            .nav-left { 
+                gap: 8px; 
+                order: 1; 
+                flex-grow: 1;
+            }
+            
+            #toggleSidebarBtn { 
+                order: -1; 
+                margin-right: auto;
+            }
+            
+            .nav-right { 
+                order: 2; 
+                flex-grow: 1; 
+                justify-content: flex-end;
+            }
+            
+            .nav-item, .top-nav-btn { 
+                font-size: 13px; 
+                padding: 6px 10px; 
+            }
+
+            .sidebar, .utility-sidebar { 
+                width: 280px; 
+            }
+            
+            .main-content.sidebar-active { 
+                margin-left: 280px; 
+            }
+            
+            .main-content.with-right-sidebar { 
+                margin-right: 280px; 
+            }
+
+            .main-title { 
+                font-size: 2.5rem; 
+            }
+            
+            .mode-selector-content { 
+                padding: 2rem 1.5rem; 
+            }
+            
+            .documents-grid { 
+                grid-template-columns: 1fr; 
+                gap: 1.5rem;
+            }
+            
+            .modal-content { 
+                max-width: 95vw; 
+                padding: 1.5rem; 
+            }
+
+            #messageArea {
+                right: 10px;
+                left: 10px;
+                max-width: none;
+            }
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
+    </style>
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <nav class="top-nav">
+        <div class="nav-left" id="navLeftLinks">
+            <button class="top-nav-btn" id="toggleSidebarBtn" onclick="toggleLeftSidebar()">☰</button>
+            <a href="javascript:void(0)" class="nav-item" onclick="showModeSelectorScreen()">回首頁</a>
+            <a href="javascript:void(0)" class="nav-item" onclick="showInfo('關於我們')">關於我們</a>
+            <a href="javascript:void(0)" class="nav-item" onclick="showInfo('編者的話')">編者的話</a>
+            <a href="javascript:void(0)" class="nav-item" onclick="showInfo('參考資源')">參考資源</a>
+        </div>
+        <div class="nav-right" id="navRightControls">
+            <!-- Content dynamically set by JS -->
+        </div>
+    </nav>
+
+    <!-- Mode Selection Screen -->
+    <div id="modeSelectorScreen">
+        <div class="mode-selector-content">
+            <h1 class="main-title">才旺諾布文集閱覽館</h1>
+            <p class="tibetan-subtitle">༄༅། །ཚེ་དབང་ནོར་བུའི་གསུང་འབུམ་ཀློག་སྟེགས།</p>
+            <p class="english-subtitle">Tsewang Norbu Collected Works</p>
+            <div class="mode-buttons">
+                <button class="mode-button" onclick="enterMode('read')">📖 進入閱覽</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Application Container -->
+    <div id="appContainer">
+        <!-- Left Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2 class="sidebar-title">課程目錄</h2>
+                <p class="sidebar-subtitle">སློབ་ཚན་གྱི་དཀར་ཆག</p>
+            </div>
+            <nav class="course-menu" id="courseMenuContainer">
+                <div style="padding: 1rem; color: var(--text-light); opacity: 0.8;">載入中...</div>
+            </nav>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content" id="mainContentArea">
+            <div class="container">
+                <header class="header">
+                    <h1>才旺諾布文集閱覽館</h1>
+                    <p class="tibetan-subtitle-header">༄༅། །ཚེ་དབང་ནོར་བུའི་གསུང་འབུམ་ཀློག་སྟེགས།</p>
+                    <p>Tsewang Norbu Collected Works</p>
+                </header>
+                
+                <div class="search-section">
+                    <div class="search-container">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" class="search-input" placeholder="搜尋文獻標題、內容或作者..." id="searchInputEl">
+                    </div>
+                </div>
+                
+                <div class="stats-bar">
+                    <div class="view-controls">
+                        <button class="view-btn active" id="gridViewBtn">📇 卡片檢視</button>
+                        <button class="view-btn" id="listViewBtn">📋 清單檢視</button>
+                    </div>
+                    <div style="font-size: 1rem; opacity: 0.9; font-weight: 500;">
+                        總計 <strong id="totalCountEl">0</strong> 部文獻
+                    </div>
+                </div>
+                
+                <div class="documents-grid" id="documentsGridEl">
+                    <!-- Documents will be rendered here -->
+                </div>
+            </div>
+        </main>
+
+        <!-- Right Utility Sidebar -->
+        <aside class="utility-sidebar" id="utilitySidebarEl">
+            <div class="utility-sidebar-header">
+                <h3 class="utility-sidebar-title">實用工具</h3>
+                <button class="modal-close" onclick="toggleUtilitySidebar()">×</button>
+            </div>
+            <div class="utility-sidebar-content">
+                <div class="utility-item" onclick="showFavorites()">
+                    <span class="utility-item-icon">❤️</span> 已收藏文章
+                </div>
+                <div id="favoritesListContainerEl" style="display:none; padding: 0.5rem 1rem;">
+                    <!-- Favorite items will be listed here -->
+                </div>
+                <div class="utility-item" onclick="openReportErrorModal()">
+                    <span class="utility-item-icon">📧</span> 回報錯字
+                </div>
+                <div class="utility-item" onclick="showUtilityModal('donateModal', '護持贊助')">
+                    <span class="utility-item-icon">💰</span> 護持贊助
+                </div>
+                <div class="utility-item" onclick="contactSupport()">
+                    <span class="utility-item-icon">📞</span> 聯繫客服
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Document Modal -->
+    <div class="modal" id="documentModal">
+        <div class="modal-content" style="max-width: 900px;">
+            <button class="modal-close" onclick="closeModal('documentModal')">×</button>
+            <div id="modalHeaderContent">
+                <h2 class="modal-document-title-zh">載入中...</h2>
+                <p class="modal-document-title-bo"></p>
+                <p class="modal-document-title-en"></p>
+            </div>
+            <div class="language-switcher-modal" id="languageSwitcherModal"></div>
+            <div class="language-content-container">
+                <div id="modalTibetanContentEl" class="language-content tibetan-text" style="display:none;"></div>
+                <hr id="modalLanguageSeparator" style="display:none;">
+                <div id="modalChineseContentEl" class="language-content chinese-text" style="display:none;"></div>
+                <hr id="modalLanguageSeparator2" style="display:none;"> 
+                <div id="modalEnglishContentEl" class="language-content english-text" style="display:none;"></div>
+            </div>
+            <div id="modalMetaContent"></div>
+        </div>
+    </div>
+
+    <!-- Admin Login Modal -->
+    <div class="modal" id="adminLoginModal">
+        <div class="modal-content" style="max-width: 450px;">
+            <button class="modal-close" onclick="closeModal('adminLoginModal')">×</button>
+            <h2 style="margin-bottom: 2rem; text-align: center; font-family: var(--chinese-title-font);">管理員登入</h2>
+            <form id="adminLoginForm">
+                <div class="form-group">
+                    <label for="adminUsername">用戶名：</label>
+                    <input type="text" id="adminUsername" required>
+                </div>
+                <div class="form-group">
+                    <label for="adminPassword">密碼：</label>
+                    <input type="password" id="adminPassword" required>
+                </div>
+                <button type="submit" class="btn" style="width: 100%; margin-top: 1rem;">登入</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Error Report Modal -->
+    <div class="modal" id="reportErrorModal">
+        <div class="modal-content" style="max-width: 600px;">
+            <button class="modal-close" onclick="closeModal('reportErrorModal')">×</button>
+            <h2 style="margin-bottom: 2rem; text-align: center; font-family: var(--chinese-title-font);">回報錯字/問題</h2>
+            <form id="reportErrorForm">
+                <input type="hidden" id="errorReportDocId" value="">
+                <div class="form-group">
+                    <label for="errorReportPageUrl">問題頁面 (自動填入):</label>
+                    <input type="text" id="errorReportPageUrl" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="errorReportContext">問題相關內容 (自動截取部分):</label>
+                    <textarea id="errorReportContext" rows="3" readonly></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="errorReportDescription">請描述您發現的問題 <span style="color:var(--text-accent)">*</span>:</label>
+                    <textarea id="errorReportDescription" rows="5" required placeholder="例如：第X段第Y行，某個字應為Z..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="errorReportEmail">您的Email (方便我們回覆，選填):</label>
+                    <input type="email" id="errorReportEmail" placeholder="your.email@example.com">
+                </div>
+                <button type="submit" class="btn" style="width: 100%; margin-top: 1rem;">提交回報</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Message Area -->
+    <div id="messageArea"></div>
+
+    <!-- Footer -->
+    <footer style="text-align: center; padding: 3rem; background: rgba(0, 0, 0, 0.3); color: var(--text-light); font-size: 0.9rem;">
+        <div class="social-links" style="margin-bottom: 1.5rem;">
+            <a href="https://www.facebook.com/rigzinchenpoassociation/?locale=zh_TW" target="_blank" title="Facebook" style="color: var(--text-light); text-decoration: none; margin: 0 1rem; padding: 0.8rem; border-radius: var(--border-radius-small); transition: background 0.2s;">📘 Facebook</a>
+            <a href="http://www.rigzin-chenpo.org/index2.html" target="_blank" title="Website" style="color: var(--text-light); text-decoration: none; margin: 0 1rem; padding: 0.8rem; border-radius: var(--border-radius-small); transition: background 0.2s;">🏠 官方網站</a>
+        </div>
+        <div class="copyright" style="opacity: 0.8;">
+            噶陀仁珍千寶 © 2025 才旺諾布文集 All Rights Reserved
+        </div>
+    </footer>
+
+    <script>
+        // === 全局變量 ===
+        let documentsData = [];
+        let currentMode = '';
+        let isAdminLoggedIn = false;
+        let currentOpenDocId = null;
+        let isLeftSidebarActive = false;
+        let favorites = [];
+        let dataLoaded = false;
+        let authToken = null;
+
+        // API Base URL
+        const API_BASE_URL = '';
+
+        // === 工具函數 ===
+        function showMessage(text, type = 'info') {
+            const msgArea = document.getElementById('messageArea');
+            const msgEl = document.createElement('div');
+            
+            msgEl.className = `message ${type}`;
+            msgEl.textContent = text;
+            
+            msgArea.appendChild(msgEl);
+            
+            setTimeout(() => {
+                msgEl.style.animation = 'slideOutRight 0.4s ease-out forwards';
+                setTimeout(() => {
+                    if (msgArea.contains(msgEl)) {
+                        msgArea.removeChild(msgEl);
+                    }
+                }, 400);
+            }, 4000);
+        }
+
+        function setLoading(element, loading = true) {
+            if (loading) {
+                element.classList.add('loading');
+            } else {
+                element.classList.remove('loading');
+            }
+        }
+
+        // === 側邊欄控制 ===
+        function toggleLeftSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContentArea');
+            const toggleBtn = document.getElementById('toggleSidebarBtn');
+            
+            isLeftSidebarActive = !isLeftSidebarActive;
+            
+            if (isLeftSidebarActive) {
+                sidebar.classList.add('active');
+                mainContent.classList.add('sidebar-active');
+                toggleBtn.innerHTML = '✕';
+            } else {
+                sidebar.classList.remove('active');
+                mainContent.classList.remove('sidebar-active');
+                toggleBtn.innerHTML = '☰';
+            }
+        }
+
+        function toggleUtilitySidebar() {
+            const sidebar = document.getElementById('utilitySidebarEl');
+            const mainContent = document.getElementById('mainContentArea');
+            const isActive = sidebar.classList.contains('active');
+            
+            if (isActive) {
+                sidebar.classList.remove('active');
+                mainContent.classList.remove('with-right-sidebar');
+            } else {
+                sidebar.classList.add('active');
+                mainContent.classList.add('with-right-sidebar');
+            }
+        }
+
+        // === 模式管理 ===
+        function enterMode(mode) {
+            console.log('Entering mode:', mode);
+            currentMode = mode;
+            
+            if (mode === 'edit') {
+                if (!isAdminLoggedIn) {
+                    showModal('adminLoginModal');
+                    return;
+                }
+                setupEditMode();
+            } else {
+                setupReadMode();
+            }
+            
+            document.getElementById('modeSelectorScreen').style.display = 'none';
+            document.getElementById('appContainer').style.display = 'flex';
+            document.body.classList.add('app-active');
+            document.body.classList.remove('read-mode', 'edit-mode');
+            document.body.classList.add(mode + '-mode');
+            
+            updateNavControls();
+            loadContent();
+        }
+
+        function showModeSelectorScreen() {
+            currentMode = '';
+            isAdminLoggedIn = false;
+            authToken = null;
+            localStorage.removeItem('adminAuthToken');
+            
+            document.getElementById('modeSelectorScreen').style.display = 'flex';
+            document.getElementById('appContainer').style.display = 'none';
+            document.body.classList.remove('app-active', 'read-mode', 'edit-mode');
+            
+            updateNavControls();
+            
+            // 重置側邊欄
+            if (isLeftSidebarActive) toggleLeftSidebar();
+            if (document.getElementById('utilitySidebarEl').classList.contains('active')) {
+                toggleUtilitySidebar();
+            }
+        }
+
+        function setupReadMode() {
+            document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
+            renderDocuments();
+        }
+
+        function setupEditMode() {
+            document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'inline-flex');
+            renderDocuments();
+        }
+
+        // === 導航控制 ===
+        function updateNavControls() {
+            const navRight = document.getElementById('navRightControls');
+            navRight.innerHTML = '';
+            
+            if (currentMode === 'edit' && isAdminLoggedIn) {
+                navRight.innerHTML = `
+                    <button class="top-nav-btn admin-only" onclick="addNewDocument()">✨ 新增</button>
+                    <div style="color:var(--text-light); display:flex; align-items:center; gap:0.5rem; font-size:13px;" class="admin-only">
+                        <span>管理員</span>
+                        <div style="width:20px; height:20px; background:var(--text-accent); border-radius:50%; text-align:center; line-height:20px; font-weight:bold; font-size:11px;">A</div>
+                    </div>
+                    <button class="top-nav-btn admin-only" onclick="adminLogout()">登出</button>
+                `;
+            } else if (currentMode === 'read') {
+                navRight.innerHTML = `
+                    <button class="top-nav-btn reader-only" onclick="showTools()">🛠️ 工具</button>
+                    <button class="top-nav-btn" onclick="enterMode('edit')">🔐 登入</button>
+                `;
+            } else {
+                navRight.innerHTML = `
+                    <button class="top-nav-btn" onclick="showTools()">🛠️ 工具</button>
+                    <button class="top-nav-btn" onclick="enterMode('edit')">🔐 登入</button>
+                `;
+            }
+            
+            // 更新顯示狀態
+            document.querySelectorAll('.admin-only').forEach(el => {
+                el.style.display = (currentMode === 'edit' && isAdminLoggedIn) ? 'inline-flex' : 'none';
+            });
+            document.querySelectorAll('.reader-only').forEach(el => {
+                el.style.display = (currentMode === 'read') ? (el.tagName === 'BUTTON' ? 'inline-flex' : 'block') : 'none';
+            });
+        }
+
+        // === 模態框控制 ===
+        function showModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.add('active');
+            }
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('active');
+            }
+            if (modalId === 'documentModal') {
+                currentOpenDocId = null;
+            }
+        }
+
+        // === 管理員功能 ===
+        async function adminLogin(username, password) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                if (!response.ok) {
+                    const errorResult = await response.json().catch(() => ({ message: `登入失敗: ${response.status}` }));
+                    throw new Error(errorResult.message || `登入失敗: ${response.status}`);
+                }
+
+                const result = await response.json();
+                if (result.success && result.token) {
+                    authToken = result.token;
+                    localStorage.setItem('adminAuthToken', result.token);
+                    isAdminLoggedIn = true;
+                    return true;
+                } else {
+                    throw new Error(result.message || "登入憑證無效。");
+                }
+            } catch (error) {
+                console.error("管理員登入失敗:", error);
+                throw error;
+            }
+        }
+
+        function adminLogout() {
+            isAdminLoggedIn = false;
+            authToken = null;
+            localStorage.removeItem('adminAuthToken');
+            showMessage('已登出管理員模式', 'info');
+            
+            currentMode = 'read';
+            document.body.classList.remove('edit-mode');
+            document.body.classList.add('read-mode');
+            
+            setupReadMode();
+            updateNavControls();
+            renderDocuments();
+        }
+
+        // === 數據管理 ===
+        async function loadDocumentsData() {
+            console.log("前端：正在從後端載入文獻資料...");
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/documents`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
+                }
+                
+                const fetchedData = await response.json();
+                if (!Array.isArray(fetchedData)) {
+                    console.error("從 API 獲取的數據不是陣列:", fetchedData);
+                    documentsData = [];
+                    throw new Error("從伺服器接收到無效的數據格式。");
+                }
+                
+                documentsData = fetchedData;
+                console.log("前端：文獻資料載入完成。數量:", documentsData.length);
+                
+                processAllDocumentMeta();
+                dataLoaded = true;
+                return true;
+            } catch (error) {
+                console.error("前端無法從伺服器獲取文獻資料:", error);
+                showMessage(`錯誤：無法從伺服器載入文獻資料。(${error.message})`, 'error');
+                documentsData = [];
+                dataLoaded = false;
+                return false;
+            }
+        }
+
+        function processAllDocumentMeta() {
+            documentsData.forEach(doc => {
+                if (!doc.meta) doc.meta = {};
+                
+                const plainTibetan = (doc.ContentTibetan || "").replace(/<[^>]+>/g, "");
+                const plainChinese = (doc.ContentChinese || "").replace(/<[^>]+>/g, "");
+                const plainEnglish = (doc.ContentEnglish || "").replace(/<[^>]+>/g, "");
+                
+                const tibetanSyllables = plainTibetan.split(/[་\s]+/).filter(s => s.trim().length > 0).length;
+                const chineseChars = plainChinese.replace(/[^\u4e00-\u9fa5]/g, "").length;
+                const englishWords = plainEnglish.split(/\s+/).filter(s => s.trim().length > 0).length;
+                
+                let wordsDescription = [];
+                if (tibetanSyllables > 0) wordsDescription.push(`藏 ${tibetanSyllables} 音節`);
+                if (chineseChars > 0) wordsDescription.push(`中 ${chineseChars} 字`);
+                if (englishWords > 0) wordsDescription.push(`英 ${englishWords} 詞`);
+                doc.meta.words = wordsDescription.join(' | ') || "N/A";
+                
+                const readTimeMinutes = Math.ceil((chineseChars / 250) + (tibetanSyllables / 150) + (englishWords / 200));
+                doc.meta.readTime = `閱讀約 ${readTimeMinutes} 分鐘`;
+                doc.meta.pages = `${Math.ceil(readTimeMinutes / 5)} 頁 (估算)`;
+                
+                doc.meta.preview = doc.meta.preview || (plainChinese || plainTibetan || plainEnglish).substring(0, 100).replace(/<[^>]+>/g, '') + "...";
+            });
+        }
+
+        async function loadContent() {
+            if (!dataLoaded) {
+                const success = await loadDocumentsData();
+                if (success) {
+                    renderSidebar();
+                    renderDocuments();
+                } else {
+                    document.getElementById('documentsGridEl').innerHTML = `
+                        <div style="text-align:center;padding:3rem;color:var(--text-light);opacity:0.8;grid-column: 1/-1;">
+                            <h3 style="margin-bottom:1rem;">無法載入文獻資料</h3>
+                            <p>請檢查網路連線或稍後再試。</p>
+                        </div>
+                    `;
+                    document.getElementById('totalCountEl').textContent = '0';
+                }
+            } else {
+                console.log("文獻資料已載入或已嘗試載入。");
+                renderSidebar();
+                renderDocuments();
+            }
+        }
+
+        // === 內容渲染 ===
+        function renderSidebar() {
+            const sidebarEl = document.getElementById('courseMenuContainer');
+            
+            if (!documentsData || documentsData.length === 0) {
+                sidebarEl.innerHTML = '<div style="padding:1rem;color:var(--text-light);opacity:0.8;">暫無目錄</div>';
+                return;
+            }
+            
+            const categories = {};
+            documentsData.forEach(doc => {
+                const cat = doc.category || '未分類';
+                if (!categories[cat]) categories[cat] = [];
+                categories[cat].push(doc);
+            });
+            
+            sidebarEl.innerHTML = Object.entries(categories).map(([category, docs]) => {
+                const categoryId = `category-list-${category.replace(/[^a-zA-Z0-9\-_]/g, '')}`;
+                return `
+                    <div style="margin-bottom:1rem;">
+                        <h4 style="padding:1rem;background:rgba(255,255,255,0.1);margin:0;cursor:pointer;border-radius:var(--border-radius-small);transition:all 0.3s ease;" 
+                           onclick="toggleCategory('${categoryId}')"
+                           onmouseover="this.style.background='rgba(255,255,255,0.2)'" 
+                           onmouseout="this.style.background='rgba(255,255,255,0.1)'">
+                            ${category} (${docs.length})
+                        </h4>
+                        <div id="${categoryId}" style="padding-left:1rem;display:block;">
+                            ${docs.map(doc => `
+                                <div style="padding:0.8rem 1rem;cursor:pointer;border-radius:var(--border-radius-small);margin:0.3rem 0;display:flex;justify-content:space-between;align-items:center;transition:all 0.3s ease;" 
+                                     onclick="openDocument('${doc.id}')" 
+                                     onmouseover="this.style.background='rgba(255,255,255,0.15);this.style.transform='translateX(5px)'" 
+                                     onmouseout="this.style.background='transparent';this.style.transform='translateX(0)'">
+                                    <span style="flex-grow:1;">${doc.chineseTitle || doc.tibetanTitle || '無標題'}</span>
+                                    <span style="font-size:0.75em;opacity:0.6;margin-left:8px;white-space:nowrap;">[${(doc.availableLanguages || []).join(',')}]</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function toggleCategory(categoryId) {
+            const catEl = document.getElementById(categoryId);
+            if (catEl) {
+                const isHidden = catEl.style.display === 'none';
+                catEl.style.display = isHidden ? 'block' : 'none';
+            }
+        }
+
+        function renderDocuments(docsToRender = documentsData) {
+            const gridEl = document.getElementById('documentsGridEl');
+            const totalEl = document.getElementById('totalCountEl');
+            
+            if (!docsToRender || docsToRender.length === 0) {
+                gridEl.innerHTML = `
+                    <div style="text-align:center;padding:3rem;color:var(--text-light);opacity:0.8;grid-column: 1/-1;">
+                        <h3 style="margin-bottom:1rem;">${currentMode === 'edit' && isAdminLoggedIn ? '尚無文獻' : '暫無文獻資料'}</h3>
+                        <p>${currentMode === 'edit' && isAdminLoggedIn ? '點擊上方 "✨ 新增" 來建立第一份文獻' : '請稍後再試或聯繫管理員'}</p>
+                    </div>
+                `;
+                totalEl.textContent = '0';
+                return;
+            }
+            
+            totalEl.textContent = docsToRender.length;
+            
+            gridEl.innerHTML = docsToRender.map(doc => `
+                <div class="document-card">
+                    <h3 class="document-title">${doc.tibetanTitle || '無藏文標題'}</h3>
+                    <h4 class="document-subtitle">${doc.chineseTitle || '無中文標題'}</h4>
+                    <div class="document-meta">
+                        作者：${doc.author || '未知'} | 類別：${doc.category || '未分類'}
+                        ${doc.meta ? ` | ${doc.meta.words}` : ''}
+                    </div>
+                    <div class="document-preview">
+                        ${doc.meta?.preview || (doc.ContentChinese || doc.ContentTibetan || doc.ContentEnglish || '').substring(0, 100).replace(/<[^>]+>/g, '')}...
+                    </div>
+                    <div class="document-card-actions">
+                        <button class="btn" onclick="event.stopPropagation(); openDocument('${doc.id}');">📖 閱讀全文</button>
+                        <button class="btn admin-only" onclick="event.stopPropagation(); editDocument('${doc.id}');" 
+                                style="background: rgba(255, 215, 0, 0.2); border-color: var(--text-accent);">✎ 編輯</button>
+                        <button class="btn admin-only" onclick="event.stopPropagation(); deleteDocument('${doc.id}');" 
+                                style="background: rgba(220, 53, 69, 0.2); border-color: #dc3545;">🗑️ 刪除</button>
+                        <button class="like-btn reader-only ${favorites.includes(doc.id) ? 'liked' : ''}" 
+                                onclick="event.stopPropagation(); toggleFavorite('${doc.id}', this);" 
+                                title="收藏">❤️</button>
+                    </div>
+                </div>
+            `).join('');
+            
+            // 更新顯示狀態
+            document.querySelectorAll('.document-card .admin-only').forEach(el => {
+                el.style.display = (currentMode === 'edit' && isAdminLoggedIn) ? 'inline-flex' : 'none';
+            });
+            document.querySelectorAll('.document-card .reader-only').forEach(el => {
+                el.style.display = (currentMode === 'read') ? 'inline-flex' : 'none';
+            });
+        }
+
+        // === 收藏功能 ===
+        function loadFavorites() {
+            const storedFavorites = localStorage.getItem('sunbumFavorites');
+            if (storedFavorites) {
+                try {
+                    favorites = JSON.parse(storedFavorites);
+                } catch (e) {
+                    console.error('載入收藏失敗:', e);
+                    favorites = [];
+                }
+            }
+        }
+
+        function saveFavorites() {
+            localStorage.setItem('sunbumFavorites', JSON.stringify(favorites));
+        }
+
+        function toggleFavorite(docId, btnElement) {
+            const index = favorites.indexOf(docId);
+            if (index > -1) {
+                favorites.splice(index, 1);
+                btnElement.classList.remove('liked');
+                showMessage('已取消收藏', 'info');
+            } else {
+                favorites.push(docId);
+                btnElement.classList.add('liked');
+                showMessage('已加入收藏！', 'success');
+            }
+            saveFavorites();
+            updateFavoritesList();
+        }
+
+        function removeFavorite(docId) {
+            const index = favorites.indexOf(docId);
+            if (index > -1) {
+                favorites.splice(index, 1);
+                saveFavorites();
+            }
+        }
+
+        function updateFavoritesList() {
+            const container = document.getElementById('favoritesListContainerEl');
+            if (favorites.length === 0) {
+                container.innerHTML = '<p style="opacity:0.7;padding:1rem;">暫無收藏文章。</p>';
+                return;
+            }
+            
+            container.innerHTML = favorites.map(favId => {
+                const doc = documentsData.find(d => d.id === favId);
+                return doc ? `
+                    <div class="favorite-item" onclick="openDocument('${doc.id}'); toggleUtilitySidebar();" 
+                         style="padding:0.8rem;margin-bottom:0.5rem;background:rgba(255,255,255,0.1);border-radius:var(--border-radius-small);cursor:pointer;transition:all 0.3s ease;"
+                         onmouseover="this.style.background='rgba(255,255,255,0.2)'"
+                         onmouseout="this.style.background='rgba(255,255,255,0.1)'">
+                        ${doc.chineseTitle || doc.tibetanTitle || '未知文稿'}
+                    </div>
+                ` : '';
+            }).join('');
+        }
+
+        function showFavorites() {
+            const favContainer = document.getElementById('favoritesListContainerEl');
+            const isVisible = favContainer.style.display !== 'none';
+            favContainer.style.display = isVisible ? 'none' : 'block';
+            if (!isVisible) updateFavoritesList();
+        }
+
+        // === 文檔模態框 ===
+        function openDocument(docId) {
+            const doc = documentsData.find(d => d.id === docId);
+            if (!doc) {
+                showMessage('找不到該文件', 'error');
+                return;
+            }
+            
+            currentOpenDocId = docId;
+            
+            // 設置標題
+            document.querySelector('#modalHeaderContent .modal-document-title-zh').textContent = doc.chineseTitle || '';
+            document.querySelector('#modalHeaderContent .modal-document-title-bo').textContent = doc.tibetanTitle || '';
+            document.querySelector('#modalHeaderContent .modal-document-title-en').textContent = doc.englishTitle || '';
+            
+            // 設置內容
+            const tibetanDiv = document.getElementById('modalTibetanContentEl');
+            const chineseDiv = document.getElementById('modalChineseContentEl');
+            const englishDiv = document.getElementById('modalEnglishContentEl');
+            
+            const hasTibetan = doc.ContentTibetan && doc.ContentTibetan.replace(/<[^>]+>|\s+/g, '') !== '';
+            const hasChinese = doc.ContentChinese && doc.ContentChinese.replace(/<[^>]+>|\s+/g, '') !== '';
+            const hasEnglish = doc.ContentEnglish && doc.ContentEnglish.replace(/<[^>]+>|\s+/g, '') !== '';
+            
+            tibetanDiv.innerHTML = hasTibetan ? 
+                `<h4>藏文原文</h4>${doc.ContentTibetan}` : 
+                `<h4>藏文原文</h4><p style="opacity:0.7;">暫無藏文內容</p>`;
+                
+            chineseDiv.innerHTML = hasChinese ? 
+                `<h4>中文翻譯</h4>${doc.ContentChinese}` : 
+                `<h4>中文翻譯</h4><p style="opacity:0.7;">暫無中文內容</p>`;
+                
+            englishDiv.innerHTML = hasEnglish ? 
+                `<h4>English Translation</h4>${doc.ContentEnglish}` : 
+                `<h4>English Translation</h4><p style="opacity:0.7;">No English content.</p>`;
+            
+            // 設置元數據
+            const metaInfo = [
+                `<strong>作者：</strong>${doc.author || '未知'}`,
+                `<strong>類別：</strong>${doc.category || '未分類'}`
+            ];
+            
+            if (doc.tags && doc.tags.length) {
+                metaInfo.push(`<strong>標籤：</strong>${doc.tags.join(', ')}`);
+            }
+            
+            if (doc.meta) {
+                metaInfo.push(`<strong>字數：</strong>${doc.meta.words}`);
+                metaInfo.push(`<strong>閱讀時間：</strong>${doc.meta.readTime}`);
+            }
+            
+            document.getElementById('modalMetaContent').innerHTML = metaInfo.join(' | ');
+            
+            // 更新語言切換器
+            updateLanguageSwitcher(doc.availableLanguages || [], docId);
+            
+            // 選擇默認顯示語言
+            let initialLang = '';
+            if (hasTibetan && hasChinese) initialLang = 'bo-zh';
+            else if (hasTibetan) initialLang = 'bo';
+            else if (hasChinese) initialLang = 'zh';
+            else if (hasEnglish) initialLang = 'en';
+            
+            if (initialLang) {
+                showLanguage(docId, initialLang);
+            }
+            
+            showModal('documentModal');
+        }
+
+        function updateLanguageSwitcher(availableLangs, docId) {
+            const switcherEl = document.getElementById('languageSwitcherModal');
+            switcherEl.innerHTML = '';
+            
+            const langMap = { bo: '藏文', zh: '中文', en: 'English' };
+            
+            const hasContent = (lang) => {
+                const doc = documentsData.find(d => d.id === docId);
+                if (!doc) return false;
+                if (lang === 'bo') return doc.ContentTibetan && doc.ContentTibetan.replace(/<[^>]+>|\s+/g, '') !== '';
+                if (lang === 'zh') return doc.ContentChinese && doc.ContentChinese.replace(/<[^>]+>|\s+/g, '') !== '';
+                if (lang === 'en') return doc.ContentEnglish && doc.ContentEnglish.replace(/<[^>]+>|\s+/g, '') !== '';
+                return false;
+            };
+            
+            // 單語言按鈕
+            availableLangs.forEach(lang => {
+                if (langMap[lang] && hasContent(lang)) {
+                    const btn = document.createElement('button');
+                    btn.textContent = langMap[lang];
+                    btn.onclick = () => showLanguage(docId, lang);
+                    btn.dataset.langCode = lang;
+                    btn.className = 'language-switcher-modal button';
+                    switcherEl.appendChild(btn);
+                }
+            });
+            
+            // 對照按鈕
+            const bilingualOptions = [
+                { code: 'bo-zh', label: '藏中對照', langs: ['bo', 'zh'] },
+                { code: 'bo-en', label: '藏英對照', langs: ['bo', 'en'] },
+                { code: 'zh-en', label: '中英對照', langs: ['zh', 'en'] }
+            ];
+            
+            bilingualOptions.forEach(option => {
+                if (option.langs.every(lang => availableLangs.includes(lang) && hasContent(lang))) {
+                    const btn = document.createElement('button');
+                    btn.textContent = option.label;
+                    btn.onclick = () => showLanguage(docId, option.code);
+                    btn.dataset.langCode = option.code;
+                    btn.className = 'language-switcher-modal button';
+                    switcherEl.appendChild(btn);
+                }
+            });
+            
+            if (switcherEl.children.length === 0) {
+                switcherEl.innerHTML = '<p style="opacity:0.7;">此文獻暫無內容可供顯示。</p>';
+            }
+        }
+
+        function showLanguage(docId, langCode) {
+            const doc = documentsData.find(d => d.id === docId);
+            if (!doc) return;
+            
+            const tibetanDiv = document.getElementById('modalTibetanContentEl');
+            const chineseDiv = document.getElementById('modalChineseContentEl');
+            const englishDiv = document.getElementById('modalEnglishContentEl');
+            const sep1 = document.getElementById('modalLanguageSeparator');
+            const sep2 = document.getElementById('modalLanguageSeparator2');
+            
+            // 隱藏所有內容
+            [tibetanDiv, chineseDiv, englishDiv].forEach(d => d.style.display = 'none');
+            [sep1, sep2].forEach(s => s.style.display = 'none');
+            
+            // 更新活動按鈕
+            document.getElementById('languageSwitcherModal').querySelectorAll('button').forEach(b => {
+                b.classList.remove('active');
+                if (b.dataset.langCode === langCode) b.classList.add('active');
+            });
+            
+            const hasTibetan = doc.ContentTibetan && doc.ContentTibetan.replace(/<[^>]+>|\s+/g, '') !== '';
+            const hasChinese = doc.ContentChinese && doc.ContentChinese.replace(/<[^>]+>|\s+/g, '') !== '';
+            const hasEnglish = doc.ContentEnglish && doc.ContentEnglish.replace(/<[^>]+>|\s+/g, '') !== '';
+            
+            // 根據語言代碼顯示內容
+            if (langCode === 'bo' && hasTibetan) {
+                tibetanDiv.style.display = 'block';
+            } else if (langCode === 'zh' && hasChinese) {
+                chineseDiv.style.display = 'block';
+            } else if (langCode === 'en' && hasEnglish) {
+                englishDiv.style.display = 'block';
+            } else if (langCode === 'bo-zh') {
+                if (hasTibetan) tibetanDiv.style.display = 'block';
+                if (hasTibetan && hasChinese) sep1.style.display = 'block';
+                if (hasChinese) chineseDiv.style.display = 'block';
+            } else if (langCode === 'bo-en') {
+                if (hasTibetan) tibetanDiv.style.display = 'block';
+                if (hasTibetan && hasEnglish) sep1.style.display = 'block';
+                if (hasEnglish) englishDiv.style.display = 'block';
+            } else if (langCode === 'zh-en') {
+                if (hasChinese) chineseDiv.style.display = 'block';
+                if (hasChinese && hasEnglish) sep1.style.display = 'block';
+                if (hasEnglish) englishDiv.style.display = 'block';
+            }
+        }
+
+        // === 管理員操作 ===
+        async function addNewDocument() {
+            const newDocData = {
+                tibetanTitle: prompt("輸入新文檔的藏文標題:", "新藏文標題") || "未命名藏文文稿",
+                chineseTitle: prompt("輸入新文檔的中文標題:", "新中文標題") || "未命名中文文稿",
+                englishTitle: prompt("輸入新文檔的英文標題:", "New English Title") || "",
+                author: prompt("輸入作者:", "管理員") || "未知作者",
+                category: prompt("輸入分類:", "新分類") || "未分類",
+                tags: (prompt("輸入標籤 (逗號分隔):", "新標籤,測試") || "").split(',').map(t => t.trim()).filter(t => t),
+                ContentTibetan: `<p class='tibetan-text'>${prompt("輸入藏文內容:", "此處為藏文內容...") || ""}</p>`,
+                ContentChinese: `<p class='chinese-text'>${prompt("輸入中文內容:", "此處為中文內容...") || ""}</p>`,
+                ContentEnglish: `<p class='english-text'>${prompt("輸入英文內容:", "English content here...") || ""}</p>`,
+                availableLanguages: [],
+                status: "draft"
+            };
+            
+            // 檢查可用語言
+            if (newDocData.ContentTibetan.replace(/<[^>]+>|\s+/g, '') !== '') newDocData.availableLanguages.push('bo');
+            if (newDocData.ContentChinese.replace(/<[^>]+>|\s+/g, '') !== '') newDocData.availableLanguages.push('zh');
+            if (newDocData.ContentEnglish.replace(/<[^>]+>|\s+/g, '') !== '') newDocData.availableLanguages.push('en');
+            
+            if (!newDocData.chineseTitle && !newDocData.tibetanTitle) {
+                showMessage('必須至少提供一個標題。', 'error');
+                return;
+            }
+
+            console.log("準備新增文獻 (將發送到後端):", newDocData);
+            showMessage('正在嘗試新增文獻到伺服器...', 'info');
+            
+            try {
+                const headers = { 'Content-Type': 'application/json' };
+                if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+                
+                const response = await fetch(`${API_BASE_URL}/api/documents`, {
+                    method: 'POST',
+                    headers,
+                    body: JSON.stringify(newDocData)
+                });
+                
+                if (!response.ok) throw new Error(`伺服器錯誤: ${response.status}`);
+                const savedDoc = await response.json();
+
+                documentsData.unshift(savedDoc);
+                renderDocuments();
+                renderSidebar();
+                showMessage(`文獻 "${savedDoc.chineseTitle || savedDoc.tibetanTitle}" 已成功新增。`, 'success');
+                openDocument(savedDoc.id);
+            } catch (error) {
+                console.error("新增文獻失敗:", error);
+                showMessage(`新增文獻失敗: ${error.message}`, 'error');
+            }
+        }
+
+        async function editDocument(docId) {
+            const doc = documentsData.find(d => d.id === docId);
+            if (!doc) {
+                showMessage('找不到要編輯的文獻', 'error');
+                return;
+            }
+
+            const updatedData = { ...doc };
+            const newChineseTitle = prompt("編輯中文標題:", updatedData.chineseTitle);
+            if (newChineseTitle !== null) updatedData.chineseTitle = newChineseTitle;
+
+            console.log(`準備更新文獻 ${docId} (將發送到後端):`, updatedData);
+            showMessage(`正在嘗試更新文獻 "${docId}" 到伺服器...`, 'info');
+            
+            try {
+                const headers = { 'Content-Type': 'application/json' };
+                if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+                
+                const response = await fetch(`${API_BASE_URL}/api/documents/${docId}`, {
+                    method: 'PUT',
+                    headers,
+                    body: JSON.stringify(updatedData)
+                });
+                
+                if (!response.ok) throw new Error(`伺服器錯誤: ${response.status}`);
+                const savedDoc = await response.json();
+
+                const index = documentsData.findIndex(d => d.id === docId);
+                if (index > -1) documentsData[index] = savedDoc;
+
+                renderDocuments();
+                renderSidebar();
+                if (currentOpenDocId === docId && document.getElementById('documentModal').classList.contains('active')) {
+                    openDocument(docId);
+                }
+                showMessage(`文獻 "${savedDoc.chineseTitle || savedDoc.tibetanTitle}" 已成功更新。`, 'success');
+            } catch (error) {
+                console.error(`更新文獻 ${docId} 失敗:`, error);
+                showMessage(`更新文獻失敗: ${error.message}`, 'error');
+            }
+        }
+
+        async function deleteDocument(docId) {
+            const doc = documentsData.find(d => d.id === docId);
+            if (!doc) {
+                showMessage('找不到要刪除的文獻', 'error');
+                return;
+            }
+
+            if (confirm(`確定要永久刪除文稿 "${doc.chineseTitle || doc.tibetanTitle}" 嗎？此操作無法復原。`)) {
+                console.log(`準備刪除文獻 ${docId} (將發送到後端)`);
+                showMessage(`正在嘗試從伺服器刪除文獻 "${docId}"...`, 'info');
+                
+                try {
+                    const headers = {};
+                    if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+                    
+                    const response = await fetch(`${API_BASE_URL}/api/documents/${docId}`, {
+                        method: 'DELETE',
+                        headers
+                    });
+                    
+                    if (!response.ok) throw new Error(`伺服器錯誤: ${response.status}`);
+
+                    documentsData = documentsData.filter(d => d.id !== docId);
+                    renderDocuments();
+                    renderSidebar();
+                    showMessage('文獻已成功刪除。', 'success');
+                    if (currentOpenDocId === docId) closeModal('documentModal');
+                    removeFavorite(docId);
+                    updateFavoritesList();
+                } catch (error) {
+                    console.error(`刪除文獻 ${docId} 失敗:`, error);
+                    showMessage(`刪除文獻失敗: ${error.message}`, 'error');
+                }
+            }
+        }
+
+        // === 錯誤回報 ===
+        async function submitErrorReport(reportData) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/report-error`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(reportData)
+                });
+
+                if (!response.ok) {
+                    const errorResult = await response.json().catch(() => ({ message: `伺服器錯誤: ${response.status}` }));
+                    throw new Error(errorResult.message || `伺服器錯誤: ${response.status}`);
+                }
+
+                const result = await response.json();
+                return result;
+            } catch (error) {
+                console.error("提交錯誤回報失敗:", error);
+                throw error;
+            }
+        }
+
+        function openReportErrorModal() {
+            const form = document.getElementById('reportErrorForm');
+            form.reset();
+            document.getElementById('errorReportPageUrl').value = window.location.href;
+            
+            let context = "";
+            if (currentOpenDocId && document.getElementById('documentModal').classList.contains('active')) {
+                const doc = documentsData.find(d => d.id === currentOpenDocId);
+                if (doc) {
+                    document.getElementById('errorReportDocId').value = currentOpenDocId;
+                    const activeLangBtn = document.querySelector('#languageSwitcherModal button.active');
+                    let contentToSample = "";
+                    if (activeLangBtn) {
+                        const langCode = activeLangBtn.dataset.langCode;
+                        if (langCode.includes('bo') && doc.ContentTibetan) contentToSample = doc.ContentTibetan;
+                        else if (langCode.includes('zh') && doc.ContentChinese) contentToSample = doc.ContentChinese;
+                        else if (langCode.includes('en') && doc.ContentEnglish) contentToSample = doc.ContentEnglish;
+                    }
+                    if (!contentToSample && doc.ContentChinese) contentToSample = doc.ContentChinese;
+                    if (contentToSample) {
+                        context = contentToSample.replace(/<[^>]+>/g, ' ').trim().substring(0, 150) + "...";
+                    }
+                }
+            } else {
+                document.getElementById('errorReportDocId').value = "N/A (非特定文稿)";
+                context = "用戶在主列表頁面回報問題。";
+            }
+            document.getElementById('errorReportContext').value = context || "無法自動截取內容。";
+            showModal('reportErrorModal');
+        }
+
+        // === 工具函數 ===
+        function showTools() {
+            toggleUtilitySidebar();
+        }
+
+        function showInfo(title) {
+            const infoContent = {
+                '關於我們': `才旺諾布文集閱覽館
+
+這是一個致力於保存和傳播才旺諾布大師珍貴文獻的數位平台。我們的使命是讓更多人能夠接觸到這些寶貴的精神財富，促進藏傳佛教文化的傳承與交流。
+
+我們的願景：
+• 數位化保存珍貴文獻
+• 提供多語言對照閱讀
+• 促進學術研究與交流
+• 傳承與弘揚佛法智慧
+
+感謝您對我們工作的支持與關注。`,
+
+                '編者的話': `編者的話
+
+在數位時代的今天，我們深感有責任將才旺諾布大師的珍貴教法以現代化的方式呈現給廣大讀者。這個閱覽館的建立，是我們對傳統文化傳承的一份貢獻。
+
+編輯原則：
+• 忠實原文，準確翻譯
+• 多語言對照，便於理解
+• 數位化呈現，方便檢索
+• 開放共享，利益眾生
+
+我們將持續努力，不斷完善這個平台，為所有對藏傳佛教文化感興趣的朋友提供更好的學習資源。
+
+編輯委員會
+2025年`,
+
+                '參考資源': `參考資源
+
+相關網站：
+• 噶陀仁珍千寶官方網站：http://www.rigzin-chenpo.org
+• Facebook 粉絲專頁：https://www.facebook.com/rigzinchenpoassociation
+
+學術資源：
+• 藏傳佛教數位圖書館
+• 相關研究論文集
+• 學術會議資料
+
+技術支援：
+• 藏文輸入法工具
+• 數位化文獻標準
+• 多媒體呈現技術
+
+如需更多資源或有任何建議，請隨時與我們聯繫。`
+            };
+            
+            showInfoModal(title, infoContent[title] || '內容準備中...');
+        }
+
+        function showInfoModal(title, content) {
+            let modal = document.getElementById('infoModal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'infoModal';
+                modal.className = 'modal';
+                modal.innerHTML = `
+                    <div class="modal-content" style="max-width: 700px;">
+                        <button class="modal-close" onclick="closeModal('infoModal')">×</button>
+                        <h2 id="infoModalTitle" style="margin-bottom: 2rem; font-family: var(--chinese-title-font); text-align: center;"></h2>
+                        <div id="infoModalContent" style="line-height: 1.8; white-space: pre-wrap; font-family: var(--chinese-content-font);"></div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            }
+            
+            document.getElementById('infoModalTitle').textContent = title;
+            document.getElementById('infoModalContent').textContent = content;
+            showModal('infoModal');
+        }
+
+        function showUtilityModal(modalType, title) {
+            if (modalType === 'donateModal') {
+                const donateContent = `發心贊助帳號
+
+1、戶名：中華民國噶陀仁珍千寶佛學會
+   郵局劃撥帳號：18856281
+
+2、轉帳或匯款銀行：台北富邦商業銀行信義分行
+   戶名：中華民國噶陀仁珍千寶佛學會 / 紀靜宜
+   Swift Code：TPBKTWTP460
+   銀行帳號：460-210836692
+
+3、海外匯款：
+   Beneficiary：Kathog Rigzin Chenpo Dharma Association
+   Bank：TAIPEI FUBON COMMERCIAL BANK CO., LTD (Hsinyi Branch)
+   Swift Code：TPBKTWTP460
+   Account No.：460-210836692
+
+感謝您的護持與支持！`;
+                
+                showInfoModal(title, donateContent);
+            } else {
+                showMessage(`${title} 功能開發中...`, 'info');
+            }
+        }
+
+        function contactSupport() {
+            const contactContent = `聯繫客服
+
+📞 電話：0968-500586; 0906357073
+
+📧 Email：rigzinsungbum@gmail.com
+
+📍 地址：No. 322, Shenqing Rd., Shengang Dist., 
+        Taichung City 429014, Taiwan (R.O.C.)
+
+🕒 服務時間：
+   週一至週五 09:00~17:00
+   週末 10:00~15:00
+
+歡迎您隨時與我們聯繫，我們將竭誠為您服務。`;
+            
+            showInfoModal('聯繫客服', contactContent);
+        }
+
+        // === 事件監聽器 ===
+        document.addEventListener('DOMContentLoaded', function() {
+            // 載入收藏
+            loadFavorites();
+
+            // 檢查是否有保存的認證令牌
+            const savedToken = localStorage.getItem('adminAuthToken');
+            if (savedToken) {
+                authToken = savedToken;
+                // 這裡可以加入令牌驗證邏輯
+            }
+
+            // 管理員登入表單
+            document.getElementById('adminLoginForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const username = document.getElementById('adminUsername').value;
+                const password = document.getElementById('adminPassword').value;
+                const submitBtn = e.target.querySelector('button[type="submit"]');
+                
+                setLoading(submitBtn, true);
+                showMessage('正在登入...', 'info');
+                
+                try {
+                    await adminLogin(username, password);
+                    closeModal('adminLoginModal');
+                    showMessage('管理員登入成功！', 'success');
+                    enterMode('edit');
+                } catch (error) {
+                    showMessage(`登入失敗: ${error.message}`, 'error');
+                } finally {
+                    setLoading(submitBtn, false);
+                }
+            });
+
+            // 搜尋功能
+            document.getElementById('searchInputEl').addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase().trim();
+                
+                if (!searchTerm) {
+                    renderDocuments(documentsData);
+                    return;
+                }
+                
+                const filteredDocs = documentsData.filter(doc =>
+                    (doc.tibetanTitle && doc.tibetanTitle.toLowerCase().includes(searchTerm)) ||
+                    (doc.chineseTitle && doc.chineseTitle.toLowerCase().includes(searchTerm)) ||
+                    (doc.englishTitle && doc.englishTitle.toLowerCase().includes(searchTerm)) ||
+                    (doc.author && doc.author.toLowerCase().includes(searchTerm)) ||
+                    (doc.ContentTibetan && doc.ContentTibetan.toLowerCase().includes(searchTerm)) ||
+                    (doc.ContentChinese && doc.ContentChinese.toLowerCase().includes(searchTerm)) ||
+                    (doc.ContentEnglish && doc.ContentEnglish.toLowerCase().includes(searchTerm)) ||
+                    (doc.tags && doc.tags.some(tag => tag.toLowerCase().includes(searchTerm)))
+                );
+                
+                renderDocuments(filteredDocs);
+                document.getElementById('totalCountEl').textContent = filteredDocs.length;
+                
+                if (filteredDocs.length === 0) {
+                    document.getElementById('documentsGridEl').innerHTML = `
+                        <div style="text-align:center;padding:3rem;color:var(--text-light);opacity:0.8;grid-column: 1/-1;">
+                            <h3 style="margin-bottom:1rem;">未找到相關文獻</h3>
+                            <p>沒有找到與 "${searchTerm}" 相關的文獻</p>
+                        </div>
+                    `;
+                }
+            });
+
+            // 檢視模式按鈕
+            document.getElementById('gridViewBtn').addEventListener('click', function() {
+                this.classList.add('active');
+                document.getElementById('listViewBtn').classList.remove('active');
+                document.getElementById('documentsGridEl').style.gridTemplateColumns = 'repeat(auto-fit, minmax(350px, 1fr))';
+            });
+
+            document.getElementById('listViewBtn').addEventListener('click', function() {
+                this.classList.add('active');
+                document.getElementById('gridViewBtn').classList.remove('active');
+                document.getElementById('documentsGridEl').style.gridTemplateColumns = '1fr';
+                showMessage('清單檢視功能開發中...', 'info');
+            });
+
+            // 錯誤回報表單
+            document.getElementById('reportErrorForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const reportData = {
+                    docId: document.getElementById('errorReportDocId').value,
+                    pageUrl: document.getElementById('errorReportPageUrl').value,
+                    context: document.getElementById('errorReportContext').value,
+                    description: document.getElementById('errorReportDescription').value,
+                    userEmail: document.getElementById('errorReportEmail').value
+                };
+
+                if (!reportData.description.trim()) {
+                    showMessage('請填寫問題描述！', 'error');
+                    return;
+                }
+                
+                const submitBtn = e.target.querySelector('button[type="submit"]');
+                setLoading(submitBtn, true);
+                showMessage('正在提交回報...', 'info');
+                
+                try {
+                    const result = await submitErrorReport(reportData);
+                    showMessage(result.message || '感謝您的回報！我們已收到您的訊息。', 'success');
+                    closeModal('reportErrorModal');
+                } catch (error) {
+                    showMessage(`提交回報失敗: ${error.message}`, 'error');
+                } finally {
+                    setLoading(submitBtn, false);
+                }
+            });
+
+            // 模態框背景點擊關閉
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        closeModal(this.id);
+                    }
+                });
+            });
+
+            // ESC 鍵關閉模態框
+            document.addEventListener('keydown', function(e) {
+                if (e.key === "Escape") {
+                    document.querySelectorAll('.modal.active').forEach(modal => {
+                        closeModal(modal.id);
+                    });
+                }
+            });
+
+            // 初始化側邊欄狀態
+            if (window.innerWidth <= 768) {
+                isLeftSidebarActive = false;
+            } else {
+                isLeftSidebarActive = true;
+            }
+            // 反轉狀態然後切換，這樣可以正確設置初始狀態
+            isLeftSidebarActive = !isLeftSidebarActive;
+            toggleLeftSidebar();
+            
+            // 顯示首頁
+            showModeSelectorScreen();
+            updateNavControls();
+        });
+
+        // 窗口大小改變時的響應式處理
+        window.addEventListener('resize', function() {
+            // 在小屏幕上自動關閉側邊欄
+            if (window.innerWidth <= 768 && isLeftSidebarActive) {
+                toggleLeftSidebar();
+            }
+        });
+    </script>
+</body>
+</html>
