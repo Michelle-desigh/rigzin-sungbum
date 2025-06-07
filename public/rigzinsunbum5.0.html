@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>才旺諾布全集閱讀系統</title>
+    <title>才旺諾布文集閱覽館</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tibetan:wght@300;400;500;600;700&family=Noto+Serif+TC:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         @font-face {
@@ -14,6 +14,11 @@
         @font-face {
             font-family: 'WenDingCuXingKai';
             src: url('fonts/文鼎粗行楷.woff2') format('woff2'); /* 確保路徑正確 */
+            font-weight: normal; font-style: normal; font-display: swap;
+        }      
+        @font-face {
+            font-family: 'GaramondUSI';
+            src: url('fonts/GaramondUSI.ttf') format('ttf'); /* 假設字體文件名和路徑 */
             font-weight: normal; font-style: normal; font-display: swap;
         }
         @font-face {
@@ -38,7 +43,7 @@
             --text-like: #e74c3c; /* 喜歡的紅色 */
             --tibetan-title-font: 'Monlam Uni Chouk', 'Noto Sans Tibetan', serif;
             --chinese-title-font: 'WenDingCuXingKai', 'Noto Serif TC', serif;
-            --english-font: 'ACaslonPro', 'Inter', sans-serif; /* 英文主要字體 */
+            --english-font: 'GaramondUSI', 'ACaslonPro', 'Inter', sans-serif; /* 英文主要字體 */
             --chinese-content-font: 'HuaKangFangSongW6', 'Noto Serif TC', serif; /* 中文內容字體 */
             --border-radius-main: 10px;
             --border-radius-small: 5px;
@@ -399,11 +404,11 @@
 
     <div id="modeSelectorScreen">
         <div class="mode-selector-content">
-            <h1 class="main-title">才旺諾布全集閱讀系統</h1>
+            <h1 class="main-title">才旺諾布文集閱覽館</h1>
             <p class="tibetan-subtitle">༄༅། །ཚེ་དབང་ནོར་བུའི་གསུང་འབུམ་ཀློག་སྟེགས།</p>
-            <p class="english-subtitle">Tsewang Norbu Complete Works Reading System</p>
+            <p class="english-subtitle">Tsewang Norbu's Collected Works</p>
             <div class="mode-buttons">
-                <button class="mode-button" onclick="enterMode('read')">📖 開始閱讀</button>
+                <button class="mode-button" onclick="enterMode('read')">📖 進入閱覽</button>
             </div>
         </div>
     </div>
@@ -422,9 +427,9 @@
         <main class="main-content" id="mainContentArea">
              <div class="container">
                 <header class="header">
-                    <h1>才旺諾布全集閱讀系統</h1>
+                    <h1>才旺諾布文集閱覽館</h1>
                     <p class="tibetan-subtitle-header">༄༅། །ཚེ་དབང་ནོར་བུའི་གསུང་འབུམ་ཀློག་སྟེགས།</p>
-                    <p>Tsewang Norbu Complete Works Reading System</p>
+                    <p>Tsewang Norbu's Colected Works</p>
                 </header>
                 <div class="search-section">
                     <div class="search-container">
@@ -446,12 +451,12 @@
 
         <aside class="utility-sidebar" id="utilitySidebarEl">
             <div class="utility-sidebar-header">
-                <h3 class="utility-sidebar-title">✆✉♡♥</h3>
+                <h3 class="utility-sidebar-title">✆✉❀✿</h3>
                 <button class="modal-close" onclick="toggleUtilitySidebar()">×</button>
             </div>
             <div class="utility-sidebar-content">
                 <div class="utility-item" onclick="showFavorites()">
-                    <span class="utility-item-icon">♥</span> 已收藏文章
+                    <span class="utility-item-icon">✿</span> 已收藏文章
                 </div>
                 <div id="favoritesListContainerEl" style="display:none; padding: 0.5rem 1rem;">
                     <!-- Favorite items will be listed here -->
@@ -544,7 +549,7 @@
             <a href="https://www.facebook.com/rigzinchenpoassociation/?locale=zh_TW" target="_blank" title="Facebook">ⓕ</a>
             <a href="http://www.rigzin-chenpo.org/index2.html" target="_blank" title="Website">🏠︎</a>
         </div>
-        <div class="copyright">噶陀仁珍千寶 © 2025 才旺諾布全集 All Rights Reserved</div>
+        <div class="copyright">噶陀仁珍千寶 © 2025 才旺諾布文集 All Rights Reserved</div>
     </footer>
 
     <script>
@@ -628,9 +633,9 @@
             if (currentMode === 'edit' && isAdminLoggedIn) {
                 navRight.innerHTML = `<button class="top-nav-btn admin-only" onclick="addNewDocument()">✨ 新增</button><div style="color:var(--text-light); display:flex; align-items:center; gap:0.3rem; font-size:13px;" class="admin-only"><span>管理員</span><div style="width:18px; height:18px; background:var(--text-accent); border-radius:50%; text-align:center; line-height:18px; font-weight:bold; font-size:11px;">A</div></div><button class="top-nav-btn admin-only" onclick="adminLogout()">登出</button>`;
             } else if (currentMode === 'read') {
-                navRight.innerHTML = `<button class="top-nav-btn reader-only" onclick="showTools()">✆✉♡♥</button><button class="top-nav-btn" onclick="enterMode('edit')">登入</button>`;
+                navRight.innerHTML = `<button class="top-nav-btn reader-only" onclick="showTools()">✆✉❀✿</button><button class="top-nav-btn" onclick="enterMode('edit')">登入</button>`;
             } else { 
-                navRight.innerHTML = `<button class="top-nav-btn" onclick="showTools()">✆✉♡♥</button><button class="top-nav-btn" onclick="enterMode('edit')">登入</button>`;
+                navRight.innerHTML = `<button class="top-nav-btn" onclick="showTools()">✆✉❀✿</button><button class="top-nav-btn" onclick="enterMode('edit')">登入</button>`;
             }
             document.querySelectorAll('.admin-only').forEach(el => el.style.display = (currentMode === 'edit' && isAdminLoggedIn) ? 'inline-flex' : 'none');
             document.querySelectorAll('.reader-only').forEach(el => el.style.display = (currentMode === 'read') ? (el.tagName === 'BUTTON' ? 'inline-flex' : 'block') : 'none');
@@ -880,7 +885,7 @@
                         <a href="javascript:void(0)" class="btn" onclick="event.stopPropagation(); openDocument('${doc.id}');">閱讀全文</a>
                         <button class="btn admin-only" onclick="event.stopPropagation(); editDocument('${doc.id}');" style="background: rgba(255, 215, 0, 0.2); border-color: var(--text-accent);">✎ 編輯</button>
                         <button class="btn admin-only" onclick="event.stopPropagation(); deleteDocument('${doc.id}');" style="background: rgba(220, 53, 69, 0.2); border-color: #dc3545;">🗙 刪除</button>
-                        <button class="like-btn reader-only ${favorites.includes(doc.id) ? 'liked' : ''}" onclick="event.stopPropagation(); toggleFavorite('${doc.id}', this);" title="收藏">♥</button>
+                        <button class="like-btn reader-only ${favorites.includes(doc.id) ? 'liked' : ''}" onclick="event.stopPropagation(); toggleFavorite('${doc.id}', this);" title="收藏">✿</button>
                     </div>
                 </div>
             `).join('');
@@ -1118,7 +1123,7 @@
 
 Email：（待補充）
 
-地址：（待補充）
+A：（待補充）
 
 服務時間：（待補充）`;
             
