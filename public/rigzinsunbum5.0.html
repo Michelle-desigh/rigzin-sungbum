@@ -8,27 +8,27 @@
     <style>
         @font-face {
             font-family: 'Monlam Uni Chouk';
-            src: url('fonts/Monlam Uni Chouk.woff2') format('woff2'); /* 確保路徑正確 */
+            src: url('fonts/Monlam Uni Chouk.woff2') format('woff2');
             font-weight: normal; font-style: normal; font-display: swap;
         }
         @font-face {
             font-family: 'WenDingCuXingKai';
-            src: url('fonts/文鼎粗行楷.woff2') format('woff2'); /* 確保路徑正確 */
+            src: url('fonts/文鼎粗行楷.woff2') format('woff2');
             font-weight: normal; font-style: normal; font-display: swap;
         }      
         @font-face {
             font-family: 'GaramondUSI';
-            src: url('fonts/GaramondUSI.ttf') format('ttf'); /* 假設字體文件名和路徑 */
+            src: url('fonts/GaramondUSI.ttf') format('ttf');
             font-weight: normal; font-style: normal; font-display: swap;
         }
         @font-face {
             font-family: 'ACaslonPro';
-            src: url('fonts/ACaslonPro-Regular.woff2') format('woff2'); /* 假設字體文件名和路徑 */
+            src: url('fonts/ACaslonPro-Regular.woff2') format('woff2');
             font-weight: normal; font-style: normal; font-display: swap;
         }
         @font-face {
             font-family: 'HuaKangFangSongW6';
-            src: url('fonts/HuaKangFangSongW6.woff2') format('woff2'); /* 假設字體文件名和路徑 */
+            src: url('fonts/HuaKangFangSongW6.woff2') format('woff2');
             font-weight: normal; font-style: normal; font-display: swap;
         }
 
@@ -39,20 +39,21 @@
             --glass-bg: rgba(20, 20, 30, 0.65);
             --glass-border: rgba(255, 255, 255, 0.15);
             --text-light: rgba(240, 240, 255, 0.95);
-            --text-accent: #FFD700; /* 金色 */
-            --text-like: #e74c3c; /* 喜歡的紅色 */
+            --text-accent: #FFD700;
+            --text-like: #e74c3c;
             --tibetan-title-font: 'Monlam Uni Chouk', 'Noto Sans Tibetan', serif;
             --chinese-title-font: 'WenDingCuXingKai', 'Noto Serif TC', serif;
-            --english-font: 'GaramondUSI', 'ACaslonPro', 'Inter', sans-serif; /* 英文主要字體 */
-            --chinese-content-font: 'HuaKangFangSongW6', 'Noto Serif TC', serif; /* 中文內容字體 */
+            --english-font: 'GaramondUSI', 'ACaslonPro', 'Inter', sans-serif;
+            --chinese-content-font: 'HuaKangFangSongW6', 'Noto Serif TC', serif;
             --border-radius-main: 10px;
             --border-radius-small: 5px;
         }
 
         body {
-            font-family: var(--english-font); /* 預設用英文字體 */
+            font-family: var(--english-font);
             background: url('background_literature.jpg') no-repeat center center;
             background-size: cover;
+            background-color: #1a1a2e;
             min-height: 100vh;
             color: var(--text-light);
             display: flex;
@@ -89,7 +90,7 @@
             height: 52px;
         }
 
-        .nav-left { display: flex; gap: 10px; align-items: center; } /* Reduced gap slightly */
+        .nav-left { display: flex; gap: 10px; align-items: center; }
         .nav-right { display: flex; gap: 8px; align-items: center; }
         
         .nav-item, .top-nav-btn {
@@ -102,7 +103,7 @@
             background: transparent; 
             border: 1px solid transparent; 
             cursor: pointer;
-            white-space: nowrap; /* Prevent buttons from wrapping */
+            white-space: nowrap;
         }
         #toggleSidebarBtn { font-size: 1.2rem; padding: 4px 8px; }
         
@@ -111,7 +112,6 @@
             color: white; 
         }
 
-        /* ... (其他 fadeInUp, modeSelectorScreen, appContainer CSS 不變) ... */
         #modeSelectorScreen { display: flex; flex-direction: column; align-items: center; justify-content: center; flex-grow: 1; text-align: center; position: relative; z-index: 10; }
         .mode-selector-content { background: var(--glass-bg); backdrop-filter: blur(15px); border-radius: var(--border-radius-main); padding: 3rem 2.5rem; border: 1px solid var(--glass-border); box-shadow: 0 10px 35px rgba(0,0,0,0.3); animation: fadeInUp 0.8s ease-out; max-width: 800px; width: 90%;}
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(25px); } to { opacity: 1; transform: translateY(0); } }
@@ -125,7 +125,6 @@
         @keyframes fadeIn { to { opacity: 1; } }
         body.app-active #appContainer { display: flex; }
 
-
         .sidebar {
             width: 300px;
             background: var(--glass-bg); 
@@ -135,9 +134,9 @@
             height: calc(100vh - 52px);
             left: 0; 
             top: 52px;
-            z-index: 200; /* Higher z-index */
+            z-index: 200;
             border-right: 1px solid var(--glass-border);
-            transform: translateX(-100%); /* Initially hidden */
+            transform: translateX(-100%);
             transition: transform 0.3s ease-out;
             border-top-right-radius: var(--border-radius-main);
         }
@@ -151,24 +150,23 @@
 
         .main-content {
             flex: 1; 
-            margin-left: 0; /* Default, sidebar closed */
+            margin-left: 0;
             min-height: calc(100vh - 52px);
             position: relative; 
             transition: margin-left 0.3s ease-out, margin-right 0.3s ease-out;
             padding: 1.5rem;
-            z-index: 50; /* Lower than sidebars */
+            z-index: 50;
         }
-        .main-content.sidebar-active { /* Left sidebar active */
+        .main-content.sidebar-active {
             margin-left: 300px;
         }
-        .main-content.with-right-sidebar { /* Right utility sidebar active */
+        .main-content.with-right-sidebar {
             margin-right: 300px; 
         }
-        .main-content.sidebar-active.with-right-sidebar { /* Both active */
+        .main-content.sidebar-active.with-right-sidebar {
             margin-left: 300px;
             margin-right: 300px;
         }
-
 
         .utility-sidebar {
             width: 300px;
@@ -179,16 +177,16 @@
             height: calc(100vh - 52px);
             right: 0; 
             top: 52px;
-            z-index: 190; /* Higher than main, lower than left sidebar if overlapping */
+            z-index: 190;
             border-left: 1px solid var(--glass-border);
             transition: transform 0.3s ease-out;
             border-top-left-radius: var(--border-radius-main);
-            transform: translateX(100%); /* Initially hidden */
+            transform: translateX(100%);
         }
         .utility-sidebar.active {
             transform: translateX(0);
         }
-        /* ... (utility-sidebar-header, title, content, item styles as before) ... */
+
         .utility-sidebar-header { padding: 1.8rem 1.5rem; position: relative; border-bottom: 1px solid var(--glass-border); }
         .utility-sidebar-title { font-family: var(--chinese-title-font); margin: 0; color: var(--text-light); }
         .utility-sidebar-content { padding: 1rem; }
@@ -198,8 +196,6 @@
         #favoritesListContainerEl .favorite-item { padding: 0.6rem 0.8rem; margin-bottom: 0.3rem; background: rgba(255,255,255,0.08); border-radius: var(--border-radius-small); font-size:0.9em; cursor:pointer; transition: background 0.2s;}
         #favoritesListContainerEl .favorite-item:hover { background: rgba(255,255,255,0.15); }
 
-
-        /* ... (container, header, search, stats-bar, view-controls styles as before) ... */
         .container { max-width: 1300px; margin: 0 auto; }
         .header { text-align: center; margin-bottom: 2.5rem; color: white; }
         .header h1 { font-family: var(--chinese-title-font); font-size: 2.8rem; }
@@ -217,7 +213,7 @@
 
         .documents-grid {
             display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); /* Slightly wider min for cards */
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
             gap: 1.5rem; 
             margin-bottom: 2rem;
         }
@@ -229,7 +225,6 @@
             padding: 1.5rem;
             border: 1px solid var(--glass-border);
             transition: all 0.3s ease;
-            /* cursor: pointer; REMOVED: click handled by "read full" button */
             display: flex;
             flex-direction: column;
         }
@@ -255,7 +250,7 @@
             font-size: 0.85rem;
             opacity: 0.8;
             margin-bottom: 1rem;
-            font-family: var(--english-font); /* Meta info in English font */
+            font-family: var(--english-font);
         }
         .document-preview { 
             font-size: 0.9rem; 
@@ -268,7 +263,7 @@
             flex-grow: 1; 
             max-height: 100px; 
             overflow: hidden;
-            font-family: var(--chinese-content-font); /* Preview in Chinese content font */
+            font-family: var(--chinese-content-font);
         }
         .document-card-actions {
             display: flex;
@@ -280,38 +275,37 @@
             background: none;
             border: none;
             color: var(--text-light);
-            font-size: 1.5rem; /* Larger heart icon */
+            font-size: 1.5rem;
             cursor: pointer;
             padding: 0.3rem;
-            margin-left: auto; /* Push to the right */
+            margin-left: auto;
             transition: color 0.2s, transform 0.2s;
         }
         .like-btn:hover {
             transform: scale(1.1);
         }
         .like-btn.liked {
-            color: var(--text-like); /* Red when liked */
+            color: var(--text-like);
         }
 
-
-        /* ... (btn, admin-only, reader-only, modal, modal-content, modal-close styles as before) ... */
         .btn { padding: 0.7rem 1.5rem; font-size: 0.9rem; border-radius: var(--border-radius-small); justify-content: center; text-align: center; border: 1px solid var(--glass-border); background: rgba(255, 255, 255, 0.1); color: var(--text-light); cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-flex; align-items: center; }
         .btn:hover { background: rgba(255, 255, 255, 0.2); color: white; }
         .admin-only { display: none !important; } 
         .reader-only { display: none !important; }
         body.edit-mode .admin-only { display: inline-flex !important; }
         body.read-mode .reader-only { display: block !important; }
-        body.read-mode .top-nav-btn.reader-only { display: inline-flex !important; } /* For buttons in nav */
-        body.read-mode .document-card-actions .reader-only { display: inline-flex !important; } /* For like button */
-
+        body.read-mode .top-nav-btn.reader-only { display: inline-flex !important; }
+        body.read-mode .document-card-actions .reader-only { display: inline-flex !important; }
 
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 2000; justify-content: center; align-items: center;}
         .modal.active { display: flex; }
         .modal-content { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--border-radius-main); padding: 2rem; max-width: 90vw; max-height: 90vh; overflow-y: auto; position: relative; display: flex; flex-direction: column; }
         .modal-close { position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: var(--text-light); font-size: 1.5rem; cursor: pointer; z-index: 10; }
         
-        /* Error Report Modal Specific Styles */
-        #reportErrorModal .modal-content { max-width: 500px; }
+        /* Error Report Modal Specific Styles - Wider on desktop */
+        #reportErrorModal .modal-content { 
+            max-width: 600px; /* 從 500px 增加到 600px */
+        }
         #reportErrorForm label { display: block; margin-bottom: 0.5rem; font-weight: 500; }
         #reportErrorForm input, #reportErrorForm textarea {
             width: 100%;
@@ -325,15 +319,30 @@
         }
         #reportErrorForm textarea { min-height: 120px; font-family: var(--chinese-content-font); }
 
+        /* Image Gallery Styles */
+        .image-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            padding: 1rem;
+        }
+        .image-gallery img {
+            width: 100%;
+            height: auto;
+            border-radius: var(--border-radius-small);
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        .image-gallery img:hover {
+            transform: scale(1.05);
+        }
 
-        /* ... (footer styles as before) ... */
         footer { text-align: center; padding: 2rem; background: rgba(0, 0, 0, 0.2); color: var(--text-light); font-size: 0.9rem; }
         .social-links { margin-bottom: 1rem; }
         .social-links a { color: var(--text-light); text-decoration: none; margin: 0 1rem; padding: 0.5rem; border-radius: var(--border-radius-small); transition: background 0.2s; }
         .social-links a:hover { background: rgba(255, 255, 255, 0.1); }
 
-
-        /* Language Switcher and Modal Content Styles (with font updates) */
+        /* Language Switcher and Modal Content Styles */
         .language-switcher-modal { margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--glass-border); display: flex; gap: 0.5rem; flex-wrap: wrap; }
         .language-switcher-modal button { padding: 0.5rem 1rem; font-size: 0.9rem; border-radius: var(--border-radius-small); border: 1px solid var(--glass-border); background: rgba(255, 255, 255, 0.1); color: var(--text-light); cursor: pointer; font-family: var(--english-font); }
         .language-switcher-modal button:hover { background: rgba(255, 255, 255, 0.2); }
@@ -347,39 +356,43 @@
         .language-content-container { line-height: 1.8; font-size: 1rem; flex-grow: 1; overflow-y: auto; min-height: 100px; }
         .language-content { margin-bottom: 1.5rem; }
         .language-content h4 { font-family: var(--chinese-title-font); margin-bottom: 0.5rem; color: var(--text-accent); font-size: 1.2rem; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 0.3rem; }
-        .tibetan-text, .tibetan-text p { font-family: 'Noto Sans Tibetan', serif; } /* Ensure p inside also gets Tibetan font */
-        .chinese-text, .chinese-text p { font-family: var(--chinese-content-font); } /* Chinese content font */
-        .english-text, .english-text p { font-family: var(--english-font); } /* English font */
+        .tibetan-text, .tibetan-text p { font-family: 'Noto Sans Tibetan', serif; }
+        .chinese-text, .chinese-text p { font-family: var(--chinese-content-font); }
+        .english-text, .english-text p { font-family: var(--english-font); }
         
         #modalLanguageSeparator, #modalLanguageSeparator2 { border: 0; height: 1px; background: var(--glass-border); margin: 1.5rem 0; }
         #modalMetaContent { margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--glass-border); font-size: 0.9em; opacity: 0.8; flex-shrink: 0; font-family: var(--english-font); }
 
-
         @media (max-width: 768px) {
-            body { padding-top: 48px; } /* Adjusted for potentially taller nav on mobile if items wrap */
+            body { padding-top: 48px; }
             .top-nav { height: auto; padding: 6px 10px; flex-wrap: wrap; justify-content: center; }
-            .nav-left { gap: 5px; margin-bottom: 5px; width: auto; justify-content: flex-start; order:1; flex-grow: 1;} /* Let hamburger be first */
-            #toggleSidebarBtn { order: -1; margin-right: auto;} /* Hamburger first */
+            .nav-left { gap: 5px; margin-bottom: 5px; width: auto; justify-content: flex-start; order:1; flex-grow: 1;}
+            #toggleSidebarBtn { order: -1; margin-right: auto;}
             .nav-right { width: auto; justify-content: flex-end; order:2; flex-grow: 1; }
             .nav-item, .top-nav-btn { font-size: 13px; padding: 5px 8px; }
 
-            .sidebar { width: 260px; height: calc(100vh - 48px); top: 48px; } /* Adjust top if nav height changes */
+            .sidebar { width: 260px; height: calc(100vh - 48px); top: 48px; }
             .main-content.sidebar-active { margin-left: 260px; }
             
             .utility-sidebar { width: 260px; height: calc(100vh - 48px); top: 48px; }
             .main-content.with-right-sidebar { margin-right: 260px; }
             .main-content.sidebar-active.with-right-sidebar { margin-left: 260px; margin-right: 260px;}
 
-
             .main-title { font-size: 2.2rem; white-space: normal; }
             .mode-selector-content { padding: 2rem 1.5rem; }
-            .documents-grid { grid-template-columns: 1fr; } /* Single column on mobile */
+            .documents-grid { grid-template-columns: 1fr; }
             .modal-content { max-width: 95vw; max-height: 95vh; padding: 1.5rem; }
+            
+            /* Error report modal 在手機上保持原始寬度 */
+            #reportErrorModal .modal-content { 
+                max-width: 95vw;
+            }
+            
             .main-title { font-size: 2.5rem; } 
             .tibetan-subtitle { font-size: 1.3rem; }
             .english-subtitle { font-size: 0.9rem; }
         }
-         /* Ensure scrollbar styling is consistent for dark theme */
+        
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); border-radius: 10px; }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
@@ -393,8 +406,10 @@
         <div class="nav-left" id="navLeftLinks">
             <button class="top-nav-btn" id="toggleSidebarBtn" onclick="toggleLeftSidebar()">☰</button>
             <a href="javascript:void(0)" class="nav-item" onclick="showModeSelectorScreen()">回首頁</a>
-            <a href="javascript:void(0)" class="nav-item" onclick="showInfo('關於我們')">關於我們</a>
+            <a href="javascript:void(0)" class="nav-item" onclick="showInfo('才旺諾布')">才旺諾布</a>
             <a href="javascript:void(0)" class="nav-item" onclick="showInfo('編者的話')">編者的話</a>
+            <a href="javascript:void(0)" class="nav-item" onclick="showInfo('古籍抄本')">古籍抄本</a>
+            <a href="javascript:void(0)" class="nav-item" onclick="showInfo('祖寺介紹')">祖寺介紹</a>
             <a href="javascript:void(0)" class="nav-item" onclick="showInfo('參考資源')">參考資源</a>
         </div>
         <div class="nav-right" id="navRightControls">
@@ -416,8 +431,8 @@
     <div id="appContainer">
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
-                <h2 class="sidebar-title">課程目錄</h2>
-                <p class="sidebar-subtitle">སློབ་ཚན་གྱི་དཀར་ཆག</p>
+                <h2 class="sidebar-title">目錄</h2>
+                <p class="sidebar-subtitle">དཀར་ཆག</p>
             </div>
             <nav class="course-menu" id="courseMenuContainer">
                 <div style="padding: 1rem; color: var(--text-light); opacity: 0.8;">載入中...</div>
@@ -429,7 +444,7 @@
                 <header class="header">
                     <h1>才旺諾布文集閱覽館</h1>
                     <p class="tibetan-subtitle-header">༄༅། །ཚེ་དབང་ནོར་བུའི་གསུང་འབུམ་ཀློག་སྟེགས།</p>
-                    <p>Tsewang Norbu's Colected Works</p>
+                    <p>Tsewang Norbu's Collected Works</p>
                 </header>
                 <div class="search-section">
                     <div class="search-container">
@@ -518,7 +533,7 @@
     <div class="modal" id="reportErrorModal">
         <div class="modal-content">
             <button class="modal-close" onclick="closeModal('reportErrorModal')">×</button>
-            <h2 style="margin-bottom: 1.5rem; text-align: center; font-family: var(--chinese-title-font);">回報錯字/問題</h2>
+            <h2 style="margin-bottom: 1.5rem; text-align: center; font-family: var(--chinese-title-font);">回報錯字&問題</h2>
             <form id="reportErrorForm">
                 <input type="hidden" id="errorReportDocId" value="">
                 <div>
@@ -553,17 +568,18 @@
     </footer>
 
     <script>
-        // --- Global Variables (只聲明一次) ---
-        let documentsData = []; // 資料將從後端獲取
+        // --- Global Variables ---
+        let documentsData = [];
         let currentMode = '';
         let isAdminLoggedIn = false;
         let currentOpenDocId = null;
         let isLeftSidebarActive = true;
         let favorites = [];
         let dataLoaded = false;
+        let adminToken = null;
 
         // --- API Base URL ---
-        const API_BASE_URL = ''; // 如果後端與前端同源，則留空
+        const API_BASE_URL = '';
 
         // --- Sidebar Toggle ---
         function toggleLeftSidebar() {
@@ -607,23 +623,24 @@
         function showModeSelectorScreen() {
             currentMode = ''; 
             isAdminLoggedIn = false; 
+            adminToken = null;
+            localStorage.removeItem('adminAuthToken');
             document.getElementById('modeSelectorScreen').style.display = 'flex'; 
             document.getElementById('appContainer').style.display = 'none'; 
             document.body.classList.remove('app-active', 'read-mode', 'edit-mode');
             updateNavControls();
-            // Ensure sidebars are reset if user goes back to home
             if (document.getElementById('sidebar').classList.contains('active') && isLeftSidebarActive) toggleLeftSidebar();
             if (document.getElementById('utilitySidebarEl').classList.contains('active')) toggleUtilitySidebar();
         }
 
         function setupReadMode() {
             document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
-            renderDocuments(); // Re-render to show like buttons
+            renderDocuments();
         }
 
         function setupEditMode() {
             document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'inline-flex');
-            renderDocuments(); // Re-render to show edit/delete buttons
+            renderDocuments();
         }
 
         // --- Nav Controls ---
@@ -656,6 +673,8 @@
         // --- Admin Functions ---
         function adminLogout() {
             isAdminLoggedIn = false; 
+            adminToken = null;
+            localStorage.removeItem('adminAuthToken');
             showMessage('已登出管理員模式', 'info'); 
             currentMode = 'read';
             document.body.classList.remove('edit-mode'); 
@@ -663,6 +682,15 @@
             setupReadMode(); 
             updateNavControls(); 
             renderDocuments();
+        }
+
+        // Helper function to get auth headers
+        function getAuthHeaders() {
+            const headers = { 'Content-Type': 'application/json' };
+            if (adminToken) {
+                headers['Authorization'] = `Bearer ${adminToken}`;
+            }
+            return headers;
         }
 
         async function addNewDocument() {
@@ -695,7 +723,7 @@
             try {
                 const response = await fetch(`${API_BASE_URL}/api/documents`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: getAuthHeaders(),
                     body: JSON.stringify(newDocData)
                 });
                 if (!response.ok) throw new Error(`伺服器錯誤: ${response.status}`);
@@ -729,7 +757,7 @@
             try {
                 const response = await fetch(`${API_BASE_URL}/api/documents/${docId}`, {
                     method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: getAuthHeaders(),
                     body: JSON.stringify(updatedData)
                 });
                 if (!response.ok) throw new Error(`伺服器錯誤: ${response.status}`);
@@ -763,7 +791,8 @@
                 
                 try {
                     const response = await fetch(`${API_BASE_URL}/api/documents/${docId}`, {
-                        method: 'DELETE'
+                        method: 'DELETE',
+                        headers: getAuthHeaders()
                     });
                     if (!response.ok) throw new Error(`伺服器錯誤: ${response.status}`);
 
@@ -1026,26 +1055,45 @@
         function showInfo(title) { 
             // 根據標題顯示對應的內容
             const infoMap = {
-                '關於我們': 'about_us.txt',
-                '編者的話': 'preface.txt',
-                '參考資源': 'reference.txt'
+                '才旺諾布': {
+                    content: 'loading...',
+                    images: 'rigzintsewangnorbu'
+                },
+                '編者的話': {
+                    file: 'preface.txt'
+                },
+                '古籍抄本': {
+                    content: '古籍手稿展示',
+                    images: 'manuscripts'
+                },
+                '祖寺介紹': {
+                    file: 'temple.txt'
+                },
+                '參考資源': {
+                    file: 'reference.txt'
+                }
             };
             
-            const filename = infoMap[title];
-            if (filename) {
-                // 讀取文字檔並顯示在 modal 中
-                fetch(`/${filename}`)
-                    .then(response => {
-                        if (!response.ok) throw new Error('檔案讀取失敗');
-                        return response.text();
-                    })
-                    .then(content => {
-                        showInfoModal(title, content);
-                    })
-                    .catch(error => {
-                        console.error(`無法讀取 ${filename}:`, error);
-                        showMessage(`無法載入${title}內容`, 'error');
-                    });
+            const info = infoMap[title];
+            if (info) {
+                if (info.file) {
+                    // 讀取文字檔
+                    fetch(`/${info.file}`)
+                        .then(response => {
+                            if (!response.ok) throw new Error('檔案讀取失敗');
+                            return response.text();
+                        })
+                        .then(content => {
+                            showInfoModal(title, content);
+                        })
+                        .catch(error => {
+                            console.error(`無法讀取 ${info.file}:`, error);
+                            showMessage(`無法載入${title}內容`, 'error');
+                        });
+                } else if (info.images) {
+                    // 顯示圖片庫
+                    showImageGalleryModal(title, info.images);
+                }
             }
         }
         
@@ -1071,6 +1119,54 @@
             showModal('infoModal');
         }
 
+        async function showImageGalleryModal(title, folder) {
+            let modal = document.getElementById('imageGalleryModal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'imageGalleryModal';
+                modal.className = 'modal';
+                modal.innerHTML = `
+                    <div class="modal-content" style="max-width: 900px;">
+                        <button class="modal-close" onclick="closeModal('imageGalleryModal')">×</button>
+                        <h2 id="galleryModalTitle" style="margin-bottom: 1.5rem; font-family: var(--chinese-title-font);"></h2>
+                        <div id="galleryModalContent" class="image-gallery"></div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            }
+            
+            document.getElementById('galleryModalTitle').textContent = title;
+            const galleryContent = document.getElementById('galleryModalContent');
+            
+            // Show loading message
+            galleryContent.innerHTML = '<p style="text-align:center;">載入圖片中...</p>';
+            
+            try {
+                // Fetch image list from backend
+                const response = await fetch(`${API_BASE_URL}/api/images/${folder}`);
+                if (!response.ok) throw new Error('無法獲取圖片列表');
+                
+                const images = await response.json();
+                
+                if (images.length === 0) {
+                    galleryContent.innerHTML = '<p style="text-align:center;">此資料夾中暫無圖片。</p>';
+                } else {
+                    galleryContent.innerHTML = images.map(img => 
+                        `<img src="/${folder}/${img}" alt="${title}" onclick="openFullscreenImage(this.src)">`
+                    ).join('');
+                }
+            } catch (error) {
+                console.error(`無法載入 ${folder} 圖片:`, error);
+                galleryContent.innerHTML = '<p style="text-align:center; color: var(--text-accent);">無法載入圖片，請稍後再試。</p>';
+            }
+            
+            showModal('imageGalleryModal');
+        }
+
+        function openFullscreenImage(src) {
+            window.open(src, '_blank');
+        }
+
         function showTools() { 
             toggleUtilitySidebar(); 
         }
@@ -1094,17 +1190,11 @@
 
         function showUtilityModal(modalType, title) { 
             if (modalType === 'donateModal') {
-                const donateContent = `發心贊助帳號：
-
+                const donateContent = `
 1、戶名：中華民國噶陀仁珍千寶佛學會
    郵局劃撥帳號：18856281
 
-2、轉帳或匯款銀行：台北富邦商業銀行信義分行
-   戶名：中華民國噶陀仁珍千寶佛學會 / 紀靜宜
-   swift code：TPBKTWTP460
-   銀行帳號：460-210836692
-
-3、海外匯款：
+2、海外匯款：
    Beneficiary：Kathog Rigzin Chenpo Dharma association
    Bank：TAIPEI FUBON COMMERCIAL BANK CO., LTD(Hsinyi Branch)
    swift code：TPBKTWTP460
@@ -1122,7 +1212,7 @@
 
 Email：rigzinsungbum@gmail.com
 
-Adress：No. 322, Shenqing Rd., Shengang Dist., Taichung City 429014, Taiwan (R.O.C.)
+Address：No. 322, Shenqing Rd., Shengang Dist., Taichung City 429014, Taiwan (R.O.C.)
 
 服務時間：週一至週五 9:00~17:00 週末 10:00~15:00`;
             
@@ -1218,18 +1308,47 @@ Adress：No. 322, Shenqing Rd., Shengang Dist., Taichung City 429014, Taiwan (R.
         document.addEventListener('DOMContentLoaded', function() {
             loadFavorites();
 
+            // Check for saved admin token
+            const savedToken = localStorage.getItem('adminAuthToken');
+            if (savedToken) {
+                adminToken = savedToken;
+                // Optionally verify token validity with backend
+            }
+
             // Admin login form
-            document.getElementById('adminLoginForm').addEventListener('submit', function(e) {
-                e.preventDefault(); 
-                const u=document.getElementById('adminUsername').value,
-                      p=document.getElementById('adminPassword').value;
-                if(u==='admin'&&p==='password123'){
-                    isAdminLoggedIn=true;
-                    closeModal('adminLoginModal');
-                    showMessage('管理員登入成功！','success');
-                    enterMode('edit');
-                }else{
-                    showMessage('用戶名或密碼錯誤','error');
+            document.getElementById('adminLoginForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const username = document.getElementById('adminUsername').value;
+                const password = document.getElementById('adminPassword').value;
+
+                showMessage('正在登入...', 'info');
+                try {
+                    const response = await fetch(`${API_BASE_URL}/api/login`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username, password })
+                    });
+
+                    if (!response.ok) {
+                        const errorResult = await response.json().catch(() => ({ message: `登入失敗: ${response.status}` }));
+                        throw new Error(errorResult.message || `登入失敗: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+                    if (result.success && result.token) {
+                        localStorage.setItem('adminAuthToken', result.token);
+                        adminToken = result.token;
+                        isAdminLoggedIn = true;
+                        closeModal('adminLoginModal');
+                        showMessage('管理員登入成功！', 'success');
+                        await enterMode('edit');
+                    } else {
+                        throw new Error(result.message || "登入憑證無效。");
+                    }
+                } catch (error) {
+                    console.error("管理員登入失敗:", error);
+                    showMessage(`登入失敗: ${error.message}`, 'error');
+                    isAdminLoggedIn = false;
                 }
             });
 
@@ -1269,21 +1388,41 @@ Adress：No. 322, Shenqing Rd., Shengang Dist., Taichung City 429014, Taiwan (R.
             });
 
             // Error report form
-            document.getElementById('reportErrorForm').addEventListener('submit', function(e) {
+            document.getElementById('reportErrorForm').addEventListener('submit', async function(e) {
                 e.preventDefault();
-                const docId = document.getElementById('errorReportDocId').value;
-                const pageUrl = document.getElementById('errorReportPageUrl').value;
-                const context = document.getElementById('errorReportContext').value;
-                const description = document.getElementById('errorReportDescription').value;
-                const email = document.getElementById('errorReportEmail').value;
+                const reportData = {
+                    docId: document.getElementById('errorReportDocId').value,
+                    pageUrl: document.getElementById('errorReportPageUrl').value,
+                    context: document.getElementById('errorReportContext').value,
+                    description: document.getElementById('errorReportDescription').value,
+                    userEmail: document.getElementById('errorReportEmail').value
+                };
 
-                if (!description.trim()) {
+                if (!reportData.description.trim()) {
                     showMessage('請填寫問題描述！', 'error');
                     return;
                 }
-                console.log("Error Report Submitted:", { docId, pageUrl, context, description, email });
-                showMessage('感謝您的回報！我們將盡快處理。', 'success');
-                closeModal('reportErrorModal');
+
+                showMessage('正在提交回報...', 'info');
+                try {
+                    const response = await fetch(`${API_BASE_URL}/api/report-error`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(reportData)
+                    });
+
+                    if (!response.ok) {
+                        const errorResult = await response.json().catch(() => ({ message: `伺服器錯誤: ${response.status}` }));
+                        throw new Error(errorResult.message || `伺服器錯誤: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+                    showMessage(result.message || '感謝您的回報！我們將盡快處理。', 'success');
+                    closeModal('reportErrorModal');
+                } catch (error) {
+                    console.error("提交錯誤回報失敗:", error);
+                    showMessage(`提交回報失敗: ${error.message}`, 'error');
+                }
             });
 
             // Close modals with backdrop click or Escape key

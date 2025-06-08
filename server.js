@@ -1,7 +1,11 @@
+require('dotenv').config(); 
 const express = require('express');
 const cors = require('cors');
 const fse = require('fs-extra');
 const path = require('path');
+const nodemailer = require('nodemailer'); // 引入 nodemailer
+const bcrypt = require('bcryptjs'); // 引入 bcryptjs
+const jwt = require('jsonwebtoken'); // 引入 jsonwebtoken
 const app = express();
 const port = process.env.PORT || 3001;
 
@@ -15,6 +19,35 @@ const publicPath = path.join(__dirname, 'public'); // public 資料夾與 server
 
 // --- 伺服前端靜態檔案 ---
 app.use(express.static(publicPath));
+
+// --- 配置 Nodemailer ---
+// 您需要使用一個真實的郵件服務提供商 (SMTP) 的帳戶信息
+// 例如 Gmail, Outlook, SendGrid, Mailgun 等。
+// 出於安全考慮，這些敏感信息 (郵箱用戶名、密碼或 API Key) 應該使用環境變數儲存，
+// 而不是直接硬編碼在程式碼中。
+// 在 Render 的 Environment Variables 中設置這些：
+// MAIL_HOST (e.g., 'smtp.gmail.com')
+// MAIL_PORT (e.g., 587 or 465)
+// MAIL_SECURE (e.g., 'false' for port 587 with TLS, 'true' for port 465 with SSL)
+// MAIL_USER (您的郵箱地址)
+// MAIL_PASS (您的郵箱密碼或應用專用密碼)
+// TO_EMAIL (您接收回報的郵箱地址 - rigzinsungbum@gmail.com)
+
+const transporter = nodemailer.createTransport({
+    host: process.env.MAIL_HOST,
+    port: parseInt(process.env.MAIL_PORT || "587"),
+    secure: process.env.MAIL_SECURE === 'true', // true for 465, false for other ports
+    auth: {
+        user: process.env.MAIL_USER,
+        pass: process.env.MAIL_PASS,
+    },
+    // 如果使用 Gmail，可能需要開啟 "允許低安全性應用程式存取權限"
+    // 或者生成 "應用程式密碼" (App Password) 來代替您的常規密碼。
+    // 對於其他服務如 SendGrid，通常使用 API Key。
+    tls: {
+        rejectUnauthorized: false // 在某些環境下可能需要，但要注意安全性
+    }
+});
 
 // --- Meta Calculation Helper Function ---
 function calculateMeta(tibetanContentHtml, chineseContentHtml, englishContentHtml = "") {
@@ -42,7 +75,6 @@ function calculateMeta(tibetanContentHtml, chineseContentHtml, englishContentHtm
         plainEnglish = englishContentHtml.replace(/<[^>]+>/g, "").trim();
     }
     const englishWords = plainEnglish.split(/\s+/).filter(s => s.trim().length > 0).length;
-
 
     if (plainTibetan.length > 0) {
         meta.preview = plainTibetan.substring(0, 80) + (plainTibetan.length > 80 ? '...' : '');
@@ -186,6 +218,56 @@ async function saveAllDocuments(documents) {
     }
 }
 
+// --- 環境變數中設置管理員帳密和 JWT 密鑰 ---
+// 在 Render Environment Variables 中設置:
+// ADMIN_USERNAME=your_admin_username
+// ADMIN_PASSWORD_HASH=your_generated_bcrypt_hash  (不要直接存密碼)
+// JWT_SECRET=a_very_strong_and_random_secret_key_for_jwt
+
+// --- 登入 API 端點 ---
+app.post('/api/login', async (req, res) => {
+    const { username, password } = req.body;
+
+    // 從環境變數獲取正確的管理員用戶名和哈希後的密碼
+    const adminUser = process.env.ADMIN_USERNAME;
+    const adminPassHash = process.env.ADMIN_PASSWORD_HASH;
+    const jwtSecret = process.env.JWT_SECRET;
+
+    if (!adminUser || !adminPassHash || !jwtSecret) {
+        console.error("管理員帳密或JWT密鑰未在環境變數中配置！");
+        return res.status(500).json({ success: false, message: "伺服器配置錯誤。" });
+    }
+
+    if (username === adminUser && password && adminPassHash) {
+        const isMatch = await bcrypt.compare(password, adminPassHash);
+        if (isMatch) {
+            // 密碼匹配，生成 JWT
+            const token = jwt.sign(
+                { userId: adminUser, role: 'admin' }, // payload
+                jwtSecret,                            // secret key
+                { expiresIn: '1h' }                  // token 有效期 1 小時
+            );
+            return res.json({ success: true, message: '登入成功', token: token });
+        }
+    }
+    return res.status(401).json({ success: false, message: '用戶名或密碼錯誤。' });
+});
+
+// --- 中介軟體：驗證管理員 Token (用於保護需要管理員權限的 API) ---
+function verifyAdminToken(req, res, next) {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1]; // Bearer <token>
+
+    if (token == null) return res.sendStatus(401); // Unauthorized
+
+    jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+        if (err) return res.sendStatus(403); // Forbidden
+        if (user.role !== 'admin') return res.sendStatus(403); // Not an admin
+        req.user = user;
+        next();
+    });
+}
+
 // --- API Endpoints ---
 app.get('/api/documents', async (req, res) => {
     try {
@@ -197,7 +279,8 @@ app.get('/api/documents', async (req, res) => {
     }
 });
 
-app.post('/api/documents', async (req, res) => {
+// --- 保護需要管理員權限的 API 端點 ---
+app.post('/api/documents', verifyAdminToken, async (req, res) => {
     try {
         const documents = await getAllDocuments();
         let newDocData = req.body;
@@ -220,7 +303,7 @@ app.post('/api/documents', async (req, res) => {
     }
 });
 
-app.put('/api/documents/:id', async (req, res) => {
+app.put('/api/documents/:id', verifyAdminToken, async (req, res) => {
     try {
         let documents = await getAllDocuments();
         const docId = req.params.id;
@@ -249,7 +332,7 @@ app.put('/api/documents/:id', async (req, res) => {
     }
 });
 
-app.delete('/api/documents/:id', async (req, res) => {
+app.delete('/api/documents/:id', verifyAdminToken, async (req, res) => {
     try {
         let documents = await getAllDocuments();
         const docId = req.params.id;
@@ -264,6 +347,77 @@ app.delete('/api/documents/:id', async (req, res) => {
         }
     } catch (error) {
         res.status(500).json({ message: "Error deleting document", error: error.message });
+    }
+});
+
+// --- 新增 API 端點：處理錯誤回報 ---
+app.post('/api/report-error', async (req, res) => {
+    const { docId, pageUrl, context, description, userEmail } = req.body;
+
+    if (!description || !description.trim()) {
+        return res.status(400).json({ message: '問題描述不能為空。' });
+    }
+    
+    // 設定收件人為 rigzinsungbum@gmail.com
+    const toEmail = process.env.TO_EMAIL || 'rigzinsungbum@gmail.com';
+    
+    if (!process.env.MAIL_USER || !process.env.MAIL_PASS) {
+         console.error("郵件配置不完整，無法發送錯誤回報。請檢查環境變數 MAIL_HOST, MAIL_PORT, MAIL_USER, MAIL_PASS。");
+         return res.status(500).json({ message: '伺服器郵件配置錯誤，暫時無法提交回報。' });
+    }
+
+    const mailOptions = {
+        from: `"才旺諾布全集系統回報" <${process.env.MAIL_USER}>`, // 發件人地址 (使用您配置的郵箱)
+        to: toEmail, // 收件人地址 (rigzinsungbum@gmail.com)
+        subject: `新錯誤回報 - 文獻: ${docId || 'N/A'}`,
+        html: `
+            <h2>才旺諾布全集閱讀系統 - 新錯誤回報</h2>
+            <p><strong>回報時間:</strong> ${new Date().toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' })}</p>
+            <p><strong>回報者Email:</strong> ${userEmail || '未提供'}</p>
+            <p><strong>問題頁面URL:</strong> ${pageUrl || 'N/A'}</p>
+            <p><strong>文獻ID (若有):</strong> ${docId || 'N/A'}</p>
+            <hr>
+            <h3>問題相關內容:</h3>
+            <pre style="background-color: #f0f0f0; padding: 10px; border-radius: 5px; white-space: pre-wrap;">${context || '未提供'}</pre>
+            <hr>
+            <h3>問題描述:</h3>
+            <pre style="background-color: #f0f0f0; padding: 10px; border-radius: 5px; white-space: pre-wrap;">${description}</pre>
+        `
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+        console.log('錯誤回報郵件已發送:', mailOptions.subject);
+        res.status(200).json({ message: '感謝您的回報！我們已收到您的訊息。' });
+    } catch (error) {
+        console.error('發送錯誤回報郵件失敗:', error);
+        res.status(500).json({ message: '提交回報失敗，請稍後再試。' });
+    }
+});
+
+// --- 新增 API 端點：獲取圖片列表 ---
+app.get('/api/images/:folder', async (req, res) => {
+    const folder = req.params.folder;
+    const allowedFolders = ['rigzintsewangnorbu', 'manuscripts']; // 白名單資料夾
+    
+    if (!allowedFolders.includes(folder)) {
+        return res.status(400).json({ message: '無效的資料夾名稱' });
+    }
+    
+    const folderPath = path.join(publicPath, folder);
+    
+    try {
+        const files = await fse.readdir(folderPath);
+        const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
+        const images = files.filter(file => {
+            const ext = path.extname(file).toLowerCase();
+            return imageExtensions.includes(ext);
+        });
+        
+        res.json(images);
+    } catch (error) {
+        console.error(`無法讀取資料夾 ${folder}:`, error);
+        res.status(500).json({ message: '無法讀取圖片資料夾' });
     }
 });
 
@@ -284,4 +438,13 @@ app.listen(port, async () => {
     console.log(`Frontend should be accessible at http://localhost:${port}`);
     console.log(`Static files are served from: ${publicPath}`);
     console.log(`Runtime data is being managed in: ${runtimeDataFile}`);
+    
+    // 顯示環境變數配置狀態
+    console.log('\n環境變數配置檢查:');
+    console.log(`- 管理員用戶名: ${process.env.ADMIN_USERNAME ? '✓ 已設置' : '✗ 未設置'}`);
+    console.log(`- 管理員密碼哈希: ${process.env.ADMIN_PASSWORD_HASH ? '✓ 已設置' : '✗ 未設置'}`);
+    console.log(`- JWT密鑰: ${process.env.JWT_SECRET ? '✓ 已設置' : '✗ 未設置'}`);
+    console.log(`- 郵件主機: ${process.env.MAIL_HOST ? '✓ 已設置' : '✗ 未設置'}`);
+    console.log(`- 郵件用戶: ${process.env.MAIL_USER ? '✓ 已設置' : '✗ 未設置'}`);
+    console.log(`- 收件郵箱: ${process.env.TO_EMAIL || 'rigzinsungbum@gmail.com'}`);
 });
