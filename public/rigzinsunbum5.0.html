@@ -1055,118 +1055,95 @@
         function showInfo(title) { 
             // 根據標題顯示對應的內容
             const infoMap = {
-                '才旺諾布': {
-                    content: 'loading...',
-                    images: 'rigzintsewangnorbu'
-                },
-                '編者的話': {
-                    file: 'preface.txt'
-                },
-                '古籍抄本': {
-                    content: '古籍手稿展示',
-                    images: 'manuscripts'
-                },
-                '祖寺介紹': {
-                    file: 'temple.txt'
-                },
-                '參考資源': {
-                    file: 'reference.txt'
-                }
+		'才旺諾布': { type: 'gallery', source: 'rigzintsewangnorbu' },
+                '編者的話': { type: 'text', file: 'preface.txt' },
+                '古籍抄本': { type: 'gallery', source: 'manuscripts' },
+                '祖寺介紹': { type: 'text', file: 'temple.txt' }, // 假設也是文本
+                '參考資源': { type: 'text', file: 'reference.txt' }
             };
             
-            const info = infoMap[title];
-            if (info) {
-                if (info.file) {
-                    // 讀取文字檔
-                    fetch(`/${info.file}`)
-                        .then(response => {
-                            if (!response.ok) throw new Error('檔案讀取失敗');
-                            return response.text();
-                        })
-                        .then(content => {
-                            showInfoModal(title, content);
-                        })
-                        .catch(error => {
-                            console.error(`無法讀取 ${info.file}:`, error);
-                            showMessage(`無法載入${title}內容`, 'error');
-                        });
-                } else if (info.images) {
-                    // 顯示圖片庫
-                    showImageGalleryModal(title, info.images);
-                }
-            }
+    const info = infoMap[title];
+    if (info) {
+        if (info.type === 'text' && info.file) {
+            // 讀取文字檔
+            fetch(`/${info.file}`)
+                .then(response => {
+                    if (!response.ok) throw new Error('檔案讀取失敗');
+                    return response.text();
+                })
+                .then(content => {
+                    showInfoModal(title, content);
+                })
+                .catch(error => {
+                    console.error(`無法讀取 ${info.file}:`, error);
+                    showMessage(`無法載入${title}內容`, 'error');
+                });
+        } else if (info.type === 'gallery' && info.source) {
+            // 顯示圖片庫
+            showImageGalleryModal(title, info.source);
+        }
+    }
+}
+
+async function showImageGalleryModal(title, folderKey) {
+    let modal = document.getElementById('imageGalleryModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'imageGalleryModal';
+        modal.className = 'modal';
+        modal.innerHTML = `
+            <div class="modal-content" style="max-width: 900px;">
+                <button class="modal-close" onclick="closeModal('imageGalleryModal')">×</button>
+                <h2 id="galleryModalTitle" style="margin-bottom: 1.5rem; font-family: var(--chinese-title-font);"></h2>
+                <div id="galleryModalContent" class="image-gallery"></div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+    
+    document.getElementById('galleryModalTitle').textContent = title;
+    const galleryContent = document.getElementById('galleryModalContent');
+    
+    // Show loading message
+    galleryContent.innerHTML = '<p style="text-align:center;">載入圖片中...</p>';
+    
+    try {
+        // Fetch image links from backend
+        const response = await fetch(`${API_BASE_URL}/api/image-links/${folderKey}`);
+        if (!response.ok) {
+            throw new Error('無法獲取圖片列表');
         }
         
-        function showInfoModal(title, content) {
-            // 創建一個通用的資訊 modal
-            let modal = document.getElementById('infoModal');
-            if (!modal) {
-                modal = document.createElement('div');
-                modal.id = 'infoModal';
-                modal.className = 'modal';
-                modal.innerHTML = `
-                    <div class="modal-content" style="max-width: 800px;">
-                        <button class="modal-close" onclick="closeModal('infoModal')">×</button>
-                        <h2 id="infoModalTitle" style="margin-bottom: 1.5rem; font-family: var(--chinese-title-font);"></h2>
-                        <div id="infoModalContent" style="line-height: 1.8; white-space: pre-wrap; font-family: var(--chinese-content-font);"></div>
-                    </div>
-                `;
-                document.body.appendChild(modal);
-            }
-            
-            document.getElementById('infoModalTitle').textContent = title;
-            document.getElementById('infoModalContent').textContent = content;
-            showModal('infoModal');
-        }
-
-        async function showImageGalleryModal(title, folder) {
-            let modal = document.getElementById('imageGalleryModal');
-            if (!modal) {
-                modal = document.createElement('div');
-                modal.id = 'imageGalleryModal';
-                modal.className = 'modal';
-                modal.innerHTML = `
-                    <div class="modal-content" style="max-width: 900px;">
-                        <button class="modal-close" onclick="closeModal('imageGalleryModal')">×</button>
-                        <h2 id="galleryModalTitle" style="margin-bottom: 1.5rem; font-family: var(--chinese-title-font);"></h2>
-                        <div id="galleryModalContent" class="image-gallery"></div>
-                    </div>
-                `;
-                document.body.appendChild(modal);
-            }
-            
-            document.getElementById('galleryModalTitle').textContent = title;
-            const galleryContent = document.getElementById('galleryModalContent');
-            
-            // Show loading message
-            galleryContent.innerHTML = '<p style="text-align:center;">載入圖片中...</p>';
-            
-            try {
-                // Fetch image list from backend
-                const response = await fetch(`${API_BASE_URL}/api/images/${folder}`);
-                if (!response.ok) throw new Error('無法獲取圖片列表');
-                
-                const images = await response.json();
-                
-                if (images.length === 0) {
-                    galleryContent.innerHTML = '<p style="text-align:center;">此資料夾中暫無圖片。</p>';
-                } else {
-                    galleryContent.innerHTML = images.map(img => 
-                        `<img src="/${folder}/${img}" alt="${title}" onclick="openFullscreenImage(this.src)">`
-                    ).join('');
+        const imageUrls = await response.json();
+        
+        if (imageUrls.length === 0) {
+            galleryContent.innerHTML = '<p style="text-align:center;">此資料夾中暫無圖片。</p>';
+        } else {
+            // 將 Google Drive 連結轉換為直接圖片連結
+            galleryContent.innerHTML = imageUrls.map(url => {
+                // 從 Google Drive 分享連結提取檔案 ID
+                const fileIdMatch = url.match(/\/d\/([a-zA-Z0-9-_]+)/);
+                if (fileIdMatch && fileIdMatch[1]) {
+                    const fileId = fileIdMatch[1];
+                    // 使用 Google Drive 的直接圖片連結格式
+                    const directImageUrl = `https://drive.google.com/uc?export=view&id=${fileId}`;
+                    return `<img src="${directImageUrl}" alt="${title}" onclick="openFullscreenImage('${url}')" style="cursor: pointer;">`;
                 }
-            } catch (error) {
-                console.error(`無法載入 ${folder} 圖片:`, error);
-                galleryContent.innerHTML = '<p style="text-align:center; color: var(--text-accent);">無法載入圖片，請稍後再試。</p>';
-            }
-            
-            showModal('imageGalleryModal');
+                return ''; // 如果無法解析連結，返回空字串
+            }).join('');
         }
+    } catch (error) {
+        console.error(`無法載入 ${folderKey} 圖片:`, error);
+        galleryContent.innerHTML = '<p style="text-align:center; color: var(--text-accent);">無法載入圖片，請稍後再試。</p>';
+    }
+    
+    showModal('imageGalleryModal');
+}
 
-        function openFullscreenImage(src) {
-            window.open(src, '_blank');
-        }
-
+function openFullscreenImage(originalUrl) {
+    // 在新標籤頁開啟原始的 Google Drive 連結
+    window.open(originalUrl, '_blank');
+}
         function showTools() { 
             toggleUtilitySidebar(); 
         }
