@@ -26,3 +26,5 @@ Thumbs.db
 # 臨時檔案
 *.tmp
 *.temp
+
+git-filter-repo/
