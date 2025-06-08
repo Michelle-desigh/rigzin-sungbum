@@ -423,11 +423,11 @@ app.get('/api/images/:folder', async (req, res) => {
 
 // --- 根路徑和其他前端路由處理 ---
 app.get('*', (req, res) => {
-  const htmlFilePath = path.join(publicPath, 'rigzinsunbum5.0.html');
+  const htmlFilePath = path.join(__dirname, 'index.html');
   if (fse.pathExistsSync(htmlFilePath)) {
     res.sendFile(htmlFilePath);
   } else {
-    res.status(404).send("HTML file not found. Please ensure 'rigzinsunbum5.0.html' is in the public directory.");
+    res.status(404).send("HTML file not found. Please ensure 'index.html' is in the  project root directory.");
   }
 });
 
