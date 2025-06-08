@@ -1,0 +1,28 @@
+# 環境變數檔案
+.env
+.env.local
+.env.production
+
+# 日誌檔案
+*.log
+logs/
+*.log.*
+
+# Node.js 相關
+node_modules/
+npm-debug.log*
+
+# 資料檔案
+data/all_runtime_documents.json
+
+# 作業系統檔案
+.DS_Store
+Thumbs.db
+
+# 編輯器檔案
+.vscode/
+.idea/
+
+# 臨時檔案
+*.tmp
+*.temp

@@ -1,4 +1,4 @@
-require('dotenv').config(); 
+require('dotenv').config(); // 加入這一行
 const express = require('express');
 const cors = require('cors');
 const fse = require('fs-extra');
@@ -8,34 +8,6 @@ const bcrypt = require('bcryptjs'); // 引入 bcryptjs
 const jwt = require('jsonwebtoken'); // 引入 jsonwebtoken
 const app = express();
 const port = process.env.PORT || 3001;
-
-const googleDriveImageLinks = {
-    rigzintsewangnorbu: [
-	"https://drive.google.com/file/d/1xlAfJtd6ljzO6mSy3IgC9MOTxjkbYptp/view?usp=drive_link",
-	"https://drive.google.com/file/d/15GyamXMO0Y8NPZEk86tHTNRZQOBY1tg6/view?usp=drive_link",
-	"https://drive.google.com/file/d/1f44WczmbobeYarsE3kxo1pJ1rzrHLvgL/view?usp=drive_link",
-	"https://drive.google.com/file/d/1wuJ2jRSTIc9AdHxNH8aOfaviq9RpnzxS/view?usp=drive_link",
-	"https://drive.google.com/file/d/10RE_CzSIToBQKo25Aaq2C1GClZh6hTcT/view?usp=drive_link",
-	"https://drive.google.com/file/d/1wUDwiYMXNI_8-SOWk-2GWECeSM3HxPG-/view?usp=drive_link",
-	"https://drive.google.com/file/d/1XRLAb8xl8i7nl4ElsSxtF42kD1Wph78u/view?usp=drive_link",
-	"https://drive.google.com/file/d/17sx5ZoUJIKQPxylWVLn1Kbq87IrJUm-G/view?usp=drive_link",
-	"https://drive.google.com/file/d/1GciHHq1OSSuKOai565J0R_sZSCGo05J1/view?usp=drive_link",
-	"https://drive.google.com/file/d/1T8GvX3C0V1dS8Nqam3Maycn36QVEk5vy/view?usp=drive_link",
-	"https://drive.google.com/file/d/1F1Z7vr9lq4JJUas990dwHc2WKcgPLrnx/view?usp=drive_link"
-    ],
-    manuscripts: [
-	"https://drive.google.com/file/d/1A3pecgRVVYaFG-FMXGuHYd2wb5zdT_Aq/view?usp=drive_link",
-	"https://drive.google.com/file/d/1_ZZHpiR-N9JJzUKkFXju7PzdH2ERg_gY/view?usp=drive_link",
-	"https://drive.google.com/file/d/1OlNeG1bzf3rWPv5DXK72vObkW5yPMfx9/view?usp=drive_link",
-	"https://drive.google.com/file/d/1zTbRUT37Jam9w2NnFRQk9tzyIYly5dOv/view?usp=drive_link",
-	"https://drive.google.com/file/d/1mIKMTpmQwssDCmbsUFh84kjou89DnfcK/view?usp=drive_link",
-	"https://drive.google.com/file/d/1wLheKcRiLgqHV_o9Bj8wN4iiUZWl15cA/view?usp=drive_link",
-	"https://drive.google.com/file/d/1Q0RbNjOtyGSgA8E34dGyp0jarhQZ5AO7/view?usp=drive_link",
-	"https://drive.google.com/file/d/1g_CEbG06kkdCcY5s-yXOE7qqzkn9dfjK/view?usp=drive_link",
-	"https://drive.google.com/file/d/15N_s-r-uIdgmOGBy2rLso14gxEG8PO-R/view?usp=drive_link",
-	"https://drive.google.com/file/d/17NfxwXZ94HwVmkQn7sWYbvBlZTRXo6W5/view?usp=drive_link" 
-  ]
-};
 
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
@@ -304,15 +276,6 @@ app.get('/api/documents', async (req, res) => {
         res.json(documents);
     } catch (error) {
         res.status(500).json({ message: "Error fetching documents", error: error.message });
-    }
-}),
-app.get('/api/image-links/:folder', async (req, res) => {
-    const folder = req.params.folder;
-    if (googleDriveImageLinks[folder]) {
-        res.json(googleDriveImageLinks[folder]);
-    } else {
-        console.warn(`Warning: Image links for folder "${folder}" not found in server config.`);
-        res.status(404).json({ message: '指定的圖片資料夾連結未找到' });
     }
 });
 
