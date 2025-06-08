@@ -28,3 +28,7 @@ Thumbs.db
 *.temp
 
 git-filter-repo/
+
+node_modules/
+data/all_runtime_documents.json
+generateHash.js
